@@ -22,3 +22,4 @@ Things to research:
 Other stuff:
 * Make a logger (good practice)
 * Decide what sort of stuff to serve on this web server
+  * Simple JS thing?
