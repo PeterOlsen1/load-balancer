@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "build": "tsc && node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.2.0"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "types": ["node"],
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "strict": true
+  }
+}
