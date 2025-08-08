@@ -8,13 +8,9 @@ import (
 
 var balancer = Balancer{}
 
-type Balancer struct {
-	//nodes + node health?
-}
-
 func WatchQueue() {
 	for {
-		<- queue.ConnectionQueue.Notify
+		<-queue.ConnectionQueue.Notify
 		for {
 			conn, err := queue.ConnectionQueue.Dequeue()
 
