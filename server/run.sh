@@ -1,0 +1,1 @@
+docker run -p $1:3000 node-server

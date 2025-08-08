@@ -6,6 +6,10 @@ COPY package.json package-lock.json ./
 
 RUN npm install
 
+RUN npm install -g typescript
+
+COPY . .
+
 EXPOSE 3000
 
-CMD ["node", "server.ts"]
+CMD ["npm", "run", "build"]

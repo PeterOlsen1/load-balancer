@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "tsc && node server.js"
+    "build": "tsc && node dist/server.js"
   },
   "dependencies": {
     "express": "^5.1.0"
