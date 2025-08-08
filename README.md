@@ -25,3 +25,7 @@ Other stuff:
   * Simple JS thing?
 * Websocket connection to frontend for live monitoring?
   * Tauri app?
+
+TODO:
+* test signal channel
+* test docker process creation
