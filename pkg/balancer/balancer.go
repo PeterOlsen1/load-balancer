@@ -6,7 +6,7 @@ import (
 	"load-balancer/pkg/types"
 )
 
-var balancer = Balancer{}
+var LoadBalancer = Balancer{}
 
 func WatchQueue() {
 	for {
@@ -21,6 +21,15 @@ func WatchQueue() {
 			go handleQueuePop(conn)
 		}
 	}
+}
+
+func (b *Balancer) InitBalancer() {
+	node, err := StartServer(3000)
+	if err != nil {
+		fmt.Println("Error starting server: ", err)
+	}
+
+	b.AddNode(node)
 }
 
 func handleQueuePop(conn *types.Connection) {

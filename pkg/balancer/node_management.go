@@ -35,6 +35,7 @@ func (b *Balancer) AddNode(node *Node) {
 	b.nodes = append(b.nodes, node)
 }
 
+// add response time metric
 func (b *Balancer) CheckNode(node *Node) error {
 	address := node.Address
 	resp, err := http.Get(fmt.Sprintf("%s/health", address))
@@ -75,5 +76,22 @@ func (b *Balancer) RemoveNode(node *Node) error {
 	}
 	b.nodes = filtered
 
+	return nil
+}
+
+func (b *Balancer) CleanupNodes() error {
+	for _, n := range b.nodes {
+		if n.Cmd != nil {
+			err := n.Cmd.Process.Kill()
+
+			if err != nil {
+				fmt.Println("Error in cleanup: ", err)
+				return err
+			}
+		}
+	}
+
+	var empty []*Node
+	b.nodes = empty
 	return nil
 }

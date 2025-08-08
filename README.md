@@ -24,3 +24,4 @@ Other stuff:
 * Decide what sort of stuff to serve on this web server
   * Simple JS thing?
 * Websocket connection to frontend for live monitoring?
+  * Tauri app?
