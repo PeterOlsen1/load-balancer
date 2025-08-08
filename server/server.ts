@@ -8,6 +8,10 @@ app.get('/', (req: Request, res: Response) => {
     res.send("Request to index page");
 });
 
+app.get('/sample', (req: Request, res: Response) => {
+    res.send("Request to sample page");
+});
+
 app.get('/health', (req: Request, res: Response) => {
     res.send("OK");
 });
