@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"load-balancer/pkg/queue"
 	"load-balancer/pkg/types"
+	"time"
 )
 
 var LoadBalancer = Balancer{}
@@ -26,9 +27,11 @@ func WatchQueue() {
 func (b *Balancer) InitBalancer() {
 	node, err := StartServer(3000)
 	if err != nil {
-		fmt.Println("Error starting server: ", err)
+		return
 	}
 
+	//allow the server to start up before sending health request
+	time.Sleep(2 * time.Second)
 	b.AddNode(node)
 }
 

@@ -1,6 +1,7 @@
 package balancer
 
 import (
+	"fmt"
 	"os/exec"
 	"sync"
 )
@@ -30,9 +31,34 @@ server must contain `/health` route that returns
 the health of the given node
 */
 type Node struct {
-	Cmd     *exec.Cmd
-	Address string
-	Metrics NodeMetrics
+	DockerInfo *DockerInfo
+	Address    string
+	Metrics    NodeMetrics
+}
+
+type DockerInfo struct {
+	Cmd *exec.Cmd
+	id  string
+}
+
+// Stops the server associated with any given node
+// through the docker stop command.
+//
+// If this node has no server, instantly return nil
+func (node *Node) StopServer() error {
+	if node.DockerInfo == nil {
+		return nil
+	}
+
+	cmd := exec.Command("docker", "stop", node.DockerInfo.id)
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println("Error docker stop: ", err)
+		return err
+	}
+
+	fmt.Println("Stopped container with ID: ", node.DockerInfo.id)
+	return nil
 }
 
 type NodeMetrics struct {

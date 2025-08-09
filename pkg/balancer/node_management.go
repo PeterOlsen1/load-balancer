@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os/exec"
+	"strings"
 )
 
 // Helper method to start an internal server,
@@ -11,19 +12,30 @@ import (
 // In a real environment, this would not be necessary,
 // and the user would just call the Balancer.AddNode method
 func StartServer(port int) (*Node, error) {
-	path := "../../server/run.sh"
+	path := "./server/run.sh" //assuming you run from root of project
 
 	cmd := exec.Command("bash", path, fmt.Sprintf("%d", port))
-	err := cmd.Start()
+
+	output, err := cmd.Output()
 	if err != nil {
-		fmt.Println("Failed to start docker container: ", err)
+		fmt.Println("Error creating container:", err)
 		return nil, err
 	}
+	containerID := strings.TrimSpace(string(output))
+	if containerID == "" {
+		return nil, fmt.Errorf("empty container ID received")
+	}
+	fmt.Println("Created container with ID:", containerID)
 
 	node := Node{
-		Cmd:     cmd,
-		Address: fmt.Sprintf("localhost:%d", port),
+		DockerInfo: &DockerInfo{
+			Cmd: cmd,
+			id:  containerID,
+		},
+		Address: fmt.Sprintf("http://localhost:%d", port),
 	}
+
+	fmt.Println("Started server @ http://localhost:", port)
 	return &node, nil
 }
 
@@ -56,14 +68,7 @@ func (b *Balancer) CheckNode(node *Node) error {
 }
 
 func (b *Balancer) RemoveNode(node *Node) error {
-	if node.Cmd != nil {
-		err := node.Cmd.Process.Kill()
-
-		if err != nil {
-			fmt.Println("Error killing process: ", err)
-			return err
-		}
-	}
+	node.StopServer()
 
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -80,15 +85,10 @@ func (b *Balancer) RemoveNode(node *Node) error {
 }
 
 func (b *Balancer) CleanupNodes() error {
-	for _, n := range b.nodes {
-		if n.Cmd != nil {
-			err := n.Cmd.Process.Kill()
+	fmt.Println("Cleaning up nodes...")
 
-			if err != nil {
-				fmt.Println("Error in cleanup: ", err)
-				return err
-			}
-		}
+	for _, n := range b.nodes {
+		n.StopServer()
 	}
 
 	var empty []*Node

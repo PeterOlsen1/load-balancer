@@ -5,14 +5,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get('/', (req: Request, res: Response) => {
+    console.log("Received request to index page");
     res.send("Request to index page");
 });
 
 app.get('/sample', (req: Request, res: Response) => {
+    console.log("Received request to sample page");
     res.send("Request to sample page");
 });
 
 app.get('/health', (req: Request, res: Response) => {
+    console.log("Health check request received");
     res.send("OK");
 });
 
