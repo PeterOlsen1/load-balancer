@@ -1,7 +1,7 @@
 package server
 
 import (
-	"fmt"
+	"load-balancer/pkg/logger"
 	"load-balancer/pkg/queue"
 	"load-balancer/pkg/types"
 	"net/http"
@@ -13,12 +13,11 @@ func Serve() error {
 }
 
 func connectionHandler(resp http.ResponseWriter, req *http.Request) {
-	fmt.Println("Adding request to queue")
-
 	conn := types.Connection{
 		Writer:  resp,
 		Request: req,
 	}
 
+	logger.LogRequest(&conn)
 	queue.ConnectionQueue.Enqueue(&conn)
 }

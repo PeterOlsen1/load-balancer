@@ -5,6 +5,8 @@ import (
 	"os"
 	"time"
 
+	"load-balancer/pkg/types"
+
 	"github.com/google/uuid"
 )
 
@@ -14,22 +16,32 @@ var logfile string = fmt.Sprintf("app_%s_%s.log",
 )
 
 func LogErr(msg string, err error) {
-	logLine := fmt.Sprintf("time=%s level=ERROR msg=\"%s\" error=\"%s\"", time.Now(), msg, err)
+	logLine := fmt.Sprintf("time=%s type=ERROR msg=\"%s\" error=\"%s\"", time.Now(), msg, err)
 	writeToFile(logLine)
 }
 
 func Log(msg string) {
-	logLine := fmt.Sprintf("time=%s level=INFO msg=\"%s\"", time.Now(), msg)
+	logLine := fmt.Sprintf("time=%s type=INFO msg=\"%s\"", time.Now(), msg)
 	writeToFile(logLine)
 }
 
 func LogContainerStart(containerID string) {
-	logLine := fmt.Sprintf("time=%s level=CONTAINER_START containerID=\"%s\"", time.Now(), containerID)
+	logLine := fmt.Sprintf("time=%s type=CONTAINER_START containerID=\"%s\"", time.Now(), containerID)
 	writeToFile(logLine)
 }
 
 func LogContainerStop(containerID string) {
-	logLine := fmt.Sprintf("time=%s level=CONTAINER_STOP containerID=\"%s\"", time.Now(), containerID)
+	logLine := fmt.Sprintf("time=%s type=CONTAINER_STOP containerID=\"%s\"", time.Now(), containerID)
+	writeToFile(logLine)
+}
+
+func LogRequest(conn *types.Connection) {
+	logLine := fmt.Sprintf("time=%s type=REQUEST method=%s path=%s user_agent=%s", time.Now(), conn.Request.Method, conn.Request.URL.Path, conn.Request.UserAgent())
+	writeToFile(logLine)
+}
+
+func LogStatusCheck(status string, address string) {
+	logLine := fmt.Sprintf("time=%s type=HEALTH status=%s address=%s", time.Now(), status, address)
 	writeToFile(logLine)
 }
 

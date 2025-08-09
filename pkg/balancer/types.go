@@ -1,7 +1,7 @@
 package balancer
 
 import (
-	"fmt"
+	"load-balancer/pkg/logger"
 	"os/exec"
 	"sync"
 )
@@ -53,11 +53,11 @@ func (node *Node) StopServer() error {
 	cmd := exec.Command("docker", "stop", node.DockerInfo.id)
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println("Error docker stop: ", err)
+		logger.LogErr("docker stop", err)
 		return err
 	}
 
-	fmt.Println("Stopped container with ID: ", node.DockerInfo.id)
+	logger.LogContainerStop(node.DockerInfo.id)
 	return nil
 }
 

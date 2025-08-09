@@ -27,6 +27,7 @@ func WatchQueue() {
 func (b *Balancer) InitBalancer() {
 	node, err := StartServer(3000)
 	if err != nil {
+		//error is already logged in the StartServer function
 		return
 	}
 

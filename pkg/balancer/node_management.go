@@ -2,6 +2,7 @@ package balancer
 
 import (
 	"fmt"
+	"load-balancer/pkg/logger"
 	"net/http"
 	"os/exec"
 	"strings"
@@ -18,14 +19,16 @@ func StartServer(port int) (*Node, error) {
 
 	output, err := cmd.Output()
 	if err != nil {
-		fmt.Println("Error creating container:", err)
+		logger.LogErr("Creating container", err)
 		return nil, err
 	}
 	containerID := strings.TrimSpace(string(output))
 	if containerID == "" {
-		return nil, fmt.Errorf("empty container ID received")
+		err := fmt.Errorf("empty container ID received")
+		logger.LogErr("Creating container", err)
+		return nil, err
 	}
-	fmt.Println("Created container with ID:", containerID)
+	logger.LogContainerStart(containerID)
 
 	node := Node{
 		DockerInfo: &DockerInfo{
@@ -35,7 +38,7 @@ func StartServer(port int) (*Node, error) {
 		Address: fmt.Sprintf("http://localhost:%d", port),
 	}
 
-	fmt.Println("Started server @ http://localhost:", port)
+	logger.Log(fmt.Sprintf("Started server @ http://localhost: %d", port))
 	return &node, nil
 }
 
@@ -52,13 +55,16 @@ func (b *Balancer) CheckNode(node *Node) error {
 	address := node.Address
 	resp, err := http.Get(fmt.Sprintf("%s/health", address))
 	if err != nil {
-		fmt.Println("Error fetching node health: ", err)
+		logger.LogErr("Fetching node health", err)
 		return err
 	}
 
 	health := Healthy
 	if resp.StatusCode != http.StatusOK {
 		health = Unhealthy
+		logger.LogStatusCheck("Unhealthy", node.Address)
+	} else {
+		logger.LogStatusCheck("Healthy", node.Address)
 	}
 	node.Metrics.Lock.Lock()
 	defer node.Metrics.Lock.Unlock()
@@ -85,7 +91,7 @@ func (b *Balancer) RemoveNode(node *Node) error {
 }
 
 func (b *Balancer) CleanupNodes() error {
-	fmt.Println("Cleaning up nodes...")
+	logger.Log("cleaning up nodes")
 
 	for _, n := range b.nodes {
 		n.StopServer()
