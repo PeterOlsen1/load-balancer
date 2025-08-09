@@ -18,6 +18,6 @@ func connectionHandler(resp http.ResponseWriter, req *http.Request) {
 		Request: req,
 	}
 
-	logger.LogRequest(&conn)
+	go logger.LogRequest(&conn)
 	queue.ConnectionQueue.Enqueue(&conn)
 }

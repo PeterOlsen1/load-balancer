@@ -53,11 +53,11 @@ func (node *Node) StopServer() error {
 	cmd := exec.Command("docker", "stop", node.DockerInfo.id)
 	err := cmd.Run()
 	if err != nil {
-		logger.LogErr("docker stop", err)
+		go logger.LogErr("docker stop", err)
 		return err
 	}
 
-	logger.LogContainerStop(node.DockerInfo.id)
+	go logger.LogContainerStop(node.DockerInfo.id)
 	return nil
 }
 

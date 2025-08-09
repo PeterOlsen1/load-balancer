@@ -19,16 +19,16 @@ func StartServer(port int) (*Node, error) {
 
 	output, err := cmd.Output()
 	if err != nil {
-		logger.LogErr("Creating container", err)
+		go logger.LogErr("Creating container", err)
 		return nil, err
 	}
 	containerID := strings.TrimSpace(string(output))
 	if containerID == "" {
 		err := fmt.Errorf("empty container ID received")
-		logger.LogErr("Creating container", err)
+		go logger.LogErr("Creating container", err)
 		return nil, err
 	}
-	logger.LogContainerStart(containerID)
+	go logger.LogContainerStart(containerID)
 
 	node := Node{
 		DockerInfo: &DockerInfo{
@@ -38,7 +38,7 @@ func StartServer(port int) (*Node, error) {
 		Address: fmt.Sprintf("http://localhost:%d", port),
 	}
 
-	logger.Log(fmt.Sprintf("Started server @ http://localhost: %d", port))
+	go logger.Log(fmt.Sprintf("Started server @ http://localhost: %d", port))
 	return &node, nil
 }
 
@@ -55,16 +55,16 @@ func (b *Balancer) CheckNode(node *Node) error {
 	address := node.Address
 	resp, err := http.Get(fmt.Sprintf("%s/health", address))
 	if err != nil {
-		logger.LogErr("Fetching node health", err)
+		go logger.LogErr("Fetching node health", err)
 		return err
 	}
 
 	health := Healthy
 	if resp.StatusCode != http.StatusOK {
 		health = Unhealthy
-		logger.LogStatusCheck("Unhealthy", node.Address)
+		go logger.LogStatusCheck("Unhealthy", node.Address)
 	} else {
-		logger.LogStatusCheck("Healthy", node.Address)
+		go logger.LogStatusCheck("Healthy", node.Address)
 	}
 	node.Metrics.Lock.Lock()
 	defer node.Metrics.Lock.Unlock()
@@ -91,7 +91,7 @@ func (b *Balancer) RemoveNode(node *Node) error {
 }
 
 func (b *Balancer) CleanupNodes() error {
-	logger.Log("cleaning up nodes")
+	go logger.Log("cleaning up nodes")
 
 	for _, n := range b.nodes {
 		n.StopServer()
