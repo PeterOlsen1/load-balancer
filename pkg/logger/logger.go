@@ -23,6 +23,16 @@ func Log(msg string) {
 	writeToFile(logLine)
 }
 
+func LogContainerStart(containerID string) {
+	logLine := fmt.Sprintf("time=%s level=CONTAINER_START containerID=\"%s\"", time.Now(), containerID)
+	writeToFile(logLine)
+}
+
+func LogContainerStop(containerID string) {
+	logLine := fmt.Sprintf("time=%s level=CONTAINER_STOP containerID=\"%s\"", time.Now(), containerID)
+	writeToFile(logLine)
+}
+
 func writeToFile(logLine string) {
 	f, err := os.OpenFile(logfile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
