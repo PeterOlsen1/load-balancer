@@ -13,6 +13,17 @@ Goroutines for:
 * Checking node health
 * Spinning up new docker container instances
 
+Proxy process:
+* Dequeue a connection
+* Pick a node to send it to (configure this to allow for multiple balancing strategies)
+  * This requires the balancer internal data structure to be modified
+    * Hash table for 'address: { node, connectionData }' pairs
+  * Balancing options
+    * Round robin
+    * least connections (weighted)
+    * compute based
+    * IP hash
+
 Things to research:
 * Good load balancing algorithms / strategies
   * At what point do we decide to spin up a new instance
@@ -20,12 +31,6 @@ Things to research:
 * How the hell to use docker
 
 Other stuff:
-* Make a logger (good practice)
-* Decide what sort of stuff to serve on this web server
-  * Simple JS thing?
 * Websocket connection to frontend for live monitoring?
   * Tauri app?
-
-TODO:
-* test signal channel
-* test docker process creation
+* Configure this to allow users to upload their own docker images?
