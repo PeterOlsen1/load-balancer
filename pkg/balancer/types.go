@@ -65,6 +65,7 @@ type NodeMetrics struct {
 	Lock         sync.Mutex
 	Health       NodeHealth
 	ResponseTime float64
+	Connections  uint32
 }
 
 /*
