@@ -8,9 +8,9 @@ import (
 )
 
 type Connection struct {
-	Writer  http.ResponseWriter
-	Request *http.Request
-	lock    sync.Mutex
+	Response http.ResponseWriter
+	Request  *http.Request
+	lock     sync.Mutex
 }
 
 func (conn *Connection) Body() (string, error) {

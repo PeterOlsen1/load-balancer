@@ -46,12 +46,12 @@ func (b *Balancer) AddNode(node *Node) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
-	go b.CheckNode(node)
+	go node.CheckHealth()
 	b.nodes = append(b.nodes, node)
 }
 
 // add response time metric
-func (b *Balancer) CheckNode(node *Node) error {
+func (node *Node) CheckHealth() error {
 	address := node.Address
 	resp, err := http.Get(fmt.Sprintf("%s/health", address))
 	if err != nil {

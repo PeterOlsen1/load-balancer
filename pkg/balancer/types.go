@@ -15,7 +15,6 @@ from many different goroutines, hence the lock
 Methods:
 * AddNode(*Node) -> add a new node to the nodes list
 * RemoveNode(*Node) -> remove a node from the nodes list
-* CheckNode(*Node) -> send a request to the given node, and update its metrics
 */
 type Balancer struct {
 	//nodes + node health?
@@ -29,6 +28,9 @@ nodes will be stored as. The `Address` field defines
 where all requests will be sent, and the given
 server must contain `/health` route that returns
 the health of the given node
+
+Method:
+* CheckHealth() -> send a request to the given node, and update its metrics
 */
 type Node struct {
 	DockerInfo *DockerInfo
