@@ -1,7 +1,6 @@
 package balancer
 
 import (
-	"fmt"
 	"load-balancer/pkg/queue"
 	"load-balancer/pkg/types"
 	"time"
@@ -37,5 +36,5 @@ func (b *Balancer) InitBalancer() {
 }
 
 func handleQueuePop(conn *types.Connection) {
-	fmt.Println(conn.Request.URL.Path)
+	LoadBalancer.ProxyRequest(conn)
 }
