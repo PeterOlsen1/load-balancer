@@ -2,7 +2,6 @@ package balancer
 
 import (
 	"load-balancer/pkg/queue"
-	"load-balancer/pkg/types"
 	"time"
 )
 
@@ -18,7 +17,10 @@ func WatchQueue() {
 				break
 			}
 
-			go handleQueuePop(conn)
+			conn.Response.Write([]byte("Hello, queue watcher!"))
+			break
+
+			LoadBalancer.ProxyRequest(conn)
 		}
 	}
 }
@@ -33,8 +35,4 @@ func (b *Balancer) InitBalancer() {
 	//allow the server to start up before sending health request
 	time.Sleep(2 * time.Second)
 	b.AddNode(node)
-}
-
-func handleQueuePop(conn *types.Connection) {
-	LoadBalancer.ProxyRequest(conn)
 }

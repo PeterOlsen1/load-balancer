@@ -39,3 +39,6 @@ Other stuff:
   * Tauri app?
 * Configure this to allow users to upload their own docker images?
 * Add rate tracking?
+
+Working on:
+* Re-implement shared queue

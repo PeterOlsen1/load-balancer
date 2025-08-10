@@ -1,12 +1,21 @@
 package balancer
 
-import "crypto/sha256"
+import (
+	"crypto/sha256"
+	"fmt"
+	"load-balancer/pkg/logger"
+)
 
 var roundRobinIndex = 0
 
 func (b *Balancer) RoundRobin() *Node {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+
+	if len(b.nodes) == 0 {
+		logger.LogErr("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
+		return nil
+	}
 
 	idx := roundRobinIndex % len(b.nodes)
 	node := b.nodes[idx]
