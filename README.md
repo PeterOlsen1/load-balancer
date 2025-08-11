@@ -1,7 +1,7 @@
 # load-balancer
 Trying out new things. Learning Go. Balancing loads 🤑
 
-### architecture planning
+## architecture planning
 
 Basic idea: we want to have some sort of web service, where requests are recieved, sent to a shared queue, and then handled accordingly
 
@@ -9,6 +9,18 @@ Questions:
 * How often do we run the /health check
 * When to spin up a new container
 * What metrics should we collect?
+
+Working on:
+* Re-implement shared queue
+* Occasionally poll nodes for health, do in separate goroutine
+
+Future ideas:
+* Websocket connection to frontend for live monitoring?
+  * Tauri app?
+* Configure this to allow users to upload their own docker images?
+* Add rate tracking?
+
+### general thoughts
   
 We need loops (within goroutines) for:
 * adding to shared queue
@@ -33,12 +45,3 @@ Things to research:
 * Good load balancing algorithms / strategies
   * At what point do we decide to spin up a new instance
   * How do we decide which instance to send requests to?
-
-Other stuff:
-* Websocket connection to frontend for live monitoring?
-  * Tauri app?
-* Configure this to allow users to upload their own docker images?
-* Add rate tracking?
-
-Working on:
-* Re-implement shared queue
