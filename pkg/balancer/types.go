@@ -45,7 +45,7 @@ type DockerInfo struct {
 type NodeMetrics struct {
 	Lock         sync.Mutex
 	Health       NodeHealth
-	ResponseTime float64
+	ResponseTime float32
 	Connections  uint32
 }
 

@@ -5,12 +5,16 @@ import (
 	"load-balancer/pkg/logger"
 	"net/http"
 	"os/exec"
+	"time"
 )
 
-// add response time metric
 func (node *Node) CheckHealth() error {
 	address := node.Address
+
+	start := time.Now()
 	resp, err := http.Get(fmt.Sprintf("%s/health", address))
+	duration := time.Since(start)
+
 	if err != nil {
 		go logger.LogErr("Fetching node health", err)
 		return err
@@ -26,6 +30,7 @@ func (node *Node) CheckHealth() error {
 	node.Metrics.Lock.Lock()
 	defer node.Metrics.Lock.Unlock()
 	node.Metrics.Health = health
+	node.Metrics.ResponseTime = float32(duration.Microseconds() / 1000)
 
 	return nil
 }
