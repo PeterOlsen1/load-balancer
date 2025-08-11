@@ -17,9 +17,6 @@ func WatchQueue() {
 				break
 			}
 
-			conn.Response.Write([]byte("Hello, queue watcher!"))
-			break
-
 			LoadBalancer.ProxyRequest(conn)
 		}
 	}

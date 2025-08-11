@@ -51,6 +51,7 @@ func LogProxy(path string, proxiedTo string) {
 }
 
 func writeToFile(logLine string) {
+	os.MkdirAll("logs", os.ModePerm)
 	f, err := os.OpenFile(logfile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Printf("Failed to open log file: %v\n", err)
