@@ -3,7 +3,6 @@ package balancer
 import (
 	"fmt"
 	"load-balancer/pkg/logger"
-	"net/http"
 	"os/exec"
 	"strings"
 )
@@ -48,29 +47,6 @@ func (b *Balancer) AddNode(node *Node) {
 
 	go node.CheckHealth()
 	b.nodes = append(b.nodes, node)
-}
-
-// add response time metric
-func (node *Node) CheckHealth() error {
-	address := node.Address
-	resp, err := http.Get(fmt.Sprintf("%s/health", address))
-	if err != nil {
-		go logger.LogErr("Fetching node health", err)
-		return err
-	}
-
-	health := Healthy
-	if resp.StatusCode != http.StatusOK {
-		health = Unhealthy
-		go logger.LogStatusCheck("Unhealthy", node.Address)
-	} else {
-		go logger.LogStatusCheck("Healthy", node.Address)
-	}
-	node.Metrics.Lock.Lock()
-	defer node.Metrics.Lock.Unlock()
-	node.Metrics.Health = health
-
-	return nil
 }
 
 func (b *Balancer) RemoveNode(node *Node) error {

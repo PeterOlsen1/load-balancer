@@ -1,7 +1,6 @@
 package balancer
 
 import (
-	"load-balancer/pkg/logger"
 	"os/exec"
 	"sync"
 )
@@ -41,26 +40,6 @@ type Node struct {
 type DockerInfo struct {
 	Cmd *exec.Cmd
 	id  string
-}
-
-// Stops the server associated with any given node
-// through the docker stop command.
-//
-// If this node has no server, instantly return nil
-func (node *Node) StopServer() error {
-	if node.DockerInfo == nil {
-		return nil
-	}
-
-	cmd := exec.Command("docker", "stop", node.DockerInfo.id)
-	err := cmd.Run()
-	if err != nil {
-		go logger.LogErr("docker stop", err)
-		return err
-	}
-
-	go logger.LogContainerStop(node.DockerInfo.id)
-	return nil
 }
 
 type NodeMetrics struct {
