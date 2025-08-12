@@ -8,6 +8,9 @@ import (
 	"time"
 )
 
+// Send a request to the node backend to check the health
+//
+// If an OK status is returned, set node to healthy. Else, unhealthy
 func (node *Node) CheckHealth() error {
 	address := node.Address
 
@@ -55,6 +58,7 @@ func (node *Node) StopServer() error {
 	return nil
 }
 
+// Return the node health as a string
 func (node *Node) GetHealth() string {
 	node.Metrics.Lock.Lock()
 	defer node.Metrics.Lock.Unlock()
@@ -73,3 +77,30 @@ func (node *Node) GetHealth() string {
 func (n *Node) Equals(other *Node) bool {
 	return n.Address == other.Address && n.DockerInfo.Id == other.DockerInfo.Id
 }
+
+// Returns a node from a URL, instead of spinning up a docker container.
+// This is to be used when the user already has a service running,
+// and wants to just input it as a node.
+//
+// This would require interaction from the frontend
+func FromUrl(url string) *Node {
+	out := Node{
+		Address: url,
+	}
+
+	go out.CheckHealth()
+	return &out
+}
+
+/*
+	f, err := os.OpenFile("./data/urls", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		logger.LogErr("Failed to open url file", err)
+		return nil, err
+	}
+	defer f.Close()
+	if _, err := f.WriteString(url + "\n"); err != nil {
+		logger.LogErr("Failed to write to url file", err)
+		return nil, err
+	}
+*/

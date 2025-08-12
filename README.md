@@ -6,12 +6,11 @@ Trying out new things. Learning Go. Balancing loads 🤑
 Basic idea: we want to have some sort of web service, where requests are recieved, sent to a shared queue, and then handled accordingly
 
 Questions:
-* How often do we run the /health check
 * When to spin up a new container
-* What metrics should we collect?
+* What metrics should we send to frontend?
 
 Working on:
-* Occasionally poll nodes for health, do in separate goroutine
+* When to spin up new docker containers?
 
 Future ideas:
 * Websocket connection to frontend for live monitoring?

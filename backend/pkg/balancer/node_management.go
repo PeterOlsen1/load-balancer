@@ -46,7 +46,6 @@ func (b *Balancer) AddNode(node *node.Node) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
-	go node.CheckHealth()
 	b.nodes = append(b.nodes, node)
 }
 
