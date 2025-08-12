@@ -11,7 +11,6 @@ Questions:
 * What metrics should we collect?
 
 Working on:
-* Re-implement shared queue
 * Occasionally poll nodes for health, do in separate goroutine
 
 Future ideas:
@@ -19,6 +18,7 @@ Future ideas:
   * Tauri app?
 * Configure this to allow users to upload their own docker images?
 * Add rate tracking?
+* Re-implement shared queue
 
 ### general thoughts
   
