@@ -3,16 +3,16 @@ package server
 import (
 	"fmt"
 	"load-balancer/pkg/balancer"
-	"load-balancer/pkg/emitter"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/types"
+	"load-balancer/pkg/ws"
 	"net/http"
 )
 
 func Serve() error {
 	fmt.Println("Starting server @ localost:8080")
+	http.HandleFunc("/ws", ws.WsHandler)
 	http.HandleFunc("/", connectionHandler)
-	http.HandleFunc("/ws", emitter.WsHandler)
 	return http.ListenAndServe(":8080", nil)
 }
 

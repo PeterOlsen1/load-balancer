@@ -1,4 +1,4 @@
-package emitter
+package ws
 
 //emit events to the frontend
 import (
