@@ -13,11 +13,9 @@ Working on:
 * When to spin up new docker containers?
 
 Future ideas:
-* Websocket connection to frontend for live monitoring?
-  * Tauri app?
 * Configure this to allow users to upload their own docker images?
-* Add rate tracking?
 * Re-implement shared queue
+* Add rate tracking?
 
 ### general thoughts
   

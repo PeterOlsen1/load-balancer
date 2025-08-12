@@ -6,6 +6,7 @@ import (
 	"load-balancer/pkg/node"
 	"os/exec"
 	"strings"
+	"sync"
 )
 
 // Helper method to start an internal server,
@@ -38,7 +39,7 @@ func StartServer(port int) (*node.Node, error) {
 		Address: fmt.Sprintf("http://localhost:%d", port),
 	}
 
-	go logger.Info(fmt.Sprintf("Started server @ http://localhost: %d", port))
+	go logger.Info(fmt.Sprintf("Started server @ http://localhost:%d", port))
 	return &node, nil
 }
 
@@ -68,12 +69,17 @@ func (b *Balancer) RemoveNode(inputNode *node.Node) error {
 
 func (b *Balancer) CleanupNodes() error {
 	go logger.Info("cleaning up nodes")
+	var wg sync.WaitGroup
 
 	for _, n := range b.nodes {
-		n.StopServer()
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			n.StopServer()
+		}()
 	}
 
-	var empty []*node.Node
-	b.nodes = empty
+	wg.Wait()
+	b.nodes = nil
 	return nil
 }
