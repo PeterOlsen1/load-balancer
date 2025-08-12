@@ -1,4 +1,4 @@
-package balancer
+package node
 
 import (
 	"fmt"
@@ -44,13 +44,32 @@ func (node *Node) StopServer() error {
 		return nil
 	}
 
-	cmd := exec.Command("docker", "stop", node.DockerInfo.id)
+	cmd := exec.Command("docker", "stop", node.DockerInfo.Id)
 	err := cmd.Run()
 	if err != nil {
 		go logger.LogErr("docker stop", err)
 		return err
 	}
 
-	go logger.LogContainerStop(node.DockerInfo.id)
+	go logger.LogContainerStop(node.DockerInfo.Id)
 	return nil
+}
+
+func (node *Node) GetHealth() string {
+	node.Metrics.Lock.Lock()
+	defer node.Metrics.Lock.Unlock()
+
+	health := node.Metrics.Health
+	switch health {
+	case 0:
+		return "Unknown"
+	case 1:
+		return "Unhealthy"
+	default:
+		return "Healthy"
+	}
+}
+
+func (n *Node) Equals(other *Node) bool {
+	return n.Address == other.Address && n.DockerInfo.Id == other.DockerInfo.Id
 }

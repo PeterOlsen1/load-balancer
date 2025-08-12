@@ -25,12 +25,12 @@ func (b *Balancer) ProxyRequest(conn *types.Connection) {
 	}()
 
 	go logger.LogProxy(conn.Request.URL.Path, node.Address)
-	go node.CheckHealth()
 
 	backendURL := fmt.Sprintf("%s%s", node.Address, conn.Request.URL.Path)
 	req, err := http.NewRequest(conn.Request.Method, backendURL, conn.Request.Body)
 	if err != nil {
 		logger.LogErr("Request creation failed", err)
+		send500(conn)
 		return
 	}
 
@@ -38,6 +38,7 @@ func (b *Balancer) ProxyRequest(conn *types.Connection) {
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		logger.LogErr("Backend request failed", err)
+		send500(conn)
 		return
 	}
 	defer resp.Body.Close()
@@ -46,6 +47,7 @@ func (b *Balancer) ProxyRequest(conn *types.Connection) {
 	_, err = io.Copy(conn.Response, resp.Body)
 	if err != nil {
 		logger.LogErr("Copying response", err)
+		send500(conn)
 		return
 	}
 }

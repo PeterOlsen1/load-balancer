@@ -3,6 +3,7 @@ package balancer
 import (
 	"fmt"
 	"load-balancer/pkg/logger"
+	"load-balancer/pkg/node"
 	"os/exec"
 	"strings"
 )
@@ -11,7 +12,7 @@ import (
 //
 // In a real environment, this would not be necessary,
 // and the user would just call the Balancer.AddNode method
-func StartServer(port int) (*Node, error) {
+func StartServer(port int) (*node.Node, error) {
 	path := "./server/run.sh" //assuming you run from root of project
 
 	cmd := exec.Command("bash", path, fmt.Sprintf("%d", port))
@@ -29,10 +30,10 @@ func StartServer(port int) (*Node, error) {
 	}
 	go logger.LogContainerStart(containerID)
 
-	node := Node{
-		DockerInfo: &DockerInfo{
+	node := node.Node{
+		DockerInfo: &node.DockerInfo{
 			Cmd: cmd,
-			id:  containerID,
+			Id:  containerID,
 		},
 		Address: fmt.Sprintf("http://localhost:%d", port),
 	}
@@ -41,7 +42,7 @@ func StartServer(port int) (*Node, error) {
 	return &node, nil
 }
 
-func (b *Balancer) AddNode(node *Node) {
+func (b *Balancer) AddNode(node *node.Node) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
@@ -49,15 +50,15 @@ func (b *Balancer) AddNode(node *Node) {
 	b.nodes = append(b.nodes, node)
 }
 
-func (b *Balancer) RemoveNode(node *Node) error {
-	node.StopServer()
+func (b *Balancer) RemoveNode(inputNode *node.Node) error {
+	inputNode.StopServer()
 
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
-	var filtered []*Node
+	var filtered []*node.Node
 	for _, n := range b.nodes {
-		if n != node {
+		if inputNode.Equals(n) {
 			filtered = append(filtered, n)
 		}
 	}
@@ -73,7 +74,7 @@ func (b *Balancer) CleanupNodes() error {
 		n.StopServer()
 	}
 
-	var empty []*Node
+	var empty []*node.Node
 	b.nodes = empty
 	return nil
 }
