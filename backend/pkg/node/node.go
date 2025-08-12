@@ -19,16 +19,16 @@ func (node *Node) CheckHealth() error {
 	duration := time.Since(start)
 
 	if err != nil {
-		go logger.LogErr("Fetching node health", err)
+		go logger.Err("Fetching node health", err)
 		return err
 	}
 
 	health := Healthy
 	if resp.StatusCode != http.StatusOK {
 		health = Unhealthy
-		go logger.LogStatusCheck("Unhealthy", node.Address)
+		go logger.StatusCheck("Unhealthy", node.Address)
 	} else {
-		go logger.LogStatusCheck("Healthy", node.Address)
+		go logger.StatusCheck("Healthy", node.Address)
 	}
 	node.Metrics.Lock.Lock()
 	defer node.Metrics.Lock.Unlock()
@@ -50,11 +50,11 @@ func (node *Node) StopServer() error {
 	cmd := exec.Command("docker", "stop", node.DockerInfo.Id)
 	err := cmd.Run()
 	if err != nil {
-		go logger.LogErr("docker stop", err)
+		go logger.Err("docker stop", err)
 		return err
 	}
 
-	go logger.LogContainerStop(node.DockerInfo.Id)
+	go logger.ContainerStop(node.DockerInfo.Id)
 	return nil
 }
 
@@ -95,12 +95,12 @@ func FromUrl(url string) *Node {
 /*
 	f, err := os.OpenFile("./data/urls", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		logger.LogErr("Failed to open url file", err)
+		logger.Err("Failed to open url file", err)
 		return nil, err
 	}
 	defer f.Close()
 	if _, err := f.WriteString(url + "\n"); err != nil {
-		logger.LogErr("Failed to write to url file", err)
+		logger.Err("Failed to write to url file", err)
 		return nil, err
 	}
 */

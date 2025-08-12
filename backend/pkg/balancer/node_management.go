@@ -19,16 +19,16 @@ func StartServer(port int) (*node.Node, error) {
 
 	output, err := cmd.Output()
 	if err != nil {
-		go logger.LogErr("Creating container", err)
+		go logger.Err("Creating container", err)
 		return nil, err
 	}
 	containerID := strings.TrimSpace(string(output))
 	if containerID == "" {
 		err := fmt.Errorf("empty container ID received")
-		go logger.LogErr("Creating container", err)
+		go logger.Err("Creating container", err)
 		return nil, err
 	}
-	go logger.LogContainerStart(containerID)
+	go logger.ContainerStart(containerID)
 
 	node := node.Node{
 		DockerInfo: &node.DockerInfo{
@@ -38,7 +38,7 @@ func StartServer(port int) (*node.Node, error) {
 		Address: fmt.Sprintf("http://localhost:%d", port),
 	}
 
-	go logger.Log(fmt.Sprintf("Started server @ http://localhost: %d", port))
+	go logger.Info(fmt.Sprintf("Started server @ http://localhost: %d", port))
 	return &node, nil
 }
 
@@ -67,7 +67,7 @@ func (b *Balancer) RemoveNode(inputNode *node.Node) error {
 }
 
 func (b *Balancer) CleanupNodes() error {
-	go logger.Log("cleaning up nodes")
+	go logger.Info("cleaning up nodes")
 
 	for _, n := range b.nodes {
 		n.StopServer()

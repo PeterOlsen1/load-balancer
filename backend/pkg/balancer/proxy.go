@@ -24,12 +24,12 @@ func (b *Balancer) ProxyRequest(conn *types.Connection) {
 		node.Metrics.Lock.Unlock()
 	}()
 
-	go logger.LogProxy(conn.Request.URL.Path, node.Address)
+	go logger.Proxy(conn.Request.URL.Path, node.Address)
 
 	backendURL := fmt.Sprintf("%s%s", node.Address, conn.Request.URL.Path)
 	req, err := http.NewRequest(conn.Request.Method, backendURL, conn.Request.Body)
 	if err != nil {
-		logger.LogErr("Request creation failed", err)
+		logger.Err("Request creation failed", err)
 		send500(conn)
 		return
 	}
@@ -37,7 +37,7 @@ func (b *Balancer) ProxyRequest(conn *types.Connection) {
 	maps.Copy(req.Header, conn.Request.Header)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		logger.LogErr("Backend request failed", err)
+		logger.Err("Backend request failed", err)
 		send500(conn)
 		return
 	}
@@ -46,7 +46,7 @@ func (b *Balancer) ProxyRequest(conn *types.Connection) {
 	conn.Response.WriteHeader(resp.StatusCode)
 	_, err = io.Copy(conn.Response, resp.Body)
 	if err != nil {
-		logger.LogErr("Copying response", err)
+		logger.Err("Copying response", err)
 		send500(conn)
 		return
 	}

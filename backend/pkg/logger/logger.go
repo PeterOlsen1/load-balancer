@@ -15,37 +15,42 @@ var logfile string = fmt.Sprintf("logs/app_%s_%s.log",
 	uuid.New().String()[:8],
 )
 
-func LogErr(msg string, err error) {
+func Err(msg string, err error) {
 	logLine := fmt.Sprintf("time=%s type=ERROR msg=\"%s\" error=\"%s\"", time.Now().Format(time.RFC3339), msg, err)
 	writeToFile(logLine)
 }
 
-func Log(msg string) {
+func Info(msg string) {
 	logLine := fmt.Sprintf("time=%s type=INFO msg=\"%s\"", time.Now().Format(time.RFC3339), msg)
 	writeToFile(logLine)
 }
 
-func LogContainerStart(containerID string) {
+func ContainerStart(containerID string) {
 	logLine := fmt.Sprintf("time=%s type=CONTAINER_START container_ID=\"%s\"", time.Now().Format(time.RFC3339), containerID)
 	writeToFile(logLine)
 }
 
-func LogContainerStop(containerID string) {
+func ContainerStop(containerID string) {
 	logLine := fmt.Sprintf("time=%s type=CONTAINER_STOP container_ID=\"%s\"", time.Now().Format(time.RFC3339), containerID)
 	writeToFile(logLine)
 }
 
-func LogRequest(conn *types.Connection) {
+func Request(conn *types.Connection) {
 	logLine := fmt.Sprintf("time=%s type=REQUEST method=%s path=\"%s\" user_agent=\"%s\"", time.Now().Format(time.RFC3339), conn.Request.Method, conn.Request.URL.Path, conn.Request.UserAgent())
 	writeToFile(logLine)
 }
 
-func LogStatusCheck(status string, address string) {
+func WsRequest(body []byte) {
+	logLine := fmt.Sprintf("time=%s type=WS_MESSAGE body=\"%s\"", time.Now().Format(time.RFC3339), string(body))
+	writeToFile(logLine)
+}
+
+func StatusCheck(status string, address string) {
 	logLine := fmt.Sprintf("time=%s type=HEALTH status=%s address=\"%s\"", time.Now().Format(time.RFC3339), status, address)
 	writeToFile(logLine)
 }
 
-func LogProxy(path string, proxiedTo string) {
+func Proxy(path string, proxiedTo string) {
 	logLine := fmt.Sprintf("time=%s type=PROXY path=\"%s\" proxied_to=\"%s\"", time.Now().Format(time.RFC3339), path, proxiedTo)
 	writeToFile(logLine)
 }

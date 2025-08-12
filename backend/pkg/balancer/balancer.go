@@ -1,9 +1,7 @@
 package balancer
 
 import (
-	"load-balancer/pkg/logger"
 	"load-balancer/pkg/queue"
-	"os"
 	"time"
 )
 
@@ -28,12 +26,6 @@ func (b *Balancer) InitBalancer() {
 	node, err := StartServer(3000)
 	if err != nil {
 		//error is already logged in the StartServer function
-		return
-	}
-
-	f, err := os.OpenFile("./data/urls", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		logger.LogErr("Failed to open url file", err)
 		return
 	}
 

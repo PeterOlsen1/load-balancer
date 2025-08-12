@@ -16,6 +16,6 @@ func send500(conn *types.Connection) {
 	_, err := conn.Response.Write([]byte(message))
 	if err != nil {
 		fmt.Println("Error writing 500 response:", err)
-		logger.LogErr("Writing 500 response", err)
+		logger.Err("Writing 500 response", err)
 	}
 }
