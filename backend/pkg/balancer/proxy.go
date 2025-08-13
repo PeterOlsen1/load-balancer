@@ -5,6 +5,7 @@ import (
 	"io"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/types"
+	"load-balancer/pkg/ws"
 	"maps"
 	"net/http"
 )
@@ -25,11 +26,13 @@ func (b *Balancer) ProxyRequest(conn *types.Connection) {
 	}()
 
 	go logger.Proxy(conn.Request.URL.Path, node.Address)
+	go ws.EventEmitter.Proxy(conn.Request.URL.Path, node.Address)
 
 	backendURL := fmt.Sprintf("%s%s", node.Address, conn.Request.URL.Path)
 	req, err := http.NewRequest(conn.Request.Method, backendURL, conn.Request.Body)
 	if err != nil {
-		logger.Err("Request creation failed", err)
+		go logger.Err("Request creation failed", err)
+		go ws.EventEmitter.Error("Request creation failed", err)
 		send500(conn)
 		return
 	}
@@ -37,7 +40,8 @@ func (b *Balancer) ProxyRequest(conn *types.Connection) {
 	maps.Copy(req.Header, conn.Request.Header)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		logger.Err("Backend request failed", err)
+		go logger.Err("Backend request failed", err)
+		go ws.EventEmitter.Error("Backend request failed", err)
 		send500(conn)
 		return
 	}
@@ -46,7 +50,8 @@ func (b *Balancer) ProxyRequest(conn *types.Connection) {
 	conn.Response.WriteHeader(resp.StatusCode)
 	_, err = io.Copy(conn.Response, resp.Body)
 	if err != nil {
-		logger.Err("Copying response", err)
+		go logger.Err("Copying response", err)
+		go ws.EventEmitter.Error("Copying response", err)
 		send500(conn)
 		return
 	}

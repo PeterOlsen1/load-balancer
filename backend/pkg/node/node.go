@@ -3,6 +3,7 @@ package node
 import (
 	"fmt"
 	"load-balancer/pkg/logger"
+	"load-balancer/pkg/ws"
 	"net/http"
 	"os/exec"
 	"time"
@@ -20,20 +21,23 @@ func (node *Node) CheckHealth() error {
 
 	if err != nil {
 		go logger.Err("Fetching node health", err)
+		go ws.EventEmitter.Error("Fetching node health", err)
 		return err
-	}
-
-	health := Healthy
-	if resp.StatusCode != http.StatusOK {
-		health = Unhealthy
-		go logger.StatusCheck("Unhealthy", node.Address)
-	} else {
-		go logger.StatusCheck("Healthy", node.Address)
 	}
 	node.Metrics.Lock.Lock()
 	defer node.Metrics.Lock.Unlock()
-	node.Metrics.Health = health
 	node.Metrics.ResponseTime = float32(duration.Microseconds() / 1000)
+	
+	health := Healthy
+	if resp.StatusCode != http.StatusOK {
+		health = Unhealthy
+		go logger.Health("Unhealthy", node.Address)
+		go ws.EventEmitter.Health("Unhealthy", node.Address)
+	} else {
+		go logger.Health("Healthy", node.Address)
+		go ws.EventEmitter.Health("Healthy", node.Address)
+	}
+	node.Metrics.Health = health
 
 	return nil
 }
@@ -51,10 +55,12 @@ func (node *Node) StopServer() error {
 	err := cmd.Run()
 	if err != nil {
 		go logger.Err("docker stop", err)
+		go ws.EventEmitter.Error("docker stop", err)
 		return err
 	}
 
 	go logger.ContainerStop(node.DockerInfo.Id)
+	go ws.EventEmitter.ContainerStop(node.DockerInfo.Id)
 	return nil
 }
 

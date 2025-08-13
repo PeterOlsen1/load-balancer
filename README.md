@@ -11,6 +11,7 @@ Questions:
 
 Working on:
 * When to spin up new docker containers?
+* Log + emit resposne time
 
 Future ideas:
 * Configure this to allow users to upload their own docker images?

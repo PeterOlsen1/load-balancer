@@ -45,7 +45,7 @@ func WsRequest(body []byte) {
 	writeToFile(logLine)
 }
 
-func StatusCheck(status string, address string) {
+func Health(status string, address string) {
 	logLine := fmt.Sprintf("time=%s type=HEALTH status=%s address=\"%s\"", time.Now().Format(time.RFC3339), status, address)
 	writeToFile(logLine)
 }

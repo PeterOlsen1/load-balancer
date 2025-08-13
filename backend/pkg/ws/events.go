@@ -42,4 +42,5 @@ type InfoEvent struct {
 type ErrorEvent struct {
 	BaseEvent
 	Message string `json:"message"`
+	Error   error  `json:"error"`
 }

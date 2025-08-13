@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/node"
+	"load-balancer/pkg/ws"
 )
 
 var roundRobinIndex = 0
@@ -14,7 +15,8 @@ func (b *Balancer) RoundRobin() *node.Node {
 	defer b.lock.Unlock()
 
 	if len(b.nodes) == 0 {
-		logger.Err("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
+		go logger.Err("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
+		go ws.EventEmitter.Error("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
 		return nil
 	}
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/node"
+	"load-balancer/pkg/ws"
 	"os/exec"
 	"strings"
 	"sync"
@@ -21,15 +22,18 @@ func StartServer(port int) (*node.Node, error) {
 	output, err := cmd.Output()
 	if err != nil {
 		go logger.Err("Creating container", err)
+		go ws.EventEmitter.Error("Creating container", err)
 		return nil, err
 	}
 	containerID := strings.TrimSpace(string(output))
 	if containerID == "" {
 		err := fmt.Errorf("empty container ID received")
 		go logger.Err("Creating container", err)
+		go ws.EventEmitter.Error("Creating container", err)
 		return nil, err
 	}
 	go logger.ContainerStart(containerID)
+	go ws.EventEmitter.ContainerStart(containerID)
 
 	node := node.Node{
 		DockerInfo: &node.DockerInfo{
@@ -40,6 +44,7 @@ func StartServer(port int) (*node.Node, error) {
 	}
 
 	go logger.Info(fmt.Sprintf("Started server @ http://localhost:%d", port))
+	go ws.EventEmitter.Info(fmt.Sprintf("Started server @ http://localhost:%d", port))
 	return &node, nil
 }
 
@@ -69,6 +74,7 @@ func (b *Balancer) RemoveNode(inputNode *node.Node) error {
 
 func (b *Balancer) CleanupNodes() error {
 	go logger.Info("cleaning up nodes")
+	go ws.EventEmitter.Info("cleaning up nodes")
 	var wg sync.WaitGroup
 
 	for _, n := range b.nodes {

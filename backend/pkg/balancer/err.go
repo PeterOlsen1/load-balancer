@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/types"
+	"load-balancer/pkg/ws"
 )
 
 func send500(conn *types.Connection) {
@@ -16,6 +17,8 @@ func send500(conn *types.Connection) {
 	_, err := conn.Response.Write([]byte(message))
 	if err != nil {
 		fmt.Println("Error writing 500 response:", err)
-		logger.Err("Writing 500 response", err)
+
+		go logger.Err("Writing 500 response", err)
+		go ws.EventEmitter.Error("Writing 500 response", err)
 	}
 }

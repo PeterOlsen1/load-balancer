@@ -118,10 +118,11 @@ func (s *Emitter) Info(message string) error {
 	return s.SendMessage(string(j))
 }
 
-func (s *Emitter) Error(message string) error {
+func (s *Emitter) Error(message string, err error) error {
 	j, err := json.Marshal(ErrorEvent{
 		BaseEvent: getBaseEvent("error"),
 		Message:   message,
+		Error:     err,
 	})
 
 	if err != nil {
