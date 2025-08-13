@@ -1,7 +1,7 @@
 package balancer
 
 import (
-	"load-balancer/pkg/node"
+	"load-balancer/pkg/balancer/node"
 	"sync"
 )
 

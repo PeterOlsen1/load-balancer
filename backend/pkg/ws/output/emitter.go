@@ -1,4 +1,4 @@
-package ws
+package output
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 )
 
 type Emitter struct {
-	conn *websocket.Conn
+	Conn *websocket.Conn
 	lock sync.Mutex
 }
 
@@ -23,14 +23,14 @@ func getBaseEvent(eventType string) BaseEvent {
 }
 
 func (s *Emitter) SendMessage(message string) error {
-	if s.conn == nil {
+	if s.Conn == nil {
 		return nil
 	}
 
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
-	err := s.conn.WriteMessage(1, []byte(message))
+	err := s.Conn.WriteMessage(1, []byte(message))
 	if err != nil {
 		logger.Err("Sending websocket message", err)
 	}
@@ -38,7 +38,7 @@ func (s *Emitter) SendMessage(message string) error {
 }
 
 func (s *Emitter) Request(conn *types.Connection) error {
-	j, err := json.Marshal(OutputRequestEvent{
+	j, err := json.Marshal(Request{
 		BaseEvent: getBaseEvent("request"),
 		IP:        conn.Request.RemoteAddr,
 		Method:    conn.Request.Method,
@@ -54,7 +54,7 @@ func (s *Emitter) Request(conn *types.Connection) error {
 }
 
 func (s *Emitter) Proxy(path string, proxiedTo string, ip string) error {
-	j, err := json.Marshal(OutputProxyEvent{
+	j, err := json.Marshal(Proxy{
 		BaseEvent: getBaseEvent("proxy"),
 		IP:        ip,
 		Path:      path,
@@ -69,7 +69,7 @@ func (s *Emitter) Proxy(path string, proxiedTo string, ip string) error {
 }
 
 func (s *Emitter) Health(status string, address string, respTime float32) error {
-	j, err := json.Marshal(OutputHealthEvent{
+	j, err := json.Marshal(Health{
 		BaseEvent:    getBaseEvent("health"),
 		Status:       status,
 		Address:      address,
@@ -84,7 +84,7 @@ func (s *Emitter) Health(status string, address string, respTime float32) error 
 }
 
 func (s *Emitter) ContainerStart(containerID string) error {
-	j, err := json.Marshal(OutputContainerStartEvent{
+	j, err := json.Marshal(ContainerStart{
 		BaseEvent:   getBaseEvent("container_start"),
 		ContainerID: containerID,
 	})
@@ -97,7 +97,7 @@ func (s *Emitter) ContainerStart(containerID string) error {
 }
 
 func (s *Emitter) ContainerStop(containerID string) error {
-	j, err := json.Marshal(OutputContainerStopEvent{
+	j, err := json.Marshal(ContainerStop{
 		BaseEvent:   getBaseEvent("container_stop"),
 		ContainerID: containerID,
 	})
@@ -110,7 +110,7 @@ func (s *Emitter) ContainerStop(containerID string) error {
 }
 
 func (s *Emitter) Info(message string) error {
-	j, err := json.Marshal(OutputInfoEvent{
+	j, err := json.Marshal(Info{
 		BaseEvent: getBaseEvent("info"),
 		Message:   message,
 	})
@@ -123,7 +123,7 @@ func (s *Emitter) Info(message string) error {
 }
 
 func (s *Emitter) Error(message string, err error) error {
-	j, err := json.Marshal(OutputErrorEvent{
+	j, err := json.Marshal(Error{
 		BaseEvent: getBaseEvent("error"),
 		Message:   message,
 		Error:     err,

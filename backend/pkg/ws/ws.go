@@ -3,6 +3,8 @@ package ws
 //emit events to the frontend
 import (
 	"load-balancer/pkg/logger"
+	"load-balancer/pkg/ws/input"
+	"load-balancer/pkg/ws/output"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -14,7 +16,8 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
-var EventEmitter Emitter
+var EventEmitter output.Emitter
+var EventReciever input.Receiver
 
 func WsHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -24,8 +27,8 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	EventEmitter = Emitter{
-		conn: conn,
+	EventEmitter = output.Emitter{
+		Conn: conn,
 	}
 
 	for {
@@ -36,6 +39,6 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		logger.WsRequest(body)
 
-		handleWsRequest(string(body), err)
+		EventReciever.HandleWsRequest(string(body), err)
 	}
 }
