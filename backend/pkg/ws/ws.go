@@ -14,6 +14,8 @@ var upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
+var EventEmitter Emitter
+
 func WsHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -22,17 +24,16 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
+	EventEmitter = Emitter{
+		conn: conn,
+	}
+
 	for {
-		messageType, body, err := conn.ReadMessage()
+		_, body, err := conn.ReadMessage()
 		if err != nil {
 			logger.Err("Reading from websocket", err)
 			return
 		}
 		logger.WsRequest(body)
-
-		if err := conn.WriteMessage(messageType, body); err != nil {
-			logger.Err("websocket write", err)
-			return
-		}
 	}
 }

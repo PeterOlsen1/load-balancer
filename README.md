@@ -34,8 +34,8 @@ Proxy process:
     * Hash table for 'address: { node, connectionData }' pairs
   * Balancing options
     * Round robin
-    * least connections (weighted)
-    * compute based
+    * least connections (+ weighted)
+    * compute based ?
     * IP hash
 
 Things to research:
