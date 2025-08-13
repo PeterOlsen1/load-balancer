@@ -35,5 +35,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		logger.WsRequest(body)
+
+		handleWsRequest(string(body), err)
 	}
 }

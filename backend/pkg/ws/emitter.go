@@ -38,7 +38,7 @@ func (s *Emitter) SendMessage(message string) error {
 }
 
 func (s *Emitter) Request(conn *types.Connection) error {
-	j, err := json.Marshal(RequestEvent{
+	j, err := json.Marshal(OutputRequestEvent{
 		BaseEvent: getBaseEvent("request"),
 		IP:        conn.Request.RemoteAddr,
 		Method:    conn.Request.Method,
@@ -54,7 +54,7 @@ func (s *Emitter) Request(conn *types.Connection) error {
 }
 
 func (s *Emitter) Proxy(path string, proxiedTo string, ip string) error {
-	j, err := json.Marshal(ProxyEvent{
+	j, err := json.Marshal(OutputProxyEvent{
 		BaseEvent: getBaseEvent("proxy"),
 		IP:        ip,
 		Path:      path,
@@ -69,7 +69,7 @@ func (s *Emitter) Proxy(path string, proxiedTo string, ip string) error {
 }
 
 func (s *Emitter) Health(status string, address string, respTime float32) error {
-	j, err := json.Marshal(HealthEvent{
+	j, err := json.Marshal(OutputHealthEvent{
 		BaseEvent:    getBaseEvent("health"),
 		Status:       status,
 		Address:      address,
@@ -84,7 +84,7 @@ func (s *Emitter) Health(status string, address string, respTime float32) error 
 }
 
 func (s *Emitter) ContainerStart(containerID string) error {
-	j, err := json.Marshal(ContainerStartEvent{
+	j, err := json.Marshal(OutputContainerStartEvent{
 		BaseEvent:   getBaseEvent("container_start"),
 		ContainerID: containerID,
 	})
@@ -97,7 +97,7 @@ func (s *Emitter) ContainerStart(containerID string) error {
 }
 
 func (s *Emitter) ContainerStop(containerID string) error {
-	j, err := json.Marshal(ContainerStopEvent{
+	j, err := json.Marshal(OutputContainerStopEvent{
 		BaseEvent:   getBaseEvent("container_stop"),
 		ContainerID: containerID,
 	})
@@ -110,7 +110,7 @@ func (s *Emitter) ContainerStop(containerID string) error {
 }
 
 func (s *Emitter) Info(message string) error {
-	j, err := json.Marshal(InfoEvent{
+	j, err := json.Marshal(OutputInfoEvent{
 		BaseEvent: getBaseEvent("info"),
 		Message:   message,
 	})
@@ -123,7 +123,7 @@ func (s *Emitter) Info(message string) error {
 }
 
 func (s *Emitter) Error(message string, err error) error {
-	j, err := json.Marshal(ErrorEvent{
+	j, err := json.Marshal(OutputErrorEvent{
 		BaseEvent: getBaseEvent("error"),
 		Message:   message,
 		Error:     err,

@@ -10,8 +10,9 @@ Questions:
 Working on:
 * When to spin up new docker containers?
 * Load URLs into nodes from CSV file when starting, or at least keep them for later use
-* Configuration of port, address to run this on
 * Decide what events we want to send from the frontend
+  * How am I going to process a requested event without circular imports. Set up a hook to run when a request type happens?
+  * Add receiver file to each packge, there we can determine how we will emit events
 
 Future ideas:
 * Configure this to allow users to upload their own docker images?

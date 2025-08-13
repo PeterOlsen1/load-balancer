@@ -5,7 +5,7 @@ type BaseEvent struct {
 	Time string `json:"time"`
 }
 
-type RequestEvent struct {
+type OutputRequestEvent struct {
 	BaseEvent
 	IP        string `json:"ip"`
 	Method    string `json:"method"`
@@ -13,36 +13,36 @@ type RequestEvent struct {
 	UserAgent string `json:"user_agent"`
 }
 
-type ProxyEvent struct {
+type OutputProxyEvent struct {
 	BaseEvent
 	IP        string `json:"ip"`
 	Path      string `json:"path"`
 	ProxiedTo string `json:"address"`
 }
 
-type HealthEvent struct {
+type OutputHealthEvent struct {
 	BaseEvent
 	Status       string  `json:"status"`
 	Address      string  `json:"address"`
 	ResponseTime float32 `json:"response_time"`
 }
 
-type ContainerStartEvent struct {
+type OutputContainerStartEvent struct {
 	BaseEvent
 	ContainerID string `json:"container_id"`
 }
 
-type ContainerStopEvent struct {
+type OutputContainerStopEvent struct {
 	BaseEvent
 	ContainerID string `json:"container_id"`
 }
 
-type InfoEvent struct {
+type OutputInfoEvent struct {
 	BaseEvent
 	Message string `json:"message"`
 }
 
-type ErrorEvent struct {
+type OutputErrorEvent struct {
 	BaseEvent
 	Message string `json:"message"`
 	Error   error  `json:"error"`
