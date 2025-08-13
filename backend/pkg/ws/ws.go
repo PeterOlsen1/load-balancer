@@ -35,10 +35,21 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 		_, body, err := conn.ReadMessage()
 		if err != nil {
 			logger.Err("Reading from websocket", err)
-			return
+			continue
 		}
 		logger.WsRequest(body)
 
-		EventReciever.HandleWsRequest(string(body), err)
+		bytes, err := EventReciever.HandleWsRequest(body)
+		if err != nil {
+			//errror should be logged within function
+			EventEmitter.Error("Constructing response", err)
+			conn.WriteMessage(0, []byte("{}"))
+			continue
+		}
+
+		err = conn.WriteMessage(1, bytes)
+		if err != nil {
+			logger.Err("Writing websocket response", err)
+		}
 	}
 }
