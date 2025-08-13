@@ -12,6 +12,7 @@ Questions:
 Working on:
 * When to spin up new docker containers?
 * Log + emit resposne time
+* Load URLs into nodes from CSV file when starting, or at least keep them for later use
 
 Future ideas:
 * Configure this to allow users to upload their own docker images?

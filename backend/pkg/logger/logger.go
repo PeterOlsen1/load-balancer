@@ -36,7 +36,7 @@ func ContainerStop(containerID string) {
 }
 
 func Request(conn *types.Connection) {
-	logLine := fmt.Sprintf("time=%s type=REQUEST method=%s path=\"%s\" user_agent=\"%s\"", time.Now().Format(time.RFC3339), conn.Request.Method, conn.Request.URL.Path, conn.Request.UserAgent())
+	logLine := fmt.Sprintf("time=%s type=REQUEST ip=%s method=%s path=\"%s\" user_agent=\"%s\"", time.Now().Format(time.RFC3339), conn.Request.RemoteAddr, conn.Request.Method, conn.Request.URL.Path, conn.Request.UserAgent())
 	writeToFile(logLine)
 }
 
@@ -50,8 +50,8 @@ func Health(status string, address string) {
 	writeToFile(logLine)
 }
 
-func Proxy(path string, proxiedTo string) {
-	logLine := fmt.Sprintf("time=%s type=PROXY path=\"%s\" proxied_to=\"%s\"", time.Now().Format(time.RFC3339), path, proxiedTo)
+func Proxy(path string, proxiedTo string, ip string) {
+	logLine := fmt.Sprintf("time=%s type=PROXY ip=%s path=\"%s\" proxied_to=\"%s\"", time.Now().Format(time.RFC3339), ip, path, proxiedTo)
 	writeToFile(logLine)
 }
 

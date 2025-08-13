@@ -27,6 +27,7 @@ func connectionHandler(resp http.ResponseWriter, req *http.Request) {
 
 	fmt.Println(req.Method + ": " + req.URL.Path)
 	go logger.Request(&conn)
+	go ws.EventEmitter.Request(&conn)
 	balancer.LoadBalancer.ProxyRequest(&conn)
 }
 

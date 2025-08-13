@@ -3,6 +3,7 @@ package ws
 import (
 	"encoding/json"
 	"load-balancer/pkg/logger"
+	"load-balancer/pkg/types"
 	"sync"
 	"time"
 
@@ -36,12 +37,13 @@ func (s *Emitter) SendMessage(message string) error {
 	return err
 }
 
-func (s *Emitter) Request(method string, path string, userAgent string) error {
+func (s *Emitter) Request(conn *types.Connection) error {
 	j, err := json.Marshal(RequestEvent{
 		BaseEvent: getBaseEvent("request"),
-		Method:    method,
-		Path:      path,
-		UserAgent: userAgent,
+		IP:        conn.Request.RemoteAddr,
+		Method:    conn.Request.Method,
+		Path:      conn.Request.URL.Path,
+		UserAgent: conn.Request.UserAgent(),
 	})
 
 	if err != nil {
@@ -51,9 +53,10 @@ func (s *Emitter) Request(method string, path string, userAgent string) error {
 	return s.SendMessage(string(j))
 }
 
-func (s *Emitter) Proxy(path string, proxiedTo string) error {
+func (s *Emitter) Proxy(path string, proxiedTo string, ip string) error {
 	j, err := json.Marshal(ProxyEvent{
 		BaseEvent: getBaseEvent("proxy"),
+		IP:        ip,
 		Path:      path,
 		ProxiedTo: proxiedTo,
 	})

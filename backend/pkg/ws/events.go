@@ -7,6 +7,7 @@ type BaseEvent struct {
 
 type RequestEvent struct {
 	BaseEvent
+	IP        string `json:"ip"`
 	Method    string `json:"method"`
 	Path      string `json:"path"`
 	UserAgent string `json:"user_agent"`
@@ -14,6 +15,7 @@ type RequestEvent struct {
 
 type ProxyEvent struct {
 	BaseEvent
+	IP        string `json:"ip"`
 	Path      string `json:"path"`
 	ProxiedTo string `json:"address"`
 }

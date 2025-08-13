@@ -25,8 +25,8 @@ func (b *Balancer) ProxyRequest(conn *types.Connection) {
 		node.Metrics.Lock.Unlock()
 	}()
 
-	go logger.Proxy(conn.Request.URL.Path, node.Address)
-	go ws.EventEmitter.Proxy(conn.Request.URL.Path, node.Address)
+	go logger.Proxy(conn.Request.URL.Path, node.Address, conn.Request.RemoteAddr)
+	go ws.EventEmitter.Proxy(conn.Request.URL.Path, node.Address, conn.Request.RemoteAddr)
 
 	backendURL := fmt.Sprintf("%s%s", node.Address, conn.Request.URL.Path)
 	req, err := http.NewRequest(conn.Request.Method, backendURL, conn.Request.Body)
