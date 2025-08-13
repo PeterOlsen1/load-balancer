@@ -16,21 +16,21 @@ Method:
 * CheckHealth() -> send a request to the given node, and update its metrics
 */
 type Node struct {
-	DockerInfo *DockerInfo
-	Address    string
-	Metrics    NodeMetrics
+	DockerInfo *DockerInfo `json:"docker_info"`
+	Address    string      `json:"address"`
+	Metrics    NodeMetrics `json:"metrics"`
 }
 
 type DockerInfo struct {
-	Cmd *exec.Cmd
-	Id  string
+	Cmd *exec.Cmd `json:"cmd"`
+	Id  string    `json:"id"`
 }
 
 type NodeMetrics struct {
 	Lock         sync.Mutex
-	Health       NodeHealth
-	ResponseTime float32
-	Connections  uint32
+	Health       NodeHealth `json:"health"`
+	ResponseTime float32	`json:"response_time"`
+	Connections  uint32		`json:"connections"`
 }
 
 /*
