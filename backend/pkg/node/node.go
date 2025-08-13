@@ -26,16 +26,17 @@ func (node *Node) CheckHealth() error {
 	}
 	node.Metrics.Lock.Lock()
 	defer node.Metrics.Lock.Unlock()
-	node.Metrics.ResponseTime = float32(duration.Microseconds() / 1000)
+	respTime := float32(duration.Microseconds() / 1000)
+	node.Metrics.ResponseTime = respTime
 	
 	health := Healthy
 	if resp.StatusCode != http.StatusOK {
 		health = Unhealthy
-		go logger.Health("Unhealthy", node.Address)
-		go ws.EventEmitter.Health("Unhealthy", node.Address)
+		go logger.Health("Unhealthy", node.Address, respTime)
+		go ws.EventEmitter.Health("Unhealthy", node.Address, respTime)
 	} else {
-		go logger.Health("Healthy", node.Address)
-		go ws.EventEmitter.Health("Healthy", node.Address)
+		go logger.Health("Healthy", node.Address, respTime)
+		go ws.EventEmitter.Health("Healthy", node.Address, respTime)
 	}
 	node.Metrics.Health = health
 

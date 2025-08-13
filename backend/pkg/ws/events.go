@@ -22,8 +22,9 @@ type ProxyEvent struct {
 
 type HealthEvent struct {
 	BaseEvent
-	Status  string `json:"status"`
-	Address string `json:"address"`
+	Status       string  `json:"status"`
+	Address      string  `json:"address"`
+	ResponseTime float32 `json:"response_time"`
 }
 
 type ContainerStartEvent struct {

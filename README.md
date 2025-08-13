@@ -16,7 +16,6 @@ Working on:
 
 Future ideas:
 * Configure this to allow users to upload their own docker images?
-* Re-implement shared queue
 * Add rate tracking?
 
 ### general thoughts

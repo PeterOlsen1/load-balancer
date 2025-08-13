@@ -68,11 +68,12 @@ func (s *Emitter) Proxy(path string, proxiedTo string, ip string) error {
 	return s.SendMessage(string(j))
 }
 
-func (s *Emitter) Health(status string, address string) error {
+func (s *Emitter) Health(status string, address string, respTime float32) error {
 	j, err := json.Marshal(HealthEvent{
-		BaseEvent: getBaseEvent("health"),
-		Status:    status,
-		Address:   address,
+		BaseEvent:    getBaseEvent("health"),
+		Status:       status,
+		Address:      address,
+		ResponseTime: respTime,
 	})
 
 	if err != nil {
