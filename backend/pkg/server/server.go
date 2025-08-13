@@ -11,12 +11,13 @@ import (
 
 var PORT int = 3001
 
-func Serve() error {
-	fmt.Println("Starting server @ localost:8080")
+func Serve(address string, port int) error {
+	url := fmt.Sprintf("%s:%d", address, port)
+	fmt.Println("Starting server @", url)
 	http.HandleFunc("/ws", ws.WsHandler)
 	http.HandleFunc("/", connectionHandler)
 	http.HandleFunc("/new", addNewContainer)
-	return http.ListenAndServe(":8080", nil)
+	return http.ListenAndServe(url, nil)
 }
 
 func connectionHandler(resp http.ResponseWriter, req *http.Request) {

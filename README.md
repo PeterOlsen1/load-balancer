@@ -3,19 +3,20 @@ Trying out new things. Learning Go. Balancing loads ⚖️
 
 ## architecture planning
 
-Basic idea: we want to have some sort of web service, where requests are recieved, sent to a shared queue, and then handled accordingly
-
 Questions:
 * When to spin up a new container
 * What metrics should we send to frontend?
 
 Working on:
 * When to spin up new docker containers?
-* Log + emit resposne time
 * Load URLs into nodes from CSV file when starting, or at least keep them for later use
+* Configuration of port, address to run this on
+* Decide what events we want to send from the frontend
 
 Future ideas:
 * Configure this to allow users to upload their own docker images?
+  * Allow configuration with a .yaml file
+    * URLs, rules for proxy, etc.
 * Add rate tracking?
 
 ### general thoughts
