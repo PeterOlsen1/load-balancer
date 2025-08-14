@@ -29,6 +29,6 @@ func main() {
 
 	//unused
 	// go balancer.WatchQueue()
-	// balancer.LoadBalancer.InitBalancer()
+	balancer.LoadBalancer.InitBalancer()
 	server.Serve(*address, *port)
 }

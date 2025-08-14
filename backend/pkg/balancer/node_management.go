@@ -2,8 +2,8 @@ package balancer
 
 import (
 	"fmt"
-	"load-balancer/pkg/logger"
 	"load-balancer/pkg/balancer/node"
+	"load-balancer/pkg/logger"
 	"load-balancer/pkg/ws"
 	"os/exec"
 	"strings"

@@ -17,7 +17,7 @@ var upgrader = websocket.Upgrader{
 }
 
 var EventEmitter output.Emitter
-var EventReciever input.Receiver
+var EventReciever input.Receiver = input.InitReceiver()
 
 func WsHandler(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -27,17 +27,27 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
+	logger.WsConnect(r)
 	EventEmitter = output.Emitter{
 		Conn: conn,
 	}
+	defer func() {
+		//remove connection at the end
+		EventEmitter.Conn = nil
+	}()
 
 	for {
 		_, body, err := conn.ReadMessage()
 		if err != nil {
-			logger.Err("Reading from websocket", err)
-			continue
+			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) ||
+				websocket.IsUnexpectedCloseError(err) {
+				logger.WsClose(r)
+			} else {
+				logger.Err("Reading from websocket", err)
+			}
+			return
 		}
-		logger.WsRequest(body)
+		logger.WsRequest(body, r.RemoteAddr)
 
 		bytes, err := EventReciever.HandleWsRequest(body)
 		if err != nil {

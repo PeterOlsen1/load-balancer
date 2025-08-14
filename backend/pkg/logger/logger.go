@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
@@ -40,8 +41,18 @@ func Request(conn *types.Connection) {
 	writeToFile(logLine)
 }
 
-func WsRequest(body []byte) {
-	logLine := fmt.Sprintf("time=%s type=WS_MESSAGE body=\"%s\"", time.Now().Format(time.RFC3339), string(body))
+func WsRequest(body []byte, ip string) {
+	logLine := fmt.Sprintf("time=%s type=WS_MESSAGE body=\"%s\" ip=\"%s\"", time.Now().Format(time.RFC3339), string(body), ip)
+	writeToFile(logLine)
+}
+
+func WsConnect(req *http.Request) {
+	logLine := fmt.Sprintf("time=%s type=WS_CONNECT ip=%s", time.Now().Format(time.RFC3339), req.RemoteAddr)
+	writeToFile(logLine)
+}
+
+func WsClose(req *http.Request) {
+	logLine := fmt.Sprintf("time=%s type=WS_CLOSE ip=%s", time.Now().Format(time.RFC3339), req.RemoteAddr)
 	writeToFile(logLine)
 }
 

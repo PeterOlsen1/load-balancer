@@ -5,12 +5,12 @@ type BaseEvent struct {
 	Time string `json:"time"`
 }
 
-type StopContainer struct {
+type ContainerStop struct {
 	BaseEvent,
 	ContainerID string `json:"container_id"`
 }
 
-type StartContainer struct {
+type ContainerStart struct {
 	BaseEvent,
 	Address string `json:"address"`
 }

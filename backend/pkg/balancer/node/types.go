@@ -22,15 +22,15 @@ type Node struct {
 }
 
 type DockerInfo struct {
-	Cmd *exec.Cmd `json:"cmd"`
-	Id  string    `json:"id"`
+	Cmd *exec.Cmd
+	Id  string `json:"id"`
 }
 
 type NodeMetrics struct {
 	Lock         sync.Mutex
 	Health       NodeHealth `json:"health"`
-	ResponseTime float32	`json:"response_time"`
-	Connections  uint32		`json:"connections"`
+	ResponseTime float32    `json:"response_time"`
+	Connections  uint32     `json:"connections"`
 }
 
 /*

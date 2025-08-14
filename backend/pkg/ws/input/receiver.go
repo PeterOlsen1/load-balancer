@@ -7,10 +7,16 @@ import (
 	"os"
 )
 
-type ReceiverFunction func(body string) (string, error)
+type ReceiverFunction func(body []byte) ([]byte, error)
 
 type Receiver struct {
 	eventMap map[string]ReceiverFunction
+}
+
+func InitReceiver() Receiver {
+	return Receiver{
+		eventMap: make(map[string]ReceiverFunction),
+	}
 }
 
 func (r *Receiver) AddEventHandler(eventType string, f ReceiverFunction) {
@@ -42,6 +48,6 @@ func (r *Receiver) HandleWsRequest(body []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	bytes, err := receiverFunc(string(body))
-	return []byte(bytes), err
+	bytes, err := receiverFunc(body)
+	return bytes, err
 }
