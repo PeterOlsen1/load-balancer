@@ -40,10 +40,6 @@ func (r *Receiver) HandleWsRequest(body []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	for k := range r.eventMap {
-		fmt.Println(k)
-	}
-
 	messageType := base.Type
 	receiverFunc := r.eventMap[messageType]
 	if receiverFunc == nil {

@@ -10,7 +10,7 @@ Questions:
 Working on:
 * When to spin up new docker containers?
 * Load URLs into nodes from CSV file when starting, or at least keep them for later use
-* Add receiver hooks
+* write logs to a different place on disk?
 
 Future ideas:
 * Configure this to allow users to upload their own docker images?

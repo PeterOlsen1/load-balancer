@@ -20,7 +20,6 @@ func getBaseResponse(respType string) BaseResponse {
 }
 
 func init() {
-	fmt.Println("running init function!")
 	ws.EventReciever.AddEventHandler("request_nodes", func(body []byte) ([]byte, error) {
 		var nodeLiterals []node.Node
 		for _, n := range b.LoadBalancer.Nodes {
@@ -81,10 +80,11 @@ func init() {
 
 	ws.EventReciever.AddEventHandler("node_start", func(body []byte) ([]byte, error) {
 		newNode, err := b.StartServer(b.PORT)
-		b.PORT++
 		if err != nil {
 			return nil, err
 		}
+		b.PORT++
+		b.LoadBalancer.AddNode(newNode)
 
 		resp := NodeStartResponse{
 			BaseResponse: getBaseResponse("node_start"),
