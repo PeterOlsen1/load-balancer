@@ -8,15 +8,17 @@ Questions:
 * What metrics should we send to frontend?
 
 Working on:
-* When to spin up new docker containers?
+* When to spin up new docker containers automatically?
 * Load URLs into nodes from CSV file when starting, or at least keep them for later use
 * write logs to a different place on disk?
+* Test out websocket connection more
 
 Future ideas:
 * Configure this to allow users to upload their own docker images?
   * Allow configuration with a .yaml file
     * URLs, rules for proxy, etc.
 * Add rate tracking?
+* Testing framework (really load it)
 
 ### general thoughts
   
