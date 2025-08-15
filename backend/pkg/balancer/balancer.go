@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+var PORT int = 3001
 var LoadBalancer = Balancer{}
 
 func WatchQueue() {
@@ -22,7 +23,6 @@ func WatchQueue() {
 	}
 }
 
-//
 // Pass in num <= 0 for no health checks
 func (b *Balancer) InitBalancer(healthCheckPeriod int) {
 	node, err := StartServer(3000)
@@ -35,7 +35,7 @@ func (b *Balancer) InitBalancer(healthCheckPeriod int) {
 	time.Sleep(2 * time.Second)
 	b.AddNode(node)
 
-	if (healthCheckPeriod <= 0) {
+	if healthCheckPeriod <= 0 {
 		return
 	}
 
@@ -45,10 +45,18 @@ func (b *Balancer) InitBalancer(healthCheckPeriod int) {
 
 		for range ticker.C {
 			b.lock.Lock()
-			for _, n := range LoadBalancer.nodes {
+			for _, n := range LoadBalancer.Nodes {
 				n.CheckHealth()
 			}
 			b.lock.Unlock()
 		}
 	}()
+}
+
+func (b *Balancer) Lock() {
+	b.lock.Lock()
+}
+
+func (b *Balancer) Unlock() {
+	b.lock.Unlock()
 }

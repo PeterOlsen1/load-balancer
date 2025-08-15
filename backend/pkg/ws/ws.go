@@ -2,6 +2,7 @@ package ws
 
 //emit events to the frontend
 import (
+	"load-balancer/pkg/types"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/ws/input"
 	"load-balancer/pkg/ws/output"
@@ -15,7 +16,6 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
-
 var EventEmitter output.Emitter
 var EventReciever input.Receiver = input.InitReceiver()
 
@@ -27,13 +27,17 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
+	lockedConn := types.LockedConnection{
+		Conn: conn,
+	}
+
 	logger.WsConnect(r)
 	EventEmitter = output.Emitter{
-		Conn: conn,
+		LockedConn: &lockedConn,
 	}
 	defer func() {
 		//remove connection at the end
-		EventEmitter.Conn = nil
+		EventEmitter.LockedConn = nil
 	}()
 
 	for {
@@ -57,6 +61,8 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		lockedConn.Lock.Lock()
+		defer lockedConn.Lock.Unlock()
 		err = conn.WriteMessage(1, bytes)
 		if err != nil {
 			logger.Err("Writing websocket response", err)

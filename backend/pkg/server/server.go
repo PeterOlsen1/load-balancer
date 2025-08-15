@@ -9,8 +9,6 @@ import (
 	"net/http"
 )
 
-var PORT int = 3001
-
 func Serve(address string, port int) error {
 	url := fmt.Sprintf("%s:%d", address, port)
 	fmt.Println("Starting server @", url)
@@ -34,12 +32,12 @@ func connectionHandler(resp http.ResponseWriter, req *http.Request) {
 
 // test endpoint for adding new container functionality
 func addNewContainer(resp http.ResponseWriter, req *http.Request) {
-	node, err := balancer.StartServer(PORT)
+	node, err := balancer.StartServer(balancer.PORT)
 	if err != nil {
 		return
 	}
 
 	balancer.LoadBalancer.AddNode(node)
-	PORT++
+	balancer.PORT++
 	fmt.Fprintf(resp, "Added new container: %s", node.DockerInfo.Id)
 }

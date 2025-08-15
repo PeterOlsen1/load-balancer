@@ -36,6 +36,16 @@ func ContainerStop(containerID string) {
 	writeToFile(logLine)
 }
 
+func ContainerPause(containerID string) {
+	logLine := fmt.Sprintf("time=%s type=CONTAINER_PAUSE container_ID=\"%s\"", time.Now().Format(time.RFC3339), containerID)
+	writeToFile(logLine)
+}
+
+func ContainerUnpause(containerID string) {
+	logLine := fmt.Sprintf("time=%s type=CONTAINER_UNPAUSE container_ID=\"%s\"", time.Now().Format(time.RFC3339), containerID)
+	writeToFile(logLine)
+}
+
 func Request(conn *types.Connection) {
 	logLine := fmt.Sprintf("time=%s type=REQUEST ip=%s method=%s path=\"%s\" user_agent=\"%s\"", time.Now().Format(time.RFC3339), conn.Request.RemoteAddr, conn.Request.Method, conn.Request.URL.Path, conn.Request.UserAgent())
 	writeToFile(logLine)

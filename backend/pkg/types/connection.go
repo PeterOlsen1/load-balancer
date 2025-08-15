@@ -5,12 +5,19 @@ import (
 	"io"
 	"net/http"
 	"sync"
+
+	"github.com/gorilla/websocket"
 )
 
 type Connection struct {
 	Response http.ResponseWriter
 	Request  *http.Request
 	lock     sync.Mutex
+}
+
+type LockedConnection struct {
+	Conn *websocket.Conn
+	Lock sync.Mutex
 }
 
 func (conn *Connection) Body() (string, error) {

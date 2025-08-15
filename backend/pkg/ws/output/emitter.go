@@ -4,15 +4,11 @@ import (
 	"encoding/json"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/types"
-	"sync"
 	"time"
-
-	"github.com/gorilla/websocket"
 )
 
 type Emitter struct {
-	Conn *websocket.Conn
-	lock sync.Mutex
+	LockedConn *types.LockedConnection
 }
 
 func getBaseEvent(eventType string) BaseEvent {
@@ -23,14 +19,14 @@ func getBaseEvent(eventType string) BaseEvent {
 }
 
 func (s *Emitter) SendMessage(message string) error {
-	if s.Conn == nil {
+	if s.LockedConn == nil {
 		return nil
 	}
 
-	s.lock.Lock()
-	defer s.lock.Unlock()
+	s.LockedConn.Lock.Lock()
+	defer s.LockedConn.Lock.Unlock()
 
-	err := s.Conn.WriteMessage(1, []byte(message))
+	err := s.LockedConn.Conn.WriteMessage(1, []byte(message))
 	if err != nil {
 		logger.Err("Sending websocket message", err)
 	}

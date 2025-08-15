@@ -52,7 +52,7 @@ func (b *Balancer) AddNode(node *node.Node) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
-	b.nodes = append(b.nodes, node)
+	b.Nodes = append(b.Nodes, node)
 }
 
 func (b *Balancer) RemoveNode(inputNode *node.Node) error {
@@ -62,12 +62,12 @@ func (b *Balancer) RemoveNode(inputNode *node.Node) error {
 	defer b.lock.Unlock()
 
 	var filtered []*node.Node
-	for _, n := range b.nodes {
+	for _, n := range b.Nodes {
 		if inputNode.Equals(n) {
 			filtered = append(filtered, n)
 		}
 	}
-	b.nodes = filtered
+	b.Nodes = filtered
 
 	return nil
 }
@@ -77,7 +77,7 @@ func (b *Balancer) CleanupNodes() error {
 	go ws.EventEmitter.Info("cleaning up nodes")
 	var wg sync.WaitGroup
 
-	for _, n := range b.nodes {
+	for _, n := range b.Nodes {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -86,6 +86,6 @@ func (b *Balancer) CleanupNodes() error {
 	}
 
 	wg.Wait()
-	b.nodes = nil
+	b.Nodes = nil
 	return nil
 }

@@ -3,8 +3,8 @@ package balancer
 import (
 	"crypto/sha256"
 	"fmt"
-	"load-balancer/pkg/logger"
 	"load-balancer/pkg/balancer/node"
+	"load-balancer/pkg/logger"
 	"load-balancer/pkg/ws"
 )
 
@@ -14,19 +14,19 @@ func (b *Balancer) RoundRobin() *node.Node {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
-	if len(b.nodes) == 0 {
+	if len(b.Nodes) == 0 {
 		go logger.Err("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
 		go ws.EventEmitter.Error("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
 		return nil
 	}
 
-	idx := roundRobinIndex % len(b.nodes)
-	node := b.nodes[idx]
+	idx := roundRobinIndex % len(b.Nodes)
+	node := b.Nodes[idx]
 	roundRobinIndex++
 
-	for node.GetHealth() == "Unhealthy" {
-		idx := roundRobinIndex % len(b.nodes)
-		node = b.nodes[idx]
+	for node.Metrics.Health != "healthy" {
+		idx := roundRobinIndex % len(b.Nodes)
+		node = b.Nodes[idx]
 		roundRobinIndex++
 	}
 
@@ -38,8 +38,8 @@ func (b *Balancer) LeastConnections() *node.Node {
 	defer b.lock.Unlock()
 
 	var lowest *node.Node = nil
-	for _, n := range b.nodes {
-		if n.Metrics.Connections < lowest.Metrics.Connections && n.GetHealth() == "Unhealthy" {
+	for _, n := range b.Nodes {
+		if n.Metrics.Connections < lowest.Metrics.Connections && n.Metrics.Health != "healthy" {
 			lowest = n
 		}
 	}
@@ -55,14 +55,14 @@ func (b *Balancer) ComputeBased() *node.Node {
 func (b *Balancer) IPHash(ip string) *node.Node {
 	hash := sha256.Sum256([]byte(ip))
 	hashInt := int(hash[0])
-	idx := hashInt % len(b.nodes)
-	node := b.nodes[idx]
+	idx := hashInt % len(b.Nodes)
+	node := b.Nodes[idx]
 
-	for node.GetHealth() == "Unhealthy" {
+	for node.Metrics.Health != "healthy" {
 		hash := sha256.Sum256([]byte(ip))
 		hashInt := int(hash[0])
-		idx := hashInt % len(b.nodes)
-		node = b.nodes[idx]
+		idx := hashInt % len(b.Nodes)
+		node = b.Nodes[idx]
 	}
 
 	return node

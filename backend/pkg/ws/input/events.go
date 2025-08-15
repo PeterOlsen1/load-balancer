@@ -5,15 +5,15 @@ type BaseEvent struct {
 	Time string `json:"time"`
 }
 
-type ContainerStop struct {
-	BaseEvent,
-	ContainerID string `json:"container_id"`
-}
-
-type ContainerStart struct {
+type NodeEvent struct {
 	BaseEvent,
 	Address string `json:"address"`
 }
+
+type NodeStop = NodeEvent
+type NodeStart = NodeEvent
+type NodePause = NodeEvent
+type NodeUnpause = NodeEvent
 
 type StopServer struct {
 	BaseEvent

@@ -13,6 +13,11 @@ import (
 //
 // If an OK status is returned, set node to healthy. Else, unhealthy
 func (node *Node) CheckHealth() error {
+	node.Metrics.Lock.Lock()
+	if node.Metrics.Health == "paused" {
+		return nil
+	}
+	node.Metrics.Lock.Unlock()
 	address := node.Address
 
 	start := time.Now()
@@ -28,19 +33,34 @@ func (node *Node) CheckHealth() error {
 	defer node.Metrics.Lock.Unlock()
 	respTime := float32(duration.Microseconds() / 1000)
 	node.Metrics.ResponseTime = respTime
-	
-	health := Healthy
+
+	health := "healthy"
 	if resp.StatusCode != http.StatusOK {
-		health = Unhealthy
-		go logger.Health("Unhealthy", node.Address, respTime)
-		go ws.EventEmitter.Health("Unhealthy", node.Address, respTime)
+		health = "unhealthy"
+		go logger.Health(health, node.Address, respTime)
+		go ws.EventEmitter.Health(health, node.Address, respTime)
 	} else {
-		go logger.Health("Healthy", node.Address, respTime)
-		go ws.EventEmitter.Health("Healthy", node.Address, respTime)
+		go logger.Health(health, node.Address, respTime)
+		go ws.EventEmitter.Health(health, node.Address, respTime)
 	}
 	node.Metrics.Health = health
 
 	return nil
+}
+
+func (node *Node) Pause() {
+	node.Metrics.Lock.Lock()
+	defer node.Metrics.Lock.Unlock()
+
+	node.Metrics.Health = "paused"
+}
+
+func (node *Node) Unpause() {
+	node.Metrics.Lock.Lock()
+	node.Metrics.Health = "unknown"
+	node.Metrics.Lock.Unlock()
+
+	node.CheckHealth()
 }
 
 // Stops the server associated with any given node
@@ -63,22 +83,6 @@ func (node *Node) StopServer() error {
 	go logger.ContainerStop(node.DockerInfo.Id)
 	go ws.EventEmitter.ContainerStop(node.DockerInfo.Id)
 	return nil
-}
-
-// Return the node health as a string
-func (node *Node) GetHealth() string {
-	node.Metrics.Lock.Lock()
-	defer node.Metrics.Lock.Unlock()
-
-	health := node.Metrics.Health
-	switch health {
-	case 0:
-		return "Unknown"
-	case 1:
-		return "Unhealthy"
-	default:
-		return "Healthy"
-	}
 }
 
 func (n *Node) Equals(other *Node) bool {

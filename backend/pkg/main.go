@@ -5,6 +5,7 @@ package main
 import (
 	"flag"
 	"load-balancer/pkg/balancer"
+	_ "load-balancer/pkg/balancer/receiver"
 	"load-balancer/pkg/server"
 	"os"
 	"os/signal"

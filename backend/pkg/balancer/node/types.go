@@ -22,29 +22,13 @@ type Node struct {
 }
 
 type DockerInfo struct {
-	Cmd *exec.Cmd
-	Id  string `json:"id"`
+	Cmd *exec.Cmd `json:"-"`
+	Id  string    `json:"id"`
 }
 
 type NodeMetrics struct {
-	Lock         sync.Mutex
-	Health       NodeHealth `json:"health"`
+	Lock         sync.Mutex `json:"-"`
+	Health       string     `json:"health"`
 	ResponseTime float32    `json:"response_time"`
 	Connections  uint32     `json:"connections"`
 }
-
-/*
-Enum to keep track of node health,
-taken from the `/health` route of the servers
-
-Unknown: uninitialized
-Unhealthy: bad status code was returned
-Healthy: 2** status code was returned
-*/
-type NodeHealth int
-
-const (
-	Unknown NodeHealth = iota
-	Unhealthy
-	Healthy
-)

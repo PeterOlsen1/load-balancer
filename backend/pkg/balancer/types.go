@@ -17,6 +17,6 @@ Methods:
 */
 type Balancer struct {
 	//nodes + node health?
-	nodes []*node.Node
+	Nodes []*node.Node
 	lock  sync.Mutex
 }
