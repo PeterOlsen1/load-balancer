@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	address := flag.String("addr", "127.0.0.1", "Address to run the server on")
+	address := flag.String("addr", "", "Address to run the server on")
 	port := flag.Int("port", 8080, "Port to run the server on")
 	flag.Parse()
 
