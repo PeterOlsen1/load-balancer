@@ -11,10 +11,29 @@ import (
 	"github.com/google/uuid"
 )
 
-var logfile string = fmt.Sprintf("logs/app_%s_%s.log",
-	time.Now().Format("2006-01-02"),
-	uuid.New().String()[:8],
-)
+func makeLogfile() (string, error) {
+	err := os.MkdirAll("logs", os.ModePerm)
+	if err != nil {
+		fmt.Println("error making logfile", err)
+		return "", err
+	}
+
+	out := fmt.Sprintf("logs/app_%s_%s.log",
+		time.Now().Format("2006-01-02"),
+		uuid.New().String()[:8],
+	)
+	return out, nil
+}
+
+var logfile string;
+
+func init() {
+	f, err := makeLogfile()
+	if err != nil {
+		return
+	}
+	logfile = f
+}
 
 func Err(msg string, err error) {
 	logLine := fmt.Sprintf("time=%s type=ERROR msg=\"%s\" error=\"%s\"", time.Now().Format(time.RFC3339), msg, err)
@@ -77,7 +96,6 @@ func Proxy(path string, proxiedTo string, ip string) {
 }
 
 func writeToFile(logLine string) {
-	os.MkdirAll("logs", os.ModePerm)
 	f, err := os.OpenFile(logfile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Printf("Failed to open log file: %v\n", err)
