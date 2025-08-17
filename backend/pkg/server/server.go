@@ -13,8 +13,8 @@ func Serve(address string, port int) error {
 	url := fmt.Sprintf("%s:%d", address, port)
 	fmt.Println("Starting server @", url)
 	http.HandleFunc("/ws", ws.WsHandler)
-	http.HandleFunc("/", connectionHandler)
 	http.HandleFunc("/new", addNewContainer)
+	http.HandleFunc("/", connectionHandler)
 	return http.ListenAndServe(url, nil)
 }
 

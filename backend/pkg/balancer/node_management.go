@@ -41,6 +41,9 @@ func StartServer(port int) (*node.Node, error) {
 			Id:  containerID,
 		},
 		Address: fmt.Sprintf("http://localhost:%d", port),
+		Metrics: node.NodeMetrics{
+			Health: "healthy",
+		},
 	}
 
 	go logger.Info(fmt.Sprintf("Started server @ http://localhost:%d", port))

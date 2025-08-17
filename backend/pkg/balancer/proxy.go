@@ -13,6 +13,8 @@ import (
 func (b *Balancer) ProxyRequest(conn *types.Connection) {
 	node := b.RoundRobin()
 	if node == nil {
+		logger.Err("Failed to find node for proxy", fmt.Errorf("failed to find node for proxy"))
+		send500(conn)
 		return
 	}
 
