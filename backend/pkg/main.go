@@ -4,17 +4,25 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"load-balancer/pkg/balancer"
 	_ "load-balancer/pkg/balancer/receiver"
+	"load-balancer/pkg/config"
 	"load-balancer/pkg/server"
 	"os"
 	"os/signal"
 )
 
 func main() {
-	address := flag.String("addr", "", "Address to run the server on")
-	port := flag.Int("port", 8080, "Port to run the server on")
+	configPath := flag.String("cfg", "./config/config.yaml", "Location of configuration file")
 	flag.Parse()
+
+	err := config.LoadConfig(*configPath)
+	if err != nil {
+		os.Exit(2)
+	}
+
+	fmt.Println(config.Config)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -31,5 +39,5 @@ func main() {
 	//unused
 	// go balancer.WatchQueue()
 	balancer.LoadBalancer.InitBalancer(0)
-	server.Serve(*address, *port)
+	server.Serve(config.Config.Server.Host, config.Config.Server.Port)
 }
