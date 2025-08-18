@@ -3,6 +3,7 @@ package balancer
 import (
 	"fmt"
 	"load-balancer/pkg/balancer/node"
+	"load-balancer/pkg/config"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/ws"
 	"os/exec"
@@ -14,10 +15,12 @@ import (
 //
 // In a real environment, this would not be necessary,
 // and the user would just call the Balancer.AddNode method
+//
+// Move logic from shell script into here
 func StartServer(port int) (*node.Node, error) {
 	path := "./server/run.sh" //assuming you run from root of project
 
-	cmd := exec.Command("bash", path, fmt.Sprintf("%d", port))
+	cmd := exec.Command("bash", path, config.Config.Docker.DockerImage, fmt.Sprintf("%d", port), fmt.Sprintf("%d", config.Config.Docker.InternalPort))
 
 	output, err := cmd.Output()
 	if err != nil {

@@ -4,7 +4,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"load-balancer/pkg/balancer"
 	_ "load-balancer/pkg/balancer/receiver"
 	"load-balancer/pkg/config"
@@ -21,8 +20,6 @@ func main() {
 	if err != nil {
 		os.Exit(2)
 	}
-
-	fmt.Println(config.Config)
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
