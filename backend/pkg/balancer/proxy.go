@@ -20,7 +20,22 @@ func (b *Balancer) ProxyRequest(conn *types.Connection) {
 
 	node.Metrics.Lock.Lock()
 	node.Metrics.Connections++
+
+	if node.Metrics.Connections > 30 {
+		node, err := StartServer(PORT)
+		if err != nil {
+			send500(conn)
+			return
+		}
+		b.AddNode(node)
+	} else if node.Metrics.Connections == 1 && len(b.Nodes) > 1 {
+		b.lock.Lock()
+		b.RemoveNode(node)
+		b.lock.Unlock()
+		node.StopServer()
+	}
 	node.Metrics.Lock.Unlock()
+
 	defer func() {
 		node.Metrics.Lock.Lock()
 		node.Metrics.Connections--

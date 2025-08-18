@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	testRequests(1000, 25*time.Millisecond)
+	testRequests(10000, 25*time.Millisecond)
 }
 
 func testRequests(numRequests int, duration time.Duration) {
