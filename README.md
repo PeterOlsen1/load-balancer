@@ -24,6 +24,19 @@ backends:
       - url: http://10.0.0.1:8080
       - url: http://10.0.0.2:8080
 ```
+
+iterating on this:
+```YAML
+routes:
+  - path: /api/*
+    docker_image: api-server
+    strategy: least_connections
+    servers:
+    - url: http://aws.something.com
+    - url: http://hello.com
+    - ...
+    
+```
   * More config rules?
     * URLs, rules for proxy, etc.
   * Replace hardcoded values with config
