@@ -9,15 +9,29 @@ Questions:
 
 Working on:
 * Config
+  * Add different route options? for exmaple:
+ ```YAML
+routes:
+  - path: /api/*
+    backend: api_servers
+  - path: /static/*
+    backend: static_servers
+
+backends:
+  api_servers:
+    strategy: least_connections
+    servers:
+      - url: http://10.0.0.1:8080
+      - url: http://10.0.0.2:8080
+```
   * More config rules?
+    * URLs, rules for proxy, etc.
   * Replace hardcoded values with config
 * More research on when to update running containers
 * Load URLs into nodes from CSV file when starting, or at least keep them for later use
 * Test out websocket connection more
 
 Future ideas:
-* Allow configuration with a .yaml file
-  * URLs, rules for proxy, etc.
 * Add rate tracking?
 * Testing framework (really load it)
 
