@@ -8,7 +8,7 @@ import (
 )
 
 var PORT int = 3000
-var LoadBalancer = Balancer{}
+var Balancer = BalancerType{}
 
 func WatchQueue() {
 	for {
@@ -20,13 +20,13 @@ func WatchQueue() {
 				break
 			}
 
-			LoadBalancer.ProxyRequest(conn)
+			Balancer.ProxyRequest(conn)
 		}
 	}
 }
 
 // Pass in num <= 0 for no health checks
-func (b *Balancer) InitBalancer(healthCheckPeriod int) error {
+func (b *BalancerType) InitBalancer(healthCheckPeriod int) error {
 	for _, route := range config.Config.Routes {
 		routeStruct := Route{
 			RouteConfig: route,
@@ -59,11 +59,13 @@ func (b *Balancer) InitBalancer(healthCheckPeriod int) error {
 		defer ticker.Stop()
 
 		for range ticker.C {
-			b.lock.Lock()
-			for _, n := range LoadBalancer.Nodes {
-				n.CheckHealth()
+			for _, r := range b.Routes {
+				r.lock.Lock()
+				for _, n := range r.Nodes {
+					n.CheckHealth()
+				}
+				r.lock.Unlock()
 			}
-			b.lock.Unlock()
 		}
 	}()
 

@@ -27,7 +27,7 @@ func connectionHandler(resp http.ResponseWriter, req *http.Request) {
 	fmt.Println(req.Method + ": " + req.URL.Path)
 	go logger.Request(&conn)
 	go ws.EventEmitter.Request(&conn)
-	balancer.LoadBalancer.ProxyRequest(&conn)
+	balancer.Balancer.ProxyRequest(&conn)
 }
 
 // // test endpoint for adding new container functionality
@@ -37,7 +37,7 @@ func connectionHandler(resp http.ResponseWriter, req *http.Request) {
 // 		return
 // 	}
 
-// 	balancer.LoadBalancer.AddNode(node)
+// 	balancer.Balancer.AddNode(node)
 // 	balancer.PORT++
 // 	fmt.Fprintf(resp, "Added new container: %s", node.DockerInfo.Id)
 // }

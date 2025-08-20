@@ -25,16 +25,11 @@ func main() {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		<-c
-		err := balancer.LoadBalancer.CleanupNodes()
-		if err != nil {
-			os.Exit(1)
-		} else {
-			os.Exit(0)
-		}
+		balancer.Balancer.CleanupNodes()
 	}()
 
 	//unused
 	// go balancer.WatchQueue()
-	balancer.LoadBalancer.InitBalancer(0)
+	balancer.Balancer.InitBalancer(0)
 	server.Serve(config.Config.Server.Host, config.Config.Server.Port)
 }

@@ -12,7 +12,7 @@ type NodeEvent struct {
 
 type NodeStop = NodeEvent
 type NodeStart struct {
-	NodeEvent
+	NodeEvent,
 	RouteName string `json:route_name`
 }
 type NodePause = NodeEvent

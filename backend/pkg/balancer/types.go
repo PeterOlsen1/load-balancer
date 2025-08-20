@@ -16,10 +16,9 @@ Methods:
 * AddNode(*Node) -> add a new node to the nodes list
 * RemoveNode(*Node) -> remove a node from the nodes list
 */
-type Balancer struct {
-	Nodes  []*node.Node
-	lock   sync.Mutex
-	Routes []*Route
+type BalancerType struct {
+	Routes    []*Route
+	NodeTable map[string]*node.Node
 }
 
 //make hash table between container ID and what route they live in for easy lookup?

@@ -10,35 +10,35 @@ import (
 
 var roundRobinIndex = 0
 
-func (b *Balancer) RoundRobin() *node.Node {
-	b.lock.Lock()
-	defer b.lock.Unlock()
+func (r *Route) RoundRobin() *node.Node {
+	r.lock.Lock()
+	defer r.lock.Unlock()
 
-	if len(b.Nodes) == 0 {
+	if len(r.Nodes) == 0 {
 		go logger.Err("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
 		go ws.EventEmitter.Error("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
 		return nil
 	}
 
-	idx := roundRobinIndex % len(b.Nodes)
-	node := b.Nodes[idx]
+	idx := roundRobinIndex % len(r.Nodes)
+	node := r.Nodes[idx]
 	roundRobinIndex++
 
 	for node.Metrics.Health != "healthy" {
-		idx := roundRobinIndex % len(b.Nodes)
-		node = b.Nodes[idx]
+		idx := roundRobinIndex % len(r.Nodes)
+		node = r.Nodes[idx]
 		roundRobinIndex++
 	}
 
 	return node
 }
 
-func (b *Balancer) LeastConnections() *node.Node {
-	b.lock.Lock()
-	defer b.lock.Unlock()
+func (r *Route) LeastConnections() *node.Node {
+	r.lock.Lock()
+	defer r.lock.Unlock()
 
 	var lowest *node.Node = nil
-	for _, n := range b.Nodes {
+	for _, n := range r.Nodes {
 		if n.Metrics.Connections < lowest.Metrics.Connections && n.Metrics.Health != "healthy" {
 			lowest = n
 		}
@@ -48,21 +48,21 @@ func (b *Balancer) LeastConnections() *node.Node {
 
 // this would be a little tougher, all docker containers are
 // on my local machine, so should have same compute
-func (b *Balancer) ComputeBased() *node.Node {
+func (r *Route) ComputeBased() *node.Node {
 	return nil
 }
 
-func (b *Balancer) IPHash(ip string) *node.Node {
+func (r *Route) IPHash(ip string) *node.Node {
 	hash := sha256.Sum256([]byte(ip))
 	hashInt := int(hash[0])
-	idx := hashInt % len(b.Nodes)
-	node := b.Nodes[idx]
+	idx := hashInt % len(r.Nodes)
+	node := r.Nodes[idx]
 
 	for node.Metrics.Health != "healthy" {
 		hash := sha256.Sum256([]byte(ip))
 		hashInt := int(hash[0])
-		idx := hashInt % len(b.Nodes)
-		node = b.Nodes[idx]
+		idx := hashInt % len(r.Nodes)
+		node = r.Nodes[idx]
 	}
 
 	return node

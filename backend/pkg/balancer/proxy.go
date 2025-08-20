@@ -11,16 +11,16 @@ import (
 	"path"
 )
 
-func (b *Balancer) ProxyRequest(conn *types.Connection) {
-	node := b.RoundRobin()
-	if node == nil {
-		logger.Err("Failed to find node for proxy", fmt.Errorf("failed to find node for proxy"))
+func (b *BalancerType) ProxyRequest(conn *types.Connection) {
+	routeObject := b.getRouteObject(conn)
+	if routeObject == nil {
 		send500(conn)
 		return
 	}
 
-	routeObject := b.getRouteObject(conn)
-	if routeObject == nil {
+	node := routeObject.RoundRobin()
+	if node == nil {
+		logger.Err("Failed to find node for proxy", fmt.Errorf("failed to find node for proxy"))
 		send500(conn)
 		return
 	}
@@ -34,11 +34,11 @@ func (b *Balancer) ProxyRequest(conn *types.Connection) {
 			send500(conn)
 			return
 		}
-		b.AddNode(node)
-	} else if node.Metrics.Connections == 1 && len(b.Nodes) > 1 {
-		b.lock.Lock()
-		b.RemoveNode(node)
-		b.lock.Unlock()
+		routeObject.AddNode(node)
+	} else if node.Metrics.Connections == 1 && len(routeObject.Nodes) > 1 {
+		routeObject.lock.Lock()
+		routeObject.RemoveNode(node)
+		routeObject.lock.Unlock()
 		node.StopServer()
 	}
 	node.Metrics.Lock.Unlock()
@@ -81,7 +81,7 @@ func (b *Balancer) ProxyRequest(conn *types.Connection) {
 	}
 }
 
-func (b *Balancer) getRouteObject(conn *types.Connection) *Route {
+func (b *BalancerType) getRouteObject(conn *types.Connection) *Route {
 	for _, route := range b.Routes {
 		routePath := route.Path
 		if routePath == "/*" {

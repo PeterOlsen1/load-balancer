@@ -39,8 +39,8 @@ func StartServer(port int, dockerInfo *config.DockerConfig) (*node.Node, error) 
 	go ws.EventEmitter.ContainerStart(containerID)
 
 	node := node.Node{
-		ContainerID:  containerID,
-		Address: fmt.Sprintf("http://localhost:%d", port),
+		ContainerID: containerID,
+		Address:     fmt.Sprintf("http://localhost:%d", port),
 		Metrics: node.NodeMetrics{
 			Health: "healthy",
 		},
@@ -51,36 +51,38 @@ func StartServer(port int, dockerInfo *config.DockerConfig) (*node.Node, error) 
 	return &node, nil
 }
 
-func (b *Balancer) AddNode(node *node.Node) {
-	b.lock.Lock()
-	defer b.lock.Unlock()
+func (r *Route) AddNode(node *node.Node) {
+	Balancer.NodeTable[node.ContainerID] = node
 
-	b.Nodes = append(b.Nodes, node)
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
+	r.Nodes = append(r.Nodes, node)
 }
 
-func (b *Balancer) RemoveNode(inputNode *node.Node) error {
+func (r *Route) RemoveNode(inputNode *node.Node) error {
 	inputNode.StopServer()
 
-	b.lock.Lock()
-	defer b.lock.Unlock()
+	r.lock.Lock()
+	defer r.lock.Unlock()
 
 	var filtered []*node.Node
-	for _, n := range b.Nodes {
+	for _, n := range r.Nodes {
 		if inputNode.Equals(n) {
 			filtered = append(filtered, n)
 		}
 	}
-	b.Nodes = filtered
+	r.Nodes = filtered
+
+	delete(Balancer.NodeTable, inputNode.ContainerID)
 
 	return nil
 }
 
-func (b *Balancer) CleanupNodes() error {
-	go logger.Info("cleaning up nodes")
-	go ws.EventEmitter.Info("cleaning up nodes")
+func (r *Route) CleanupNodes() {
 	var wg sync.WaitGroup
 
-	for _, n := range b.Nodes {
+	for _, n := range r.Nodes {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -89,6 +91,21 @@ func (b *Balancer) CleanupNodes() error {
 	}
 
 	wg.Wait()
-	b.Nodes = nil
-	return nil
+	r.Nodes = nil
+}
+
+func (b *BalancerType) CleanupNodes() {
+	go logger.Info("cleaning up nodes")
+	go ws.EventEmitter.Info("cleaning up nodes")
+	var wg sync.WaitGroup
+
+	for _, r := range b.Routes {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			r.CleanupNodes()
+		}()
+	}
+
+	wg.Wait()
 }

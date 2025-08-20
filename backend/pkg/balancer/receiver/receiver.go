@@ -22,7 +22,8 @@ func getBaseResponse(respType string) BaseResponse {
 func init() {
 	ws.EventReciever.AddEventHandler("request_nodes", func(body []byte) ([]byte, error) {
 		var nodeLiterals []node.Node
-		for _, n := range b.LoadBalancer.Nodes {
+
+		for _, n := range b.Balancer.NodeTable {
 			nodeLiterals = append(nodeLiterals, *n)
 		}
 
@@ -49,7 +50,7 @@ func init() {
 		}
 
 		var address *string = nil
-		for _, route := range b.LoadBalancer.Routes {
+		for _, route := range b.Balancer.Routes {
 			for _, n := range route.Nodes {
 				if n.ContainerID == userRequest.ContainerID {
 					address = &n.Address
@@ -88,7 +89,7 @@ func init() {
 		}
 
 		var routeObject *b.Route = nil
-		for _, route := range b.LoadBalancer.Routes {
+		for _, route := range b.Balancer.Routes {
 			if route.Name == userRequest.RouteName {
 				routeObject = route
 				break
@@ -100,7 +101,7 @@ func init() {
 			return nil, err
 		}
 		b.PORT++
-		b.LoadBalancer.AddNode(newNode)
+		routeObject.AddNode(newNode)
 
 		resp := NodeStartResponse{
 			BaseResponse: getBaseResponse("node_start"),
@@ -125,14 +126,7 @@ func init() {
 			return nil, err
 		}
 
-		var node *node.Node
-		for _, n := range b.LoadBalancer.Nodes {
-			if n.ContainerID == userRequest.ContainerID {
-				node = n
-				break
-			}
-		}
-
+		node := b.Balancer.NodeTable[userRequest.ContainerID]
 		if node == nil {
 			logger.Err("Node not found", nil)
 			return nil, fmt.Errorf("node not found")
@@ -154,20 +148,13 @@ func init() {
 	})
 
 	ws.EventReciever.AddEventHandler("node_unpause", func(body []byte) ([]byte, error) {
-		var nodeAddress string
-		if err := json.Unmarshal(body, &nodeAddress); err != nil {
+		userRequest := input.NodeUnpause{}
+		if err := json.Unmarshal(body, &userRequest); err != nil {
 			logger.Err("Failed to unmarshal node address", err)
 			return nil, err
 		}
 
-		var node *node.Node
-		for _, n := range b.LoadBalancer.Nodes {
-			if n.Address == nodeAddress {
-				node = n
-				break
-			}
-		}
-
+		node := b.Balancer.NodeTable[userRequest.ContainerID]
 		if node == nil {
 			logger.Err("Node not found", nil)
 			return nil, fmt.Errorf("node not found")

@@ -9,6 +9,9 @@ Questions:
 
 Working on:
 * Config
+  * Adapt round robin to this new strategy with both URLs and nodes
+    * Automatically load all URLs in as new nodes, this will let us health check them too
+  * Fix balancer receiever
   * Add different route options? for exmaple:
  ```YAML
 routes:
@@ -41,12 +44,12 @@ routes:
     * URLs, rules for proxy, etc.
   * Replace hardcoded values with config
 * More research on when to update running containers
-* Load URLs into nodes from CSV file when starting, or at least keep them for later use
 * Test out websocket connection more
 
 Future ideas:
 * Add rate tracking?
 * Testing framework (really load it)
+* Deploying to AWS or something?
 
 ### general thoughts
   
@@ -79,3 +82,4 @@ Things to research:
   * Backend shoots logs to the frontend
   * Logs + metrics about responses
 * Allow for user to manually start / update nodes
+
