@@ -11,7 +11,7 @@ Working on:
 * Config
   * Adapt round robin to this new strategy with both URLs and nodes
     * Automatically load all URLs in as new nodes, this will let us health check them too
-  * Fix balancer receiever
+  * Fix balancer receiever methods
   * Add different route options? for exmaple:
  ```YAML
 routes:

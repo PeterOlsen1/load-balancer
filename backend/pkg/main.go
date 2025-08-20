@@ -1,7 +1,5 @@
 package main
 
-// var wg sync.WaitGroup
-
 import (
 	"flag"
 	"load-balancer/pkg/balancer"
@@ -26,6 +24,7 @@ func main() {
 	go func() {
 		<-c
 		balancer.Balancer.CleanupNodes()
+		os.Exit(0)
 	}()
 
 	//unused

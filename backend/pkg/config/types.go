@@ -20,7 +20,7 @@ type LoggingConfig struct {
 // InternalPort: the port on which the server runs
 type DockerConfig struct {
 	Image        string `yaml:"image"`
-	InternalPort int    `yaml:"internal_poort"`
+	InternalPort int    `yaml:"internal_port"`
 }
 
 type RouteServerConfig struct {

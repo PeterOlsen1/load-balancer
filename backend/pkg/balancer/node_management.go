@@ -84,6 +84,10 @@ func (r *Route) CleanupNodes() {
 	var wg sync.WaitGroup
 
 	for _, n := range r.Nodes {
+		if n == nil {
+			continue
+		}
+
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -101,6 +105,10 @@ func (b *BalancerType) CleanupNodes() {
 	var wg sync.WaitGroup
 
 	for _, r := range b.Routes {
+		if r == nil {
+			continue
+		}
+
 		wg.Add(1)
 		go func() {
 			defer wg.Done()

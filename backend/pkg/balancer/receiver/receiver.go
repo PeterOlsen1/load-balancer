@@ -173,4 +173,8 @@ func init() {
 		}
 		return j, nil
 	})
+
+	ws.EventReciever.AddEventHandler("request_routes", func(body []byte) ([]byte, error) {
+		return []byte("TODO"), nil
+	})
 }
