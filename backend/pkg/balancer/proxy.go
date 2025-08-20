@@ -18,7 +18,7 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 		return
 	}
 
-	node := routeObject.RoundRobin()
+	node := routeObject.GetProxyNode(conn.Request.RemoteAddr)
 	if node == nil {
 		logger.Err("Failed to find node for proxy", fmt.Errorf("failed to find node for proxy"))
 		send500(conn)
