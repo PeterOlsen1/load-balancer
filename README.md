@@ -1,5 +1,5 @@
 # load-balancer
-Trying out new things. Learning Go. Balancing loads ⚖️
+Trying out new things. Learning Go. Balancing loads. Scaling horizontally ⚖️
 
 ## architecture planning
 

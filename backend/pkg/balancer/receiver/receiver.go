@@ -96,11 +96,10 @@ func init() {
 			}
 		}
 
-		newNode, err := b.StartServer(b.PORT, routeObject.Docker)
+		newNode, err := b.StartServer(routeObject.Docker)
 		if err != nil {
 			return nil, err
 		}
-		b.PORT++
 		routeObject.AddNode(newNode)
 
 		resp := NodeStartResponse{

@@ -4,10 +4,21 @@ import (
 	"fmt"
 	"load-balancer/pkg/config"
 	"load-balancer/pkg/queue"
+	"sync"
 	"time"
 )
 
-var PORT int = 3000
+var port int = 3000
+var portMutex sync.Mutex
+
+func ConsumePort() int {
+	var ret int
+	portMutex.Lock()
+	ret = port
+	portMutex.Unlock()
+	return ret
+}
+
 var Balancer = BalancerType{}
 
 func WatchQueue() {
@@ -37,7 +48,7 @@ func (b *BalancerType) InitBalancer(healthCheckPeriod int) error {
 			continue
 		}
 
-		node, err := StartServer(PORT, route.Docker)
+		node, err := StartServer(route.Docker)
 		if err != nil {
 			return err
 		}

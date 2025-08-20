@@ -29,7 +29,7 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 	node.Metrics.Connections++
 
 	if node.Metrics.Connections > 30 {
-		node, err := StartServer(PORT, routeObject.Docker)
+		node, err := StartServer(routeObject.Docker)
 		if err != nil {
 			send500(conn)
 			return

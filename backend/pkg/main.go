@@ -18,7 +18,7 @@ func main() {
 
 	err := config.LoadConfig(*configPath)
 	if err != nil {
-		os.Exit(2)
+		os.Exit(1)
 	}
 
 	c := make(chan os.Signal, 1)

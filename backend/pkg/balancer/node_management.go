@@ -17,9 +17,10 @@ import (
 // and the user would just call the Balancer.AddNode method
 //
 // Move logic from shell script into here
-func StartServer(port int, dockerInfo *config.DockerConfig) (*node.Node, error) {
+func StartServer(dockerInfo *config.DockerConfig) (*node.Node, error) {
 	path := "./server/run.sh" //assuming you run from root of project
 
+	port := ConsumePort()
 	cmd := exec.Command("bash", path, dockerInfo.Image, fmt.Sprintf("%d", port), fmt.Sprintf("%d", dockerInfo.InternalPort))
 
 	output, err := cmd.Output()
