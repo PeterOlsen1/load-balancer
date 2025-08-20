@@ -9,6 +9,18 @@ import (
 	"time"
 )
 
+func FromURL(url string) *Node {
+	return &Node{
+		ContainerID: "",
+		Address:     url,
+		Metrics: NodeMetrics{
+			Health:       "unknown",
+			ResponseTime: 0,
+			Connections:  0,
+		},
+	}
+}
+
 // Send a request to the node backend to check the health
 //
 // If an OK status is returned, set node to healthy. Else, unhealthy

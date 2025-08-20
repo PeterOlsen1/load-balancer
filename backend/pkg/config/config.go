@@ -24,13 +24,10 @@ var Config = ConfigType{
 			MaxNodes:      0,
 			HealthTimeout: 5000,
 			Docker: &DockerConfig{
-			    Image:        "node-server",
-			    InternalPort: 3000,
+				Image:        "node-server",
+				InternalPort: 3000,
 			},
-			Servers: []RouteServerConfig{
-				{URL: "http://10.0.0.1:8080"},
-				{URL: "http://10.0.0.2:8080"},
-			},
+			Servers: []RouteServerConfig{},
 		},
 	},
 }

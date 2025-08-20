@@ -20,6 +20,14 @@ type Node struct {
 	Metrics     NodeMetrics `json:"metrics"`
 }
 
+//
+// Most of the fields here are self explanatory
+// Response time is in ms
+// Health is an enum that can be any of the following values:
+// - healthy
+// - paused
+// - unhealthy
+// - unknown
 type NodeMetrics struct {
 	Lock         sync.Mutex `json:"-"`
 	Health       string     `json:"health"`

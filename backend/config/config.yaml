@@ -16,6 +16,4 @@ routes:
       image: node-server
       internal_port: 3000
     servers:
-      - url: http://10.0.0.1:8080
-      - url: http://10.0.0.2:8080
     
