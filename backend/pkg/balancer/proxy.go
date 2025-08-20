@@ -8,6 +8,7 @@ import (
 	"load-balancer/pkg/ws"
 	"maps"
 	"net/http"
+	"path"
 )
 
 func (b *Balancer) ProxyRequest(conn *types.Connection) {
@@ -18,11 +19,17 @@ func (b *Balancer) ProxyRequest(conn *types.Connection) {
 		return
 	}
 
+	routeObject := b.getRouteObject(conn)
+	if routeObject == nil {
+		send500(conn)
+		return
+	}
+
 	node.Metrics.Lock.Lock()
 	node.Metrics.Connections++
 
 	if node.Metrics.Connections > 30 {
-		node, err := StartServer(PORT)
+		node, err := StartServer(PORT, routeObject.Docker)
 		if err != nil {
 			send500(conn)
 			return
@@ -72,4 +79,25 @@ func (b *Balancer) ProxyRequest(conn *types.Connection) {
 		send500(conn)
 		return
 	}
+}
+
+func (b *Balancer) getRouteObject(conn *types.Connection) *Route {
+	for _, route := range b.Routes {
+		routePath := route.Path
+		if routePath == "/*" {
+			routePath = "/"
+		}
+
+		matched, err := path.Match(routePath, conn.Request.URL.Path)
+		if err != nil {
+			go logger.Err("Route matching failed", err)
+			continue
+		}
+
+		if matched {
+			return route
+		}
+	}
+
+	return nil
 }

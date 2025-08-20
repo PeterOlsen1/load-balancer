@@ -68,11 +68,11 @@ func (node *Node) Unpause() {
 //
 // If this node has no server, instantly return nil
 func (node *Node) StopServer() error {
-	if node.DockerInfo == nil {
+	if node.ContainerID == "" {
 		return nil
 	}
 
-	cmd := exec.Command("docker", "stop", node.DockerInfo.Id)
+	cmd := exec.Command("docker", "stop", node.ContainerID)
 	err := cmd.Run()
 	if err != nil {
 		go logger.Err("docker stop", err)
@@ -80,13 +80,13 @@ func (node *Node) StopServer() error {
 		return err
 	}
 
-	go logger.ContainerStop(node.DockerInfo.Id)
-	go ws.EventEmitter.ContainerStop(node.DockerInfo.Id)
+	go logger.ContainerStop(node.ContainerID)
+	go ws.EventEmitter.ContainerStop(node.ContainerID)
 	return nil
 }
 
 func (n *Node) Equals(other *Node) bool {
-	return n.Address == other.Address && n.DockerInfo.Id == other.DockerInfo.Id
+	return n.Address == other.Address && n.ContainerID == other.ContainerID
 }
 
 // Returns a node from a URL, instead of spinning up a docker container.

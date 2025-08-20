@@ -49,21 +49,22 @@ func init() {
 		}
 
 		var address *string = nil
-		b.LoadBalancer.Lock()
-		defer b.LoadBalancer.Unlock()
-		for _, n := range b.LoadBalancer.Nodes {
-			if n.Address == userRequest.Address {
-				address = &n.Address
-				err := n.StopServer()
-				if err != nil {
-					return nil, err
+		for _, route := range b.LoadBalancer.Routes {
+			for _, n := range route.Nodes {
+				if n.ContainerID == userRequest.ContainerID {
+					address = &n.Address
+					err := n.StopServer()
+					if err != nil {
+						return nil, err
+					}
+					break
 				}
 			}
 		}
 
 		resp := NodeStopResponse{
 			BaseResponse: getBaseResponse("node_stop"),
-			Message:      fmt.Sprintf("Could not locate node @ %s", userRequest.Address),
+			Message:      fmt.Sprintf("Could not locate node with ID %s", userRequest.ContainerID),
 		}
 
 		if address != nil {
@@ -79,7 +80,22 @@ func init() {
 	})
 
 	ws.EventReciever.AddEventHandler("node_start", func(body []byte) ([]byte, error) {
-		newNode, err := b.StartServer(b.PORT)
+		userRequest := input.NodeStart{}
+		err := json.Unmarshal(body, &userRequest)
+		if err != nil {
+			logger.Err("Unmarshalling node_start JSON", err)
+			return nil, err
+		}
+
+		var routeObject *b.Route = nil
+		for _, route := range b.LoadBalancer.Routes {
+			if route.Name == userRequest.RouteName {
+				routeObject = route
+				break
+			}
+		}
+
+		newNode, err := b.StartServer(b.PORT, routeObject.Docker)
 		if err != nil {
 			return nil, err
 		}
@@ -89,7 +105,7 @@ func init() {
 		resp := NodeStartResponse{
 			BaseResponse: getBaseResponse("node_start"),
 			Message:      "Successfully started new node",
-			ContainerID:  newNode.DockerInfo.Id,
+			ContainerID:  newNode.ContainerID,
 			Address:      newNode.Address,
 		}
 
@@ -111,7 +127,7 @@ func init() {
 
 		var node *node.Node
 		for _, n := range b.LoadBalancer.Nodes {
-			if n.Address == userRequest.Address {
+			if n.ContainerID == userRequest.ContainerID {
 				node = n
 				break
 			}
@@ -123,7 +139,7 @@ func init() {
 		}
 
 		node.Pause()
-		logger.ContainerPause(node.DockerInfo.Id)
+		logger.ContainerPause(node.ContainerID)
 
 		resp := NodePauseResponse{
 			BaseResponse: getBaseResponse("node_pause"),
@@ -158,7 +174,7 @@ func init() {
 		}
 
 		node.Unpause()
-		logger.ContainerUnpause(node.DockerInfo.Id)
+		logger.ContainerUnpause(node.ContainerID)
 
 		resp := NodeUnpauseResponse{
 			BaseResponse: getBaseResponse("unnode_pause"),

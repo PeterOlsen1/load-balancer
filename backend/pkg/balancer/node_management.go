@@ -17,10 +17,10 @@ import (
 // and the user would just call the Balancer.AddNode method
 //
 // Move logic from shell script into here
-func StartServer(port int) (*node.Node, error) {
+func StartServer(port int, dockerInfo *config.DockerConfig) (*node.Node, error) {
 	path := "./server/run.sh" //assuming you run from root of project
 
-	cmd := exec.Command("bash", path, config.Config.Docker.DockerImage, fmt.Sprintf("%d", port), fmt.Sprintf("%d", config.Config.Docker.InternalPort))
+	cmd := exec.Command("bash", path, dockerInfo.Image, fmt.Sprintf("%d", port), fmt.Sprintf("%d", dockerInfo.InternalPort))
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -39,10 +39,7 @@ func StartServer(port int) (*node.Node, error) {
 	go ws.EventEmitter.ContainerStart(containerID)
 
 	node := node.Node{
-		DockerInfo: &node.DockerInfo{
-			Cmd: cmd,
-			Id:  containerID,
-		},
+		ContainerID:  containerID,
 		Address: fmt.Sprintf("http://localhost:%d", port),
 		Metrics: node.NodeMetrics{
 			Health: "healthy",

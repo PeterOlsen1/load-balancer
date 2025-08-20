@@ -1,11 +1,13 @@
 package balancer
 
 import (
+	"fmt"
+	"load-balancer/pkg/config"
 	"load-balancer/pkg/queue"
 	"time"
 )
 
-var PORT int = 3001
+var PORT int = 3000
 var LoadBalancer = Balancer{}
 
 func WatchQueue() {
@@ -24,23 +26,36 @@ func WatchQueue() {
 }
 
 // Pass in num <= 0 for no health checks
-func (b *Balancer) InitBalancer(healthCheckPeriod int) {
-	node, err := StartServer(3000)
-	if err != nil {
-		//error is already logged in the StartServer function
-		return
+func (b *Balancer) InitBalancer(healthCheckPeriod int) error {
+	for _, route := range config.Config.Routes {
+		routeStruct := Route{
+			RouteConfig: route,
+		}
+
+		b.Routes = append(b.Routes, &routeStruct)
+		if route.Docker == nil {
+			continue
+		}
+
+		node, err := StartServer(PORT, route.Docker)
+		if err != nil {
+			return err
+		}
+
+		routeStruct.lock.Lock()
+		routeStruct.Nodes = append(routeStruct.Nodes, node)
+		routeStruct.lock.Unlock()
 	}
 
 	//allow the server to start up before sending health request
-	time.Sleep(2 * time.Second)
-	b.AddNode(node)
+	time.Sleep(1500 * time.Millisecond)
 
 	if healthCheckPeriod <= 0 {
-		return
+		return fmt.Errorf("health check period is negative")
 	}
 
 	go func() {
-		ticker := time.NewTicker(time.Duration(healthCheckPeriod) * time.Second)
+		ticker := time.NewTicker(time.Duration(healthCheckPeriod) * time.Millisecond)
 		defer ticker.Stop()
 
 		for range ticker.C {
@@ -51,12 +66,6 @@ func (b *Balancer) InitBalancer(healthCheckPeriod int) {
 			b.lock.Unlock()
 		}
 	}()
-}
 
-func (b *Balancer) Lock() {
-	b.lock.Lock()
-}
-
-func (b *Balancer) Unlock() {
-	b.lock.Unlock()
+	return nil
 }

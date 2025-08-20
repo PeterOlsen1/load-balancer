@@ -2,6 +2,7 @@ package balancer
 
 import (
 	"load-balancer/pkg/balancer/node"
+	"load-balancer/pkg/config"
 	"sync"
 )
 
@@ -16,7 +17,15 @@ Methods:
 * RemoveNode(*Node) -> remove a node from the nodes list
 */
 type Balancer struct {
-	//nodes + node health?
-	Nodes []*node.Node
+	Nodes  []*node.Node
+	lock   sync.Mutex
+	Routes []*Route
+}
+
+//make hash table between container ID and what route they live in for easy lookup?
+
+type Route struct {
+	config.RouteConfig
 	lock  sync.Mutex
+	Nodes []*node.Node
 }

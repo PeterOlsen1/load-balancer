@@ -1,7 +1,6 @@
 package node
 
 import (
-	"os/exec"
 	"sync"
 )
 
@@ -16,14 +15,9 @@ Method:
 * CheckHealth() -> send a request to the given node, and update its metrics
 */
 type Node struct {
-	DockerInfo *DockerInfo `json:"docker_info"`
-	Address    string      `json:"address"`
-	Metrics    NodeMetrics `json:"metrics"`
-}
-
-type DockerInfo struct {
-	Cmd *exec.Cmd `json:"-"`
-	Id  string    `json:"id"`
+	ContainerID string      `json:"id"`
+	Address     string      `json:"address"`
+	Metrics     NodeMetrics `json:"metrics"`
 }
 
 type NodeMetrics struct {

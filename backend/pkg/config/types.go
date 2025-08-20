@@ -1,10 +1,9 @@
 package config
 
 type ConfigType struct {
-	Server       ServerConfig       `yaml:"server"`
-	LoadBalancer LoadBalancerConfig `yaml:"load_balancer"`
-	Docker       DockerConfig       `yaml:"docker"`
-	Logging      LoggingConfig      `yaml:"logging"`
+	Server  ServerConfig  `yaml:"server"`
+	Logging LoggingConfig `yaml:"logging"`
+	Routes  []RouteConfig `yaml:"routes"`
 }
 
 type ServerConfig struct {
@@ -12,18 +11,28 @@ type ServerConfig struct {
 	Host string `yaml:"host"`
 }
 
-type LoadBalancerConfig struct {
-	HealthInterval int    `yaml:"health_interval"`
-	MaxNodes       int    `yaml:"max_nodes"`
-	Strategy       string `yaml:"strategy"`
-}
-
-type DockerConfig struct {
-	DockerImage  string `yaml:"docker_image"`
-	InternalPort int    `yaml:"internal_port"`
-}
-
 type LoggingConfig struct {
 	Level  string `yaml:"level"`
 	Folder string `yaml:"folder"`
+}
+
+// Image: the name of the given docker image to scale
+// InternalPort: the port on which the server runs
+type DockerConfig struct {
+	Image        string `yaml:"image"`
+	InternalPort int    `yaml:"internal_poort"`
+}
+
+type RouteServerConfig struct {
+	URL string `yaml:"url"`
+}
+
+type RouteConfig struct {
+	Path          string              `yaml:"path"`
+	Name          string              `yaml:"name"`
+	Strategy      string              `yaml:"strategy"`
+	MaxNodes      int                 `yaml:"max_nodes"`
+	HealthTimeout int                 `yaml:"health_timeout_ms"`
+	Docker        *DockerConfig       `yaml:"docker"`
+	Servers       []RouteServerConfig `yaml:"servers"`
 }

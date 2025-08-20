@@ -12,21 +12,30 @@ var Config = ConfigType{
 		Port: 8080,
 		Host: "localhost",
 	},
-	LoadBalancer: LoadBalancerConfig{
-		HealthInterval: 5000,
-		MaxNodes:       10,
-		Strategy:       "round-robin",
-	},
-	Docker: DockerConfig{
-		DockerImage:  "node-server",
-		InternalPort: 3000,
-	},
 	Logging: LoggingConfig{
 		Level:  "all",
 		Folder: "./logs",
 	},
+	Routes: []RouteConfig{
+		{
+			Path:          "/*",
+			Name:          "allServer",
+			Strategy:      "round-robin",
+			MaxNodes:      0,
+			HealthTimeout: 5000,
+			Docker: &DockerConfig{
+			    Image:        "node-server",
+			    InternalPort: 3000,
+			},
+			Servers: []RouteServerConfig{
+				{URL: "http://10.0.0.1:8080"},
+				{URL: "http://10.0.0.2:8080"},
+			},
+		},
+	},
 }
 
+// LoadConfig function to read YAML file and populate Config
 func LoadConfig(configPath string) error {
 	f, err := os.Open(configPath)
 	if err != nil {
@@ -39,6 +48,14 @@ func LoadConfig(configPath string) error {
 	if err != nil {
 		fmt.Println("Error reading config file:", err)
 		return err
+	}
+
+	nameMap := make(map[string]bool)
+	for _, route := range Config.Routes {
+		if nameMap[route.Name] {
+			return fmt.Errorf("duplicate route name found: %s", route.Name)
+		}
+		nameMap[route.Name] = true
 	}
 
 	return nil

@@ -7,19 +7,18 @@ type BaseEvent struct {
 
 type NodeEvent struct {
 	BaseEvent,
-	Address string `json:"address"`
+	ContainerID string `json:"container_id"`
 }
 
 type NodeStop = NodeEvent
-type NodeStart = NodeEvent
+type NodeStart struct {
+	NodeEvent
+	RouteName string `json:route_name`
+}
 type NodePause = NodeEvent
 type NodeUnpause = NodeEvent
 
 type StopServer struct {
-	BaseEvent
-}
-
-type StartServer struct {
 	BaseEvent
 }
 

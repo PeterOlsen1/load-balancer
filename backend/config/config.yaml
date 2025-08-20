@@ -2,15 +2,20 @@ server:
   port: 8080
   host: localhost
 
-load_balancer:
-  health_timeout: 5000
-  max_nodes: 0
-  strategy: round-robin
-
-docker:
-  docker_image: node-server
-  internal_port: 3000
-
 logging:
   level: all
   folder: "./logs"
+
+routes:
+  - path: /*
+    name: allServer
+    strategy: round-robin
+    max_nodes: 0
+    health_timeout_ms: 5000
+    docker:
+      image: node-server
+      internal_port: 3000
+    servers:
+      - url: http://10.0.0.1:8080
+      - url: http://10.0.0.2:8080
+    
