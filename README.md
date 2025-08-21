@@ -7,6 +7,10 @@ Questions:
 * When to spin up a new container
 * What metrics should we send to frontend?
 
+Testing:
+* Horizontal scaling
+* `getRouteObject`
+
 Working on:
 * Config
   * Fix balancer receiever methods

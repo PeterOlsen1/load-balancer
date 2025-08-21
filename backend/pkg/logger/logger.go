@@ -13,8 +13,8 @@ import (
 )
 
 var logfile string
-var ll string = config.Config.Logging.Level
-var logDir string = config.Config.Logging.Folder
+var ll string
+var logDir string
 
 func makeLogfile() (string, error) {
 	err := os.MkdirAll(logDir, os.ModePerm)
@@ -31,7 +31,10 @@ func makeLogfile() (string, error) {
 	return out, nil
 }
 
-func init() {
+func InitLogger() {
+	ll = config.Config.Logging.Level
+	logDir = config.Config.Logging.Folder
+
 	f, err := makeLogfile()
 	if err != nil {
 		return
@@ -57,7 +60,7 @@ func Info(msg string) {
 }
 
 func ContainerStart(containerID string) {
-	if ll != "all" {
+	if ll == "error" || ll == "none" {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=CONTAINER_START container_ID=\"%s\"", time.Now().Format(time.RFC3339), containerID)
@@ -65,7 +68,7 @@ func ContainerStart(containerID string) {
 }
 
 func ContainerStop(containerID string) {
-	if ll != "all" {
+	if ll == "error" || ll == "none" {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=CONTAINER_STOP container_ID=\"%s\"", time.Now().Format(time.RFC3339), containerID)
@@ -73,7 +76,7 @@ func ContainerStop(containerID string) {
 }
 
 func ContainerPause(containerID string) {
-	if ll != "all" {
+	if ll == "error" || ll == "none" {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=CONTAINER_PAUSE container_ID=\"%s\"", time.Now().Format(time.RFC3339), containerID)
@@ -81,7 +84,7 @@ func ContainerPause(containerID string) {
 }
 
 func ContainerUnpause(containerID string) {
-	if ll != "all" {
+	if ll == "error" || ll == "none" {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=CONTAINER_UNPAUSE container_ID=\"%s\"", time.Now().Format(time.RFC3339), containerID)

@@ -14,32 +14,41 @@ import (
 func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 	routeObject := b.getRouteObject(conn)
 	if routeObject == nil {
-		send500(conn)
+		send500(conn, "Failed to find route match")
+		logger.Err("Failed to find route match", fmt.Errorf("finding route match"))
 		return
 	}
 
 	node := routeObject.GetProxyNode(conn.Request.RemoteAddr)
 	if node == nil {
 		logger.Err("Failed to find node for proxy", fmt.Errorf("failed to find node for proxy"))
-		send500(conn)
+		send500(conn, "Failed to find node for proxy")
 		return
 	}
 
 	node.Metrics.Lock.Lock()
 	node.Metrics.Connections++
 
+	fmt.Println("connections:", node.Metrics.Connections)
+
+	// add new node if we are above x connections
+	// if we have one connection (slow) and more than one node, remove it
+	// ^ could be improved upon,
 	if node.Metrics.Connections > 30 {
 		node, err := StartServer(routeObject.Docker)
 		if err != nil {
-			send500(conn)
+			send500(conn, "Failed starting server on connection threshhold")
 			return
 		}
 		routeObject.AddNode(node)
 	} else if node.Metrics.Connections == 1 && len(routeObject.Nodes) > 1 {
-		routeObject.lock.Lock()
-		routeObject.RemoveNode(node)
-		routeObject.lock.Unlock()
-		node.StopServer()
+		// close node once the proxy is done, this feels risky. re-evaluate how we want this to work
+		defer func() {
+			routeObject.lock.Lock()
+			routeObject.RemoveNode(node)
+			routeObject.lock.Unlock()
+			node.StopServer()
+		}()
 	}
 	node.Metrics.Lock.Unlock()
 
@@ -57,7 +66,7 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 	if err != nil {
 		go logger.Err("Request creation failed", err)
 		go ws.EventEmitter.Error("Request creation failed", err)
-		send500(conn)
+		send500(conn, "Creating request to backend")
 		return
 	}
 
@@ -66,7 +75,7 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 	if err != nil {
 		go logger.Err("Backend request failed", err)
 		go ws.EventEmitter.Error("Backend request failed", err)
-		send500(conn)
+		send500(conn, "Sending backend request")
 		return
 	}
 	defer resp.Body.Close()
@@ -76,19 +85,14 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 	if err != nil {
 		go logger.Err("Copying response", err)
 		go ws.EventEmitter.Error("Copying response", err)
-		send500(conn)
+		send500(conn, "Copying backend response")
 		return
 	}
 }
 
 func (b *BalancerType) getRouteObject(conn *types.Connection) *Route {
 	for _, route := range b.Routes {
-		routePath := route.Path
-		if routePath == "/*" {
-			routePath = "/"
-		}
-
-		matched, err := path.Match(routePath, conn.Request.URL.Path)
+		matched, err := path.Match(route.Path, conn.Request.URL.Path)
 		if err != nil {
 			go logger.Err("Route matching failed", err)
 			continue

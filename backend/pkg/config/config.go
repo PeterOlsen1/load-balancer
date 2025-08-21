@@ -7,36 +7,14 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var Config = ConfigType{
-	Server: ServerConfig{
-		Port: 8080,
-		Host: "localhost",
-	},
-	Logging: LoggingConfig{
-		Level:  "all",
-		Folder: "./logs",
-	},
-	Routes: []RouteConfig{
-		{
-			Path:          "/*",
-			Name:          "allServer",
-			Strategy:      "round-robin",
-			MaxNodes:      0,
-			HealthTimeout: 5000,
-			Docker: &DockerConfig{
-				Image:        "node-server",
-				InternalPort: 3000,
-			},
-			Servers: []RouteServerConfig{},
-		},
-	},
-}
+var Config ConfigType
 
 // LoadConfig function to read YAML file and populate Config
 func LoadConfig(configPath string) error {
 	f, err := os.Open(configPath)
 	if err != nil {
 		fmt.Println("Error reading config:", err)
+		setDefaultConfig()
 		return err
 	}
 	defer f.Close()
@@ -44,6 +22,7 @@ func LoadConfig(configPath string) error {
 	err = yaml.NewDecoder(f).Decode(&Config)
 	if err != nil {
 		fmt.Println("Error reading config file:", err)
+		setDefaultConfig()
 		return err
 	}
 
@@ -56,4 +35,31 @@ func LoadConfig(configPath string) error {
 	}
 
 	return nil
+}
+
+func setDefaultConfig() {
+	Config = ConfigType{
+		Server: ServerConfig{
+			Port: 8080,
+			Host: "localhost",
+		},
+		Logging: LoggingConfig{
+			Level:  "all",
+			Folder: "./logs",
+		},
+		Routes: []RouteConfig{
+			{
+				Path:          "/*",
+				Name:          "allServer",
+				Strategy:      "round-robin",
+				MaxNodes:      0,
+				HealthTimeout: 5000,
+				Docker: &DockerConfig{
+					Image:        "node-server",
+					InternalPort: 3000,
+				},
+				Servers: []RouteServerConfig{},
+			},
+		},
+	}
 }

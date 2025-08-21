@@ -5,6 +5,7 @@ import (
 	"load-balancer/pkg/balancer"
 	_ "load-balancer/pkg/balancer/receiver"
 	"load-balancer/pkg/config"
+	"load-balancer/pkg/logger"
 	"load-balancer/pkg/server"
 	"os"
 	"os/signal"
@@ -18,6 +19,7 @@ func main() {
 	if err != nil {
 		os.Exit(1)
 	}
+	logger.InitLogger()
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)

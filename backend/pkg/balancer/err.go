@@ -7,8 +7,8 @@ import (
 	"load-balancer/pkg/ws"
 )
 
-func send500(conn *types.Connection) {
-	message := "500 Internal Server Error"
+func send500(conn *types.Connection, reason string) {
+	message := fmt.Sprintf("500 Internal Server Error: %s", reason)
 	conn.Response.Header().Set("Content-Type", "text/plain")
 	conn.Response.Header().Set("Content-Length", fmt.Sprintf("%d", len(message)))
 	conn.Response.WriteHeader(500)
