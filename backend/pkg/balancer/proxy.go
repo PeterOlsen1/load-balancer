@@ -34,7 +34,8 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 	// add new node if we are above x connections
 	// if we have one connection (slow) and more than one node, remove it
 	// ^ could be improved upon,
-	if node.Metrics.Connections > 30 {
+	if !node.Metrics.CreatedNewNode && node.Metrics.Connections > routeObject.Docker.RequestScaleThreshold {
+		node.Metrics.CreatedNewNode = true
 		go func() {
 			node, err := StartServer(routeObject.Docker)
 			if err != nil {
@@ -58,6 +59,11 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 	defer func() {
 		node.Metrics.Lock.Lock()
 		node.Metrics.Connections--
+
+		//if we are below 70% of connection threshold, it is okay to make a new node
+		if node.Metrics.Connections < int(float64(routeObject.Docker.RequestScaleThreshold)*0.7) {
+			node.Metrics.CreatedNewNode = false
+		}
 		node.Metrics.Lock.Unlock()
 	}()
 

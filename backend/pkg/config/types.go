@@ -19,8 +19,9 @@ type LoggingConfig struct {
 // Image: the name of the given docker image to scale
 // InternalPort: the port on which the server runs
 type DockerConfig struct {
-	Image        string `yaml:"image"`
-	InternalPort int    `yaml:"internal_port"`
+	Image                 string `yaml:"image"`
+	InternalPort          int    `yaml:"internal_port"`
+	RequestScaleThreshold int    `yaml:"request_scale_threshold"`
 }
 
 type RouteServerConfig struct {

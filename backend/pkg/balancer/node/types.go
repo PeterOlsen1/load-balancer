@@ -20,17 +20,18 @@ type Node struct {
 	Metrics     NodeMetrics `json:"metrics"`
 }
 
-//
-// Most of the fields here are self explanatory
-// Response time is in ms
-// Health is an enum that can be any of the following values:
+// Explaining some fields
+// * Response time is in ms
+// * Health is an enum that can be any of the following values:
 // - healthy
 // - paused
 // - unhealthy
 // - unknown
+// * CreatedNewNode is a flag where if we are over max connections, a node has already been created
 type NodeMetrics struct {
-	Lock         sync.Mutex `json:"-"`
-	Health       string     `json:"health"`
-	ResponseTime float32    `json:"response_time"`
-	Connections  uint32     `json:"connections"`
+	Lock           sync.Mutex `json:"-"`
+	Health         string     `json:"health"`
+	ResponseTime   float32    `json:"response_time"`
+	Connections    int     `json:"connections"`
+	CreatedNewNode bool       `json:"-"`
 }

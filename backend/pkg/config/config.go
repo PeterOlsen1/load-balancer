@@ -55,8 +55,9 @@ func setDefaultConfig() {
 				MaxNodes:      0,
 				HealthTimeout: 5000,
 				Docker: &DockerConfig{
-					Image:        "node-server",
-					InternalPort: 3000,
+					Image:                 "node-server",
+					InternalPort:          3000,
+					RequestScaleThreshold: 30,
 				},
 				Servers: []RouteServerConfig{},
 			},
