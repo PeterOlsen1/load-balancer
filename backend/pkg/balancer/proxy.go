@@ -35,21 +35,24 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 	// if we have one connection (slow) and more than one node, remove it
 	// ^ could be improved upon,
 	if node.Metrics.Connections > 30 {
-		node, err := StartServer(routeObject.Docker)
-		if err != nil {
-			send500(conn, "Failed starting server on connection threshhold")
-			return
-		}
-		routeObject.AddNode(node)
-	} else if node.Metrics.Connections == 1 && len(routeObject.Nodes) > 1 {
-		// close node once the proxy is done, this feels risky. re-evaluate how we want this to work
-		defer func() {
-			routeObject.lock.Lock()
-			routeObject.RemoveNode(node)
-			routeObject.lock.Unlock()
-			node.StopServer()
+		go func() {
+			node, err := StartServer(routeObject.Docker)
+			if err != nil {
+				send500(conn, "Failed starting server on connection threshhold")
+				return
+			}
+			routeObject.AddNode(node)
 		}()
 	}
+	//  else if node.Metrics.Connections == 1 && len(routeObject.Nodes) > 1 {
+	// 	// close node once the proxy is done, this feels risky. re-evaluate how we want this to work
+	// 	defer func() {
+	// 		routeObject.lock.Lock()
+	// 		routeObject.RemoveNode(node)
+	// 		routeObject.lock.Unlock()
+	// 		node.StopServer()
+	// 	}()
+	// }
 	node.Metrics.Lock.Unlock()
 
 	defer func() {
