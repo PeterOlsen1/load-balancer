@@ -1,57 +1,30 @@
 # load-balancer
 Trying out new things. Learning Go. Balancing loads. Scaling horizontally ⚖️
 
+## current work
+
+Testing:
+* Horizontal scaling
+  * Stop a container if it sits idle for too long
+  * Update the health of a container as soon as it is good to go
+* `getRouteObject`
+
+Working on:
+* Fix balancer receiever methods
+* More config rules?
+  * URLs, rules for proxy, etc.
+* Replace hardcoded values with config
+* Test out websocket connection more
+
+Future ideas:
+* Add rate tracking?
+* Deploying to AWS or something?
+
 ## architecture planning
 
 Questions:
 * When to spin up a new container
 * What metrics should we send to frontend?
-
-Testing:
-* Horizontal scaling
-* `getRouteObject`
-
-Working on:
-* Config
-  * Fix balancer receiever methods
-  * Add different route options? for exmaple:
- ```YAML
-routes:
-  - path: /api/*
-    backend: api_servers
-  - path: /static/*
-    backend: static_servers
-
-backends:
-  api_servers:
-    strategy: least_connections
-    servers:
-      - url: http://10.0.0.1:8080
-      - url: http://10.0.0.2:8080
-```
-
-iterating on this:
-```YAML
-routes:
-  - path: /api/*
-    docker_image: api-server
-    strategy: least_connections
-    servers:
-    - url: http://aws.something.com
-    - url: http://hello.com
-    - ...
-    
-```
-  * More config rules?
-    * URLs, rules for proxy, etc.
-  * Replace hardcoded values with config
-* More research on when to update running containers
-* Test out websocket connection more
-
-Future ideas:
-* Add rate tracking?
-* Testing framework (really load it)
-* Deploying to AWS or something?
 
 ### general thoughts
   
@@ -85,3 +58,34 @@ Things to research:
   * Logs + metrics about responses
 * Allow for user to manually start / update nodes
 
+### items completed
+
+* Config
+  * Add different route options? for exmaple:
+ ```YAML
+routes:
+  - path: /api/*
+    backend: api_servers
+  - path: /static/*
+    backend: static_servers
+
+backends:
+  api_servers:
+    strategy: least_connections
+    servers:
+      - url: http://10.0.0.1:8080
+      - url: http://10.0.0.2:8080
+```
+
+iterating on this:
+```YAML
+routes:
+  - path: /api/*
+    docker_image: api-server
+    strategy: least_connections
+    servers:
+    - url: http://aws.something.com
+    - url: http://hello.com
+    - ...
+    
+```
