@@ -57,7 +57,7 @@ func setDefaultConfig() {
 				Docker: &DockerConfig{
 					Image:                 "node-server",
 					InternalPort:          3000,
-					RequestScaleThreshold: 30,
+					RequestScaleThreshold: 15,
 				},
 				Servers: []RouteServerConfig{},
 			},

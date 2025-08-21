@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	testRequests(35)
+	testRequests(1000)
 }
 
 func testRequests(numRequests int) {
@@ -23,8 +23,8 @@ func testRequests(numRequests int) {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			_, err := http.Get("http://localhost:8080/")
-			if err != nil {
+			resp, err := http.Get("http://localhost:8080/")
+			if err != nil || resp.StatusCode != 200 {
 				fmt.Printf("Encountered error on test #%d: %v\n", i, err)
 				numFailed++
 			} else {
