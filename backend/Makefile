@@ -1,4 +1,4 @@
-.PHONY: all test clean
+.PHONY: all test clean clean-containers
 
 all:
 	go run ./pkg/main.go
@@ -8,3 +8,6 @@ test:
 
 clean:
 	rm -rf ./logs
+
+clean-containers:
+	docker stop $$(docker ps -q)

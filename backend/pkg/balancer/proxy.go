@@ -58,14 +58,14 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 		node.Metrics.Lock.Unlock()
 	}()
 
-	go logger.Proxy(conn.Request.URL.Path, node.Address, conn.Request.RemoteAddr)
-	go ws.EventEmitter.Proxy(conn.Request.URL.Path, node.Address, conn.Request.RemoteAddr)
+	logger.Proxy(conn.Request.URL.Path, node.Address, conn.Request.RemoteAddr)
+	ws.EventEmitter.Proxy(conn.Request.URL.Path, node.Address, conn.Request.RemoteAddr)
 
 	backendURL := fmt.Sprintf("%s%s", node.Address, conn.Request.URL.Path)
 	req, err := http.NewRequest(conn.Request.Method, backendURL, conn.Request.Body)
 	if err != nil {
-		go logger.Err("Request creation failed", err)
-		go ws.EventEmitter.Error("Request creation failed", err)
+		logger.Err("Request creation failed", err)
+		ws.EventEmitter.Error("Request creation failed", err)
 		send500(conn, "Creating request to backend")
 		return
 	}
@@ -73,8 +73,8 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 	maps.Copy(req.Header, conn.Request.Header)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		go logger.Err("Backend request failed", err)
-		go ws.EventEmitter.Error("Backend request failed", err)
+		logger.Err("Backend request failed", err)
+		ws.EventEmitter.Error("Backend request failed", err)
 		send500(conn, "Sending backend request")
 		return
 	}
@@ -83,18 +83,19 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 	conn.Response.WriteHeader(resp.StatusCode)
 	_, err = io.Copy(conn.Response, resp.Body)
 	if err != nil {
-		go logger.Err("Copying response", err)
-		go ws.EventEmitter.Error("Copying response", err)
+		logger.Err("Copying response", err)
+		ws.EventEmitter.Error("Copying response", err)
 		send500(conn, "Copying backend response")
 		return
 	}
+
 }
 
 func (b *BalancerType) getRouteObject(conn *types.Connection) *Route {
 	for _, route := range b.Routes {
 		matched, err := path.Match(route.Path, conn.Request.URL.Path)
 		if err != nil {
-			go logger.Err("Route matching failed", err)
+			logger.Err("Route matching failed", err)
 			continue
 		}
 

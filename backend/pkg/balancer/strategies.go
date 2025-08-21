@@ -28,8 +28,8 @@ func (r *Route) GetProxyNode(ip string) *node.Node {
 func (r *Route) roundRobin() *node.Node {
 	r.lock.Lock()
 	if len(r.Nodes) == 0 {
-		go logger.Err("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
-		go ws.EventEmitter.Error("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
+		logger.Err("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
+		ws.EventEmitter.Error("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
 		return nil
 	}
 

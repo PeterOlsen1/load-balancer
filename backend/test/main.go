@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	testRequests(10000)
+	testRequests(50)
 }
 
 func testRequests(numRequests int) {
@@ -23,9 +23,13 @@ func testRequests(numRequests int) {
 			_, err := http.Get("http://localhost:8080/")
 			if err != nil {
 				fmt.Printf("Encountered error on test #%d: %v\n", i, err)
+			} else {
+				fmt.Printf("Completed request #%d\n", i)
 			}
 		}(i)
 	}
+
+	wg.Wait()
 	elapsed := time.Since(start)
 
 	avg := elapsed.Nanoseconds() / int64(numRequests)

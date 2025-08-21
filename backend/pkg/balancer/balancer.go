@@ -15,11 +15,14 @@ func ConsumePort() int {
 	var ret int
 	portMutex.Lock()
 	ret = port
+	port++
 	portMutex.Unlock()
 	return ret
 }
 
-var Balancer = BalancerType{}
+var Balancer = BalancerType{
+	NodeTable: make(map[string]*node.Node),
+}
 
 func WatchQueue() {
 	for {
@@ -45,14 +48,15 @@ func (b *BalancerType) InitBalancer() error {
 
 		b.Routes = append(b.Routes, &routeStruct)
 		if route.Docker != nil && len(route.Servers) == 0 {
-			node, err := StartServer(route.Docker)
+			serverNode, err := StartServer(route.Docker)
 			if err != nil {
 				return err
 			}
 
 			routeStruct.lock.Lock()
-			routeStruct.Nodes = append(routeStruct.Nodes, node)
+			routeStruct.Nodes = append(routeStruct.Nodes, serverNode)
 			routeStruct.lock.Unlock()
+			b.NodeTable[serverNode.ContainerID] = serverNode
 		}
 
 		for _, server := range route.Servers {

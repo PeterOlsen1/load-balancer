@@ -20,24 +20,25 @@ import (
 func StartServer(dockerInfo *config.DockerConfig) (*node.Node, error) {
 	path := "./server/run.sh" //assuming you run from root of project
 
+	fmt.Println(path, dockerInfo.Image, port, dockerInfo.InternalPort)
 	port := ConsumePort()
 	cmd := exec.Command("bash", path, dockerInfo.Image, fmt.Sprintf("%d", port), fmt.Sprintf("%d", dockerInfo.InternalPort))
 
 	output, err := cmd.Output()
 	if err != nil {
-		go logger.Err("Creating container", err)
-		go ws.EventEmitter.Error("Creating container", err)
+		logger.Err("Creating container", err)
+		ws.EventEmitter.Error("Creating container", err)
 		return nil, err
 	}
 	containerID := strings.TrimSpace(string(output))
 	if containerID == "" {
 		err := fmt.Errorf("empty container ID received")
-		go logger.Err("Creating container", err)
-		go ws.EventEmitter.Error("Creating container", err)
+		logger.Err("Creating container", err)
+		ws.EventEmitter.Error("Creating container", err)
 		return nil, err
 	}
-	go logger.ContainerStart(containerID)
-	go ws.EventEmitter.ContainerStart(containerID)
+	logger.ContainerStart(containerID)
+	ws.EventEmitter.ContainerStart(containerID)
 
 	node := node.Node{
 		ContainerID: containerID,
@@ -47,18 +48,18 @@ func StartServer(dockerInfo *config.DockerConfig) (*node.Node, error) {
 		},
 	}
 
-	go logger.Info(fmt.Sprintf("Started server @ http://localhost:%d", port))
-	go ws.EventEmitter.Info(fmt.Sprintf("Started server @ http://localhost:%d", port))
+	logger.Info(fmt.Sprintf("Started server @ http://localhost:%d", port))
+	ws.EventEmitter.Info(fmt.Sprintf("Started server @ http://localhost:%d", port))
 	return &node, nil
 }
 
-func (r *Route) AddNode(node *node.Node) {
-	Balancer.NodeTable[node.ContainerID] = node
+func (r *Route) AddNode(inputNode *node.Node) {
+	Balancer.NodeTable[inputNode.ContainerID] = inputNode
 
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	r.Nodes = append(r.Nodes, node)
+	r.Nodes = append(r.Nodes, inputNode)
 }
 
 func (r *Route) RemoveNode(inputNode *node.Node) error {
@@ -100,8 +101,8 @@ func (r *Route) CleanupNodes() {
 }
 
 func (b *BalancerType) CleanupNodes() {
-	go logger.Info("cleaning up nodes")
-	go ws.EventEmitter.Info("cleaning up nodes")
+	logger.Info("cleaning up nodes")
+	ws.EventEmitter.Info("cleaning up nodes")
 	var wg sync.WaitGroup
 
 	for _, r := range b.Routes {

@@ -37,8 +37,8 @@ func (node *Node) CheckHealth() error {
 	duration := time.Since(start)
 
 	if err != nil {
-		go logger.Err("Fetching node health", err)
-		go ws.EventEmitter.Error("Fetching node health", err)
+		logger.Err("Fetching node health", err)
+		ws.EventEmitter.Error("Fetching node health", err)
 		return err
 	}
 	node.Metrics.Lock.Lock()
@@ -49,11 +49,11 @@ func (node *Node) CheckHealth() error {
 	health := "healthy"
 	if resp.StatusCode != http.StatusOK {
 		health = "unhealthy"
-		go logger.Health(health, node.Address, respTime)
-		go ws.EventEmitter.Health(health, node.Address, respTime)
+		logger.Health(health, node.Address, respTime)
+		ws.EventEmitter.Health(health, node.Address, respTime)
 	} else {
-		go logger.Health(health, node.Address, respTime)
-		go ws.EventEmitter.Health(health, node.Address, respTime)
+		logger.Health(health, node.Address, respTime)
+		ws.EventEmitter.Health(health, node.Address, respTime)
 	}
 	node.Metrics.Health = health
 
@@ -87,13 +87,13 @@ func (node *Node) StopServer() error {
 	cmd := exec.Command("docker", "stop", node.ContainerID)
 	err := cmd.Run()
 	if err != nil {
-		go logger.Err("docker stop", err)
-		go ws.EventEmitter.Error("docker stop", err)
+		logger.Err("docker stop", err)
+		ws.EventEmitter.Error("docker stop", err)
 		return err
 	}
 
-	go logger.ContainerStop(node.ContainerID)
-	go ws.EventEmitter.ContainerStop(node.ContainerID)
+	logger.ContainerStop(node.ContainerID)
+	ws.EventEmitter.ContainerStop(node.ContainerID)
 	return nil
 }
 
