@@ -9,6 +9,7 @@ import (
 	"maps"
 	"net/http"
 	"path"
+	"time"
 )
 
 func (b *BalancerType) ProxyRequest(conn *types.Connection) {
@@ -64,6 +65,8 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 		if node.Metrics.Connections < int(float64(routeObject.Docker.RequestScaleThreshold)*0.7) {
 			node.Metrics.CreatedNewNode = false
 		}
+		
+		node.Metrics.LastRequestTime = time.Now()
 		node.Metrics.Lock.Unlock()
 	}()
 

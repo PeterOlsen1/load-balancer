@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	testRequests(1000)
+	testRequests(50)
 }
 
 func testRequests(numRequests int) {

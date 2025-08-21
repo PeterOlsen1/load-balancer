@@ -16,6 +16,7 @@ routes:
     docker:
       image: node-server
       internal_port: 3000
-      request_scale_threshold: 30
+      request_scale_threshold: 15
+      no_requests_timeout_ms: 5000
     servers:
     

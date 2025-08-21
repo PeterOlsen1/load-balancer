@@ -58,6 +58,7 @@ func setDefaultConfig() {
 					Image:                 "node-server",
 					InternalPort:          3000,
 					RequestScaleThreshold: 15,
+					NoRequestsTimeout:     5000,
 				},
 				Servers: []RouteServerConfig{},
 			},

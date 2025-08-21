@@ -58,7 +58,6 @@ func (r *Route) AddNode(inputNode *node.Node) {
 
 	r.lock.Lock()
 	defer r.lock.Unlock()
-
 	r.Nodes = append(r.Nodes, inputNode)
 }
 
@@ -75,7 +74,6 @@ func (r *Route) RemoveNode(inputNode *node.Node) error {
 		}
 	}
 	r.Nodes = filtered
-
 	delete(Balancer.NodeTable, inputNode.ContainerID)
 
 	return nil

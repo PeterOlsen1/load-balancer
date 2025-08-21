@@ -1,6 +1,7 @@
 package balancer
 
 import (
+	"fmt"
 	"load-balancer/pkg/balancer/node"
 	"load-balancer/pkg/config"
 	"load-balancer/pkg/queue"
@@ -63,6 +64,7 @@ func (b *BalancerType) InitBalancer() error {
 			routeStruct.Nodes = append(routeStruct.Nodes, node.FromURL(server.URL))
 		}
 
+		//goroutine to periodically check health of containers
 		go func() {
 			if route.HealthTimeout <= 0 {
 				//skip health check if timeout is not set
@@ -83,6 +85,27 @@ func (b *BalancerType) InitBalancer() error {
 					}
 					r.lock.Unlock()
 				}
+			}
+		}()
+
+		//goroutine to periodically check if we need to stop a container
+		go func() {
+			ticker := time.NewTicker(time.Duration(route.HealthTimeout) * time.Millisecond)
+			defer ticker.Stop()
+
+			for range ticker.C {
+				fmt.Println("checking servers...")
+				routeStruct.lock.Lock()
+				for _, node := range routeStruct.Nodes {
+					node.Metrics.Lock.Lock()
+					if routeStruct.Docker != nil && len(routeStruct.Nodes) > 1 && time.Since(node.Metrics.LastRequestTime).Milliseconds() > time.Duration(routeStruct.Docker.RequestScaleThreshold).Milliseconds() {
+						fmt.Println("removing server")
+						routeStruct.RemoveNode(node)
+						node.StopServer()
+					}
+					node.Metrics.Lock.Unlock()
+				}
+				routeStruct.lock.Unlock()
 			}
 		}()
 	}

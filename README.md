@@ -5,7 +5,7 @@ Trying out new things. Learning Go. Balancing loads. Scaling horizontally ⚖️
 
 Testing:
 * Horizontal scaling
-  * Stop a container if it sits idle for too long
+  * Idle container stopping
   * Update the health of a container as soon as it is good to go
 * `getRouteObject`
 
