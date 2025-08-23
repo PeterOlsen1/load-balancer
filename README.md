@@ -7,9 +7,11 @@ Testing:
 * Horizontal scaling
   * Idle container stopping
   * Update the health of a container as soon as it is good to go
+    * Need to scale horizontally faster
 * `getRouteObject`
 
 Working on:
+* Add a request queue for each node?
 * Fix balancer receiever methods
 * More config rules?
   * URLs, rules for proxy, etc.
