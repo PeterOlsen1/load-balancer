@@ -4,7 +4,6 @@ import (
 	"load-balancer/pkg/balancer/node"
 	"load-balancer/pkg/balancer/route"
 	"load-balancer/pkg/config"
-	"load-balancer/pkg/queue"
 	"time"
 )
 
@@ -12,22 +11,6 @@ var Balancer = BalancerType{
 	NodeTable: make(map[string]*node.Node),
 }
 
-func WatchQueue() {
-	for {
-		<-queue.ConnectionQueue.Notify
-		for {
-			conn, err := queue.ConnectionQueue.Dequeue()
-
-			if err != nil {
-				break
-			}
-
-			Balancer.ProxyRequest(conn)
-		}
-	}
-}
-
-// Pass in num <= 0 for no health checks
 func (b *BalancerType) InitBalancer() error {
 	for _, r := range config.Config.Routes {
 		routeStruct := route.Route{
@@ -40,10 +23,6 @@ func (b *BalancerType) InitBalancer() error {
 			if err != nil {
 				return err
 			}
-
-			routeStruct.Lock.Lock()
-			routeStruct.Nodes = append(routeStruct.Nodes, serverNode)
-			routeStruct.Lock.Unlock()
 			b.NodeTable[serverNode.ContainerID] = serverNode
 		}
 

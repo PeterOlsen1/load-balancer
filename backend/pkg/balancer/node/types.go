@@ -1,6 +1,7 @@
 package node
 
 import (
+	"load-balancer/pkg/types"
 	"sync"
 	"time"
 )
@@ -36,4 +37,10 @@ type NodeMetrics struct {
 	Connections     int        `json:"connections"`
 	CreatedNewNode  bool       `json:"-"`
 	LastRequestTime time.Time  `json:"last_request"`
+}
+
+type NodeQueue struct {
+	Lock  sync.Mutex          `json:"-"`
+	Queue []*types.Connection `json:"queue"`
+	Open  bool                `json:"open"`
 }
