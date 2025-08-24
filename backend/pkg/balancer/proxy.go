@@ -38,7 +38,7 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 	if !node.Metrics.CreatedNewNode && node.Metrics.Connections > routeObject.Docker.RequestScaleThreshold {
 		node.Metrics.CreatedNewNode = true
 		go func() {
-			node, err := StartServer(routeObject.Docker)
+			node, err := routeObject.Scale()
 			if err != nil {
 				send500(conn, "Failed starting server on connection threshhold")
 				return

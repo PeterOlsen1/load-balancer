@@ -2,55 +2,16 @@ package balancer
 
 import (
 	"fmt"
+	"load-balancer/pkg/balancer/docker"
 	"load-balancer/pkg/balancer/node"
-	"load-balancer/pkg/config"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/ws"
-	"os/exec"
-	"strings"
 	"sync"
 )
 
-// Helper method to start an internal server,
-//
-// In a real environment, this would not be necessary,
-// and the user would just call the Balancer.AddNode method
-//
-// Move logic from shell script into here
-func StartServer(dockerInfo *config.DockerConfig) (*node.Node, error) {
-	path := "./server/run.sh" //assuming you run from root of project
-
-	fmt.Println(path, dockerInfo.Image, port, dockerInfo.InternalPort)
+func (r *Route) Scale() (*node.Node, error) {
 	port := ConsumePort()
-	cmd := exec.Command("bash", path, dockerInfo.Image, fmt.Sprintf("%d", port), fmt.Sprintf("%d", dockerInfo.InternalPort))
-
-	output, err := cmd.Output()
-	if err != nil {
-		logger.Err("Creating container", err)
-		ws.EventEmitter.Error("Creating container", err)
-		return nil, err
-	}
-	containerID := strings.TrimSpace(string(output))
-	if containerID == "" {
-		err := fmt.Errorf("empty container ID received")
-		logger.Err("Creating container", err)
-		ws.EventEmitter.Error("Creating container", err)
-		return nil, err
-	}
-	logger.ContainerStart(containerID)
-	ws.EventEmitter.ContainerStart(containerID)
-
-	node := node.Node{
-		ContainerID: containerID,
-		Address:     fmt.Sprintf("http://localhost:%d", port),
-		Metrics: node.NodeMetrics{
-			Health: "unknown",
-		},
-	}
-
-	logger.Info(fmt.Sprintf("Started server @ http://localhost:%d", port))
-	ws.EventEmitter.Info(fmt.Sprintf("Started server @ http://localhost:%d", port))
-	return &node, nil
+	return docker.StartContainer(port, r.Docker)
 }
 
 func (r *Route) AddNode(inputNode *node.Node) {

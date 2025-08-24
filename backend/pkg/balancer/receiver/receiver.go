@@ -96,7 +96,7 @@ func init() {
 			}
 		}
 
-		newNode, err := b.StartServer(routeObject.Docker)
+		newNode, err := routeObject.Scale()
 		if err != nil {
 			return nil, err
 		}

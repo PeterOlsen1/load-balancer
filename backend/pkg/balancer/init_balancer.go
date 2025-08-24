@@ -20,6 +20,17 @@ func ConsumePort() int {
 	return ret
 }
 
+func ConsumeMultiplePorts(numPorts int) []int {
+	var ret []int
+	portMutex.Lock()
+	for range numPorts {
+		ret = append(ret, port)
+		port++
+	}
+	portMutex.Unlock()
+	return ret
+}
+
 var Balancer = BalancerType{
 	NodeTable: make(map[string]*node.Node),
 }
@@ -48,7 +59,7 @@ func (b *BalancerType) InitBalancer() error {
 
 		b.Routes = append(b.Routes, &routeStruct)
 		if route.Docker != nil && len(route.Servers) == 0 {
-			serverNode, err := StartServer(route.Docker)
+			serverNode, err := routeStruct.Scale()
 			if err != nil {
 				return err
 			}
