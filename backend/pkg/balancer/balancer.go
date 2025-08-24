@@ -96,12 +96,13 @@ func (b *BalancerType) InitBalancer() error {
 			for range ticker.C {
 				fmt.Println("checking servers...")
 				routeStruct.lock.Lock()
-				for _, node := range routeStruct.Nodes {
+				for i := len(routeStruct.Nodes) - 1; i >= 0; i-- {
+					node := routeStruct.Nodes[i]
 					node.Metrics.Lock.Lock()
 					if routeStruct.Docker != nil && len(routeStruct.Nodes) > 1 && time.Since(node.Metrics.LastRequestTime).Milliseconds() > time.Duration(routeStruct.Docker.RequestScaleThreshold).Milliseconds() {
+						//lock the metrics so that other requests can't make a request
 						fmt.Println("removing server")
 						routeStruct.RemoveNode(node)
-						node.StopServer()
 					}
 					node.Metrics.Lock.Unlock()
 				}

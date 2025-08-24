@@ -38,10 +38,18 @@ func (r *Route) roundRobin() *node.Node {
 	roundRobinIndex++
 	r.lock.Unlock()
 
+	n := len(r.Nodes)
+	loops := 0
 	for node.Metrics.Health != "healthy" {
 		idx := roundRobinIndex % len(r.Nodes)
 		node = r.Nodes[idx]
 		roundRobinIndex++
+		
+		if loops > n {
+			return nil
+		} else {
+			loops++
+		}
 	}
 
 	return node

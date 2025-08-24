@@ -61,16 +61,15 @@ func (r *Route) AddNode(inputNode *node.Node) {
 	r.Nodes = append(r.Nodes, inputNode)
 }
 
+// No lock since the only place RemoveNode is called already
+// has the Route lock acquired
 func (r *Route) RemoveNode(inputNode *node.Node) error {
-	inputNode.StopServer()
-
-	r.lock.Lock()
-	defer r.lock.Unlock()
 
 	var filtered []*node.Node
 	for _, n := range r.Nodes {
 		if inputNode.Equals(n) {
 			filtered = append(filtered, n)
+			inputNode.StopServer()
 		}
 	}
 	r.Nodes = filtered

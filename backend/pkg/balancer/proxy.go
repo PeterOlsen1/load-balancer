@@ -46,15 +46,6 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 			routeObject.AddNode(node)
 		}()
 	}
-	//  else if node.Metrics.Connections == 1 && len(routeObject.Nodes) > 1 {
-	// 	// close node once the proxy is done, this feels risky. re-evaluate how we want this to work
-	// 	defer func() {
-	// 		routeObject.lock.Lock()
-	// 		routeObject.RemoveNode(node)
-	// 		routeObject.lock.Unlock()
-	// 		node.StopServer()
-	// 	}()
-	// }
 	node.Metrics.Lock.Unlock()
 
 	defer func() {
@@ -65,7 +56,7 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 		if node.Metrics.Connections < int(float64(routeObject.Docker.RequestScaleThreshold)*0.7) {
 			node.Metrics.CreatedNewNode = false
 		}
-		
+
 		node.Metrics.LastRequestTime = time.Now()
 		node.Metrics.Lock.Unlock()
 	}()
