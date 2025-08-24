@@ -2,8 +2,8 @@ package ws
 
 //emit events to the frontend
 import (
-	"load-balancer/pkg/types"
 	"load-balancer/pkg/logger"
+	"load-balancer/pkg/types"
 	"load-balancer/pkg/ws/input"
 	"load-balancer/pkg/ws/output"
 	"net/http"

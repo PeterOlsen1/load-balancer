@@ -46,7 +46,7 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 				send500(conn, "Failed starting server on connection threshhold")
 				return
 			}
-			
+
 			b.NodeTable[node.ContainerID] = node
 		}()
 	}

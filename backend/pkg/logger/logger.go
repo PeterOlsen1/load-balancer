@@ -158,7 +158,7 @@ func writeToFile(logLine string) {
 	}
 
 	linesWritten++
-	if (linesWritten > maxLogLines) {
+	if linesWritten > maxLogLines {
 		fmt.Println("50000 log lines bro, starting a new log")
 		newLogFile, err := makeLogfile()
 		if err != nil {
@@ -169,5 +169,5 @@ func writeToFile(logLine string) {
 
 		logfile = newLogFile
 		linesWritten = 0
-	} 
+	}
 }

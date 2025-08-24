@@ -49,7 +49,7 @@ func (node *Node) CheckHealth() error {
 
 	node.Metrics.Lock.Lock()
 	defer node.Metrics.Lock.Unlock()
-	
+
 	respTime := float32(duration.Microseconds() / 1000)
 	node.Metrics.ResponseTime = respTime
 
