@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"load-balancer/pkg/config"
@@ -15,6 +16,9 @@ import (
 var logfile string
 var ll string
 var logDir string
+var logLock sync.Mutex
+var linesWritten int
+var maxLogLines int = 50000 //TODO: replace with config
 
 func makeLogfile() (string, error) {
 	err := os.MkdirAll(logDir, os.ModePerm)
@@ -140,6 +144,9 @@ func Proxy(path string, proxiedTo string, ip string) {
 }
 
 func writeToFile(logLine string) {
+	logLock.Lock()
+	defer logLock.Unlock()
+
 	f, err := os.OpenFile(logfile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Printf("Failed to open log file: %v\n", err)
@@ -149,4 +156,18 @@ func writeToFile(logLine string) {
 	if _, err := f.WriteString(logLine + "\n"); err != nil {
 		fmt.Printf("Failed to write to log file: %v\n", err)
 	}
+
+	linesWritten++
+	if (linesWritten > maxLogLines) {
+		fmt.Println("50000 log lines bro, starting a new log")
+		newLogFile, err := makeLogfile()
+		if err != nil {
+			fmt.Printf("Failed to create new log file: %v\n", err)
+			return
+		}
+		fmt.Fprintf(f, "%d log lines written, moving to new file %s", maxLogLines, newLogFile)
+
+		logfile = newLogFile
+		linesWritten = 0
+	} 
 }

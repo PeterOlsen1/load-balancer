@@ -4,8 +4,8 @@ Trying out new things. Learning Go. Balancing loads. Scaling horizontally ⚖️
 ## current work
 
 Testing:
+* How do we make sure a node is unreachable before removing it
 * Horizontal scaling
-  * Idle container stopping
   * Update the health of a container as soon as it is good to go
 * `getRouteObject`
 

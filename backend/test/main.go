@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	testRequests(50, 0)
+	testRequests(500, 50000)
 }
 
 func testRequests(numRequests int, waitTime time.Duration) {
@@ -33,7 +33,7 @@ func testRequests(numRequests int, waitTime time.Duration) {
 			}
 		}(i)
 
-		time.Sleep(waitTime * time.Millisecond)
+		time.Sleep(waitTime * time.Nanosecond)
 	}
 
 	wg.Wait()
