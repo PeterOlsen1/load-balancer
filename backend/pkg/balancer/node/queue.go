@@ -5,10 +5,43 @@ import (
 	"load-balancer/pkg/types"
 )
 
-func NewNodeQueue(capacity int) *NodeQueue {
+func (n *Node) WatchQueue() {
+	q := &n.Queue
+
+	for {
+		select {
+		case <-q.signal:
+			conn, err := q.Dequeue()
+			if err != nil {
+				continue
+			}
+
+			n.processRequest(conn)
+		default:
+			q.Lock.Lock()
+			if !q.Open {
+				q.Lock.Unlock()
+
+				for len(q.Queue) > 0 {
+					conn, err := q.Dequeue()
+					if err != nil {
+						continue
+					}
+
+					n.processRequest(conn)
+				}
+				return // Exit the loop if the queue is closed
+			}
+			q.Lock.Unlock()
+		}
+	}
+}
+
+func InitNodeQueue(capacity int) *NodeQueue {
 	return &NodeQueue{
-		Queue: make([]*types.Connection, 0, capacity),
-		Open:  true,
+		Queue:  make([]*types.Connection, 0, capacity),
+		Open:   true,
+		signal: make(chan struct{}),
 	}
 }
 
@@ -21,6 +54,7 @@ func (q *NodeQueue) Enqueue(conn *types.Connection) error {
 	}
 
 	q.Queue = append(q.Queue, conn)
+	q.signal <- struct{}{}
 	return nil
 }
 
@@ -60,14 +94,15 @@ func (q *NodeQueue) TakeFromBack(numEntries int) ([]*types.Connection, error) {
 	return conns, nil
 }
 
-func (q *NodeQueue) CloseQueue() {
-	q.Lock.Lock()
-	q.Open = false
-	q.Lock.Unlock()
+func (n *Node) CloseQueue() {
+	n.Queue.Lock.Lock()
+	n.Queue.Open = false
+	n.Queue.Lock.Unlock()
 }
 
-func (q *NodeQueue) OpenQueue() {
-	q.Lock.Lock()
-	q.Open = true
-	q.Lock.Unlock()
+func (n *Node) OpenQueue() {
+	n.Queue.Lock.Lock()
+	n.Queue.Open = true
+	n.Queue.Lock.Unlock()
+	go n.WatchQueue()
 }

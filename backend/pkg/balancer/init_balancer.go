@@ -27,7 +27,7 @@ func (b *BalancerType) InitBalancer() error {
 		}
 
 		for _, server := range routeStruct.Servers {
-			routeStruct.Nodes = append(routeStruct.Nodes, node.FromURL(server.URL))
+			routeStruct.Nodes = append(routeStruct.Nodes, node.FromURL(server.URL, &routeStruct.RouteConfig))
 		}
 
 		//goroutine to periodically check health of containers

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"load-balancer/pkg/balancer/route"
+	"load-balancer/pkg/errors"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/types"
 	"load-balancer/pkg/ws"
@@ -13,10 +14,10 @@ import (
 	"time"
 )
 
-func (b *BalancerType) ProxyRequest(conn *types.Connection) {
+func (b *BalancerType) OldProxyRequest(conn *types.Connection) {
 	routeObject := b.getRouteObject(conn)
 	if routeObject == nil {
-		send500(conn, "Failed to find route match")
+		errors.Send500(conn, "Failed to find route match")
 		logger.Err("Failed to find route match", fmt.Errorf("finding route match"))
 		return
 	}
@@ -24,7 +25,7 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 	node := routeObject.GetProxyNode(conn.Request.RemoteAddr)
 	if node == nil {
 		logger.Err("Failed to find node for proxy", fmt.Errorf("failed to find node for proxy"))
-		send500(conn, "Failed to find node for proxy")
+		errors.Send500(conn, "Failed to find node for proxy")
 		return
 	}
 
@@ -43,7 +44,7 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 		go func() {
 			node, err := routeObject.Scale()
 			if err != nil {
-				send500(conn, "Failed starting server on connection threshhold")
+				errors.Send500(conn, "Failed starting server on connection threshhold")
 				return
 			}
 
@@ -73,7 +74,7 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 	if err != nil {
 		logger.Err("Request creation failed", err)
 		ws.EventEmitter.Error("Request creation failed", err)
-		send500(conn, "Creating request to backend")
+		errors.Send500(conn, "Creating request to backend")
 		return
 	}
 
@@ -82,7 +83,7 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 	if err != nil {
 		logger.Err("Backend request failed", err)
 		ws.EventEmitter.Error("Backend request failed", err)
-		send500(conn, "Sending backend request")
+		errors.Send500(conn, "Sending backend request")
 		return
 	}
 	defer resp.Body.Close()
@@ -92,7 +93,7 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 	if err != nil {
 		logger.Err("Copying response", err)
 		ws.EventEmitter.Error("Copying response", err)
-		send500(conn, "Copying backend response")
+		errors.Send500(conn, "Copying backend response")
 		return
 	}
 
@@ -112,4 +113,62 @@ func (b *BalancerType) getRouteObject(conn *types.Connection) *route.Route {
 	}
 
 	return nil
+}
+
+func (b *BalancerType) ProxyRequest(conn *types.Connection) {
+	routeObject := b.getRouteObject(conn)
+	if routeObject == nil {
+		errors.Send500(conn, "Failed to find route match")
+		logger.Err("Failed to find route match", fmt.Errorf("finding route match"))
+		return
+	}
+
+	node := routeObject.GetProxyNode(conn.Request.RemoteAddr)
+	if node == nil {
+		logger.Err("Failed to find node for proxy", fmt.Errorf("failed to find node for proxy"))
+		errors.Send500(conn, "Failed to find node for proxy")
+		return
+	}
+
+	//add to queue here
+	err := node.Queue.Enqueue(conn)
+	if err != nil {
+		errors.Send500(conn, "Failed to add connection to node queue")
+		return
+	}
+
+	node.Metrics.Lock.Lock()
+	node.Metrics.Connections++
+
+	fmt.Println("connections:", node.Metrics.Connections)
+
+	// add new node if we are above x connections
+	// if we have one connection (slow) and more than one node, remove it
+	// ^ could be improved upon,
+	if !node.Metrics.CreatedNewNode && len(node.Queue.Queue) > routeObject.Docker.RequestScaleThreshold {
+		node.Metrics.CreatedNewNode = true
+		go func() {
+			node, err := routeObject.Scale()
+			if err != nil {
+				errors.Send500(conn, "Failed starting server on connection threshhold")
+				return
+			}
+
+			b.NodeTable[node.ContainerID] = node
+		}()
+	}
+	node.Metrics.Lock.Unlock()
+
+	defer func() {
+		node.Metrics.Lock.Lock()
+		node.Metrics.Connections--
+
+		//if we are below 70% of connection threshold, it is okay to make a new node
+		if len(node.Queue.Queue) < int(float64(routeObject.Docker.RequestScaleThreshold)*0.7) {
+			node.Metrics.CreatedNewNode = false
+		}
+
+		node.Metrics.LastRequestTime = time.Now()
+		node.Metrics.Lock.Unlock()
+	}()
 }

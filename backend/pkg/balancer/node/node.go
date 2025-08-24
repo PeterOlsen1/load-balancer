@@ -2,25 +2,47 @@ package node
 
 import (
 	"fmt"
+	"io"
+	"load-balancer/pkg/errors"
 	"load-balancer/pkg/logger"
+	"load-balancer/pkg/types"
 	"load-balancer/pkg/ws"
+	"maps"
 	"net/http"
 	"time"
 )
 
-func FromURL(url string) *Node {
-	out := &Node{
-		ContainerID: "",
-		Address:     url,
-		Metrics: NodeMetrics{
-			Health:       "unknown",
-			ResponseTime: 0,
-			Connections:  0,
-		},
+func (node *Node) processRequest(conn *types.Connection) {
+	logger.Proxy(conn.Request.URL.Path, node.Address, conn.Request.RemoteAddr)
+	ws.EventEmitter.Proxy(conn.Request.URL.Path, node.Address, conn.Request.RemoteAddr)
+
+	backendURL := fmt.Sprintf("%s%s", node.Address, conn.Request.URL.Path)
+	req, err := http.NewRequest(conn.Request.Method, backendURL, conn.Request.Body)
+	if err != nil {
+		logger.Err("Request creation failed", err)
+		ws.EventEmitter.Error("Request creation failed", err)
+		errors.Send500(conn, "Creating request to backend")
+		return
 	}
 
-	go out.CheckHealth()
-	return out
+	maps.Copy(req.Header, conn.Request.Header)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		logger.Err("Backend request failed", err)
+		ws.EventEmitter.Error("Backend request failed", err)
+		errors.Send500(conn, "Sending backend request")
+		return
+	}
+	defer resp.Body.Close()
+
+	conn.Response.WriteHeader(resp.StatusCode)
+	_, err = io.Copy(conn.Response, resp.Body)
+	if err != nil {
+		logger.Err("Copying response", err)
+		ws.EventEmitter.Error("Copying response", err)
+		errors.Send500(conn, "Copying backend response")
+		return
+	}
 }
 
 // Send a request to the node backend to check the health
@@ -56,11 +78,13 @@ func (node *Node) CheckHealth() error {
 	health := "healthy"
 	if resp.StatusCode != http.StatusOK {
 		health = "unhealthy"
-		go node.Queue.CloseQueue()
+		go node.CloseQueue()
 
 		logger.Health(health, node.Address, respTime)
 		ws.EventEmitter.Health(health, node.Address, respTime)
 	} else {
+		go node.OpenQueue()
+
 		logger.Health(health, node.Address, respTime)
 		ws.EventEmitter.Health(health, node.Address, respTime)
 	}
@@ -74,7 +98,7 @@ func (node *Node) Pause() {
 	node.Metrics.Health = "paused"
 	node.Metrics.Lock.Unlock()
 
-	node.Queue.CloseQueue()
+	node.CloseQueue()
 }
 
 func (node *Node) Unpause() {

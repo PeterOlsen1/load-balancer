@@ -41,7 +41,8 @@ type NodeMetrics struct {
 }
 
 type NodeQueue struct {
-	Lock  sync.Mutex          `json:"-"`
-	Queue []*types.Connection `json:"queue"`
-	Open  bool                `json:"open"`
+	Lock   sync.Mutex          `json:"-"`
+	Queue  []*types.Connection `json:"queue"`
+	Open   bool                `json:"open"`
+	signal chan (struct{})
 }

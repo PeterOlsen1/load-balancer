@@ -7,9 +7,11 @@ import (
 	"sync"
 )
 
+// the Scale() method should automatically decide whether to spin
+// up a docker container, or use a pre-existing URL.
 func (r *Route) Scale() (*node.Node, error) {
 	port := port.ConsumePort()
-	node, err := docker.StartContainer(port, r.Docker)
+	node, err := docker.StartContainer(port, &r.RouteConfig)
 	if err != nil {
 		return nil, err
 	}

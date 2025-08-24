@@ -13,7 +13,8 @@ import (
 	"github.com/moby/moby/client"
 )
 
-func StartContainer(externalPort int, dockerInfo *config.DockerConfig) (*node.Node, error) {
+func StartContainer(externalPort int, routeInfo *config.RouteConfig) (*node.Node, error) {
+	dockerInfo := routeInfo.Docker
 	cli, err := createDockerClient()
 	if err != nil {
 		logger.Err("Failed to create Docker client", err)
@@ -55,17 +56,11 @@ func StartContainer(externalPort int, dockerInfo *config.DockerConfig) (*node.No
 	logger.ContainerStart(resp.ID)
 	ws.EventEmitter.ContainerStart(resp.ID)
 
-	node := node.Node{
-		ContainerID: resp.ID,
-		Address:     fmt.Sprintf("http://localhost:%d", externalPort),
-		Metrics: node.NodeMetrics{
-			Health: "unknown",
-		},
-	}
+	node := node.FromContainer(resp.ID , fmt.Sprintf("http://localhost:%d", externalPort), routeInfo)
 
 	logger.Info(fmt.Sprintf("Started server @ http://localhost:%d", externalPort))
 	ws.EventEmitter.Info(fmt.Sprintf("Started server @ http://localhost:%d", externalPort))
-	return &node, nil
+	return node, nil
 }
 
 func StopContainer(containerID string) error {
