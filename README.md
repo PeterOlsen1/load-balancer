@@ -14,9 +14,11 @@ Testing:
 * How do we make sure a node is unreachable before removing it
 * Horizontal scaling
   * Update the health of a container as soon as it is good to go
+    * Need to scale horizontally faster
 * `getRouteObject`
 
 Working on:
+* Add a request queue for each node?
 * How to stop non container nodes
 * Fix balancer receiever methods
 * More config rules?
