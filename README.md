@@ -17,6 +17,7 @@ Testing:
 * `getRouteObject`
 
 Working on:
+* How to stop non container nodes
 * Fix balancer receiever methods
 * More config rules?
   * URLs, rules for proxy, etc.
