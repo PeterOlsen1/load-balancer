@@ -3,6 +3,7 @@ package balancer
 import (
 	"fmt"
 	"io"
+	"load-balancer/pkg/balancer/route"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/types"
 	"load-balancer/pkg/ws"
@@ -43,7 +44,8 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 				send500(conn, "Failed starting server on connection threshhold")
 				return
 			}
-			routeObject.AddNode(node)
+			
+			b.NodeTable[node.ContainerID] = node
 		}()
 	}
 	node.Metrics.Lock.Unlock()
@@ -94,7 +96,7 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 
 }
 
-func (b *BalancerType) getRouteObject(conn *types.Connection) *Route {
+func (b *BalancerType) getRouteObject(conn *types.Connection) *route.Route {
 	for _, route := range b.Routes {
 		matched, err := path.Match(route.Path, conn.Request.URL.Path)
 		if err != nil {

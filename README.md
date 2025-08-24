@@ -12,6 +12,7 @@ Docker RESEARCH!!!
   
 Testing:
 * How do we make sure a node is unreachable before removing it
+  * Pause contianer for a bit, remove it later unless needed again?
 * Horizontal scaling
   * Update the health of a container as soon as it is good to go
     * Need to scale horizontally faster

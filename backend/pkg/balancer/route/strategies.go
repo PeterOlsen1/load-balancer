@@ -1,4 +1,4 @@
-package balancer
+package route
 
 import (
 	"crypto/sha256"
@@ -26,7 +26,7 @@ func (r *Route) GetProxyNode(ip string) *node.Node {
 }
 
 func (r *Route) roundRobin() *node.Node {
-	r.lock.Lock()
+	r.Lock.Lock()
 	if len(r.Nodes) == 0 {
 		logger.Err("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
 		ws.EventEmitter.Error("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
@@ -36,7 +36,7 @@ func (r *Route) roundRobin() *node.Node {
 	idx := roundRobinIndex % len(r.Nodes)
 	node := r.Nodes[idx]
 	roundRobinIndex++
-	r.lock.Unlock()
+	r.Lock.Unlock()
 
 	n := len(r.Nodes)
 	loops := 0
@@ -44,7 +44,7 @@ func (r *Route) roundRobin() *node.Node {
 		idx := roundRobinIndex % len(r.Nodes)
 		node = r.Nodes[idx]
 		roundRobinIndex++
-		
+
 		if loops > n {
 			return nil
 		} else {
@@ -56,8 +56,8 @@ func (r *Route) roundRobin() *node.Node {
 }
 
 func (r *Route) leastConnections() *node.Node {
-	r.lock.Lock()
-	defer r.lock.Unlock()
+	r.Lock.Lock()
+	defer r.Lock.Unlock()
 
 	var lowest *node.Node = nil
 	for _, n := range r.Nodes {

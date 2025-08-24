@@ -5,7 +5,7 @@ import "load-balancer/pkg/balancer/node"
 type BaseResponse struct {
 	Type     string `json:"type"`
 	Time     string `json:"time"`
-	Response bool `json:"response"`
+	Response bool   `json:"response"`
 }
 
 type RequestNodesResponse struct {

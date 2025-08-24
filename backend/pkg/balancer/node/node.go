@@ -5,7 +5,6 @@ import (
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/ws"
 	"net/http"
-	"os/exec"
 	"time"
 )
 
@@ -84,16 +83,6 @@ func (node *Node) StopServer() error {
 		return nil
 	}
 
-	cmd := exec.Command("docker", "stop", node.ContainerID)
-	err := cmd.Run()
-	if err != nil {
-		logger.Err("docker stop", err)
-		ws.EventEmitter.Error("docker stop", err)
-		return err
-	}
-
-	logger.ContainerStop(node.ContainerID)
-	ws.EventEmitter.ContainerStop(node.ContainerID)
 	return nil
 }
 
@@ -114,16 +103,3 @@ func FromUrl(url string) *Node {
 	go out.CheckHealth()
 	return &out
 }
-
-/*
-	f, err := os.OpenFile("./data/urls", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		logger.Err("Failed to open url file", err)
-		return nil, err
-	}
-	defer f.Close()
-	if _, err := f.WriteString(url + "\n"); err != nil {
-		logger.Err("Failed to write to url file", err)
-		return nil, err
-	}
-*/

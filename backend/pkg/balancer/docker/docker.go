@@ -7,47 +7,11 @@ import (
 	"load-balancer/pkg/config"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/ws"
-	"os/exec"
-	"strings"
 
 	"github.com/docker/go-connections/nat"
 	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/client"
 )
-
-func StartServer(externalPort int, dockerInfo *config.DockerConfig) (*node.Node, error) {
-	path := "./server/run.sh" //assuming you run from root of project
-
-	cmd := exec.Command("bash", path, dockerInfo.Image, fmt.Sprintf("%d", externalPort), fmt.Sprintf("%d", dockerInfo.InternalPort))
-
-	output, err := cmd.Output()
-	if err != nil {
-		logger.Err("Creating container", err)
-		ws.EventEmitter.Error("Creating container", err)
-		return nil, err
-	}
-	containerID := strings.TrimSpace(string(output))
-	if containerID == "" {
-		err := fmt.Errorf("empty container ID received")
-		logger.Err("Creating container", err)
-		ws.EventEmitter.Error("Creating container", err)
-		return nil, err
-	}
-	logger.ContainerStart(containerID)
-	ws.EventEmitter.ContainerStart(containerID)
-
-	node := node.Node{
-		ContainerID: containerID,
-		Address:     fmt.Sprintf("http://localhost:%d", externalPort),
-		Metrics: node.NodeMetrics{
-			Health: "unknown",
-		},
-	}
-
-	logger.Info(fmt.Sprintf("Started server @ http://localhost:%d", externalPort))
-	ws.EventEmitter.Info(fmt.Sprintf("Started server @ http://localhost:%d", externalPort))
-	return &node, nil
-}
 
 func StartContainer(externalPort int, dockerInfo *config.DockerConfig) (*node.Node, error) {
 	cli, err := createDockerClient()
@@ -102,6 +66,41 @@ func StartContainer(externalPort int, dockerInfo *config.DockerConfig) (*node.No
 	logger.Info(fmt.Sprintf("Started server @ http://localhost:%d", externalPort))
 	ws.EventEmitter.Info(fmt.Sprintf("Started server @ http://localhost:%d", externalPort))
 	return &node, nil
+}
+
+func StopContainer(containerID string) error {
+	if containerID == "" {
+		return fmt.Errorf("container ID is empty")
+	}
+
+	cli, err := createDockerClient()
+	if err != nil {
+		logger.Err("Failed to create Docker client", err)
+		ws.EventEmitter.Error("Failed to create Docker client", err)
+		return err
+	}
+
+	ctx := context.Background()
+	timeout := 10
+
+	err = cli.ContainerStop(ctx, containerID, container.StopOptions{Timeout: &timeout})
+	if err != nil {
+		logger.Err(fmt.Sprintf("Failed to stop container %s", containerID), err)
+		ws.EventEmitter.Error(fmt.Sprintf("Failed to stop container %s", containerID), err)
+		return err
+	}
+
+	err = cli.ContainerRemove(ctx, containerID, container.RemoveOptions{})
+	if err != nil {
+		logger.Err(fmt.Sprintf("Failed to remove container %s", containerID), err)
+		ws.EventEmitter.Error(fmt.Sprintf("Failed to remove container %s", containerID), err)
+		return err
+	}
+
+	logger.ContainerStop(containerID)
+	ws.EventEmitter.ContainerStop(containerID)
+
+	return nil
 }
 
 func createDockerClient() (*client.Client, error) {

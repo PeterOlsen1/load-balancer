@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	b "load-balancer/pkg/balancer"
+	"load-balancer/pkg/balancer/docker"
 	"load-balancer/pkg/balancer/node"
+	"load-balancer/pkg/balancer/route"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/ws"
 	"load-balancer/pkg/ws/input"
@@ -54,7 +56,7 @@ func init() {
 			for _, n := range route.Nodes {
 				if n.ContainerID == userRequest.ContainerID {
 					address = &n.Address
-					err := n.StopServer()
+					err := docker.StopContainer(n.ContainerID)
 					if err != nil {
 						return nil, err
 					}
@@ -88,7 +90,7 @@ func init() {
 			return nil, err
 		}
 
-		var routeObject *b.Route = nil
+		var routeObject *route.Route = nil
 		for _, route := range b.Balancer.Routes {
 			if route.Name == userRequest.RouteName {
 				routeObject = route
@@ -100,7 +102,7 @@ func init() {
 		if err != nil {
 			return nil, err
 		}
-		routeObject.AddNode(newNode)
+		b.Balancer.NodeTable[newNode.ContainerID] = newNode
 
 		resp := NodeStartResponse{
 			BaseResponse: getBaseResponse("node_start"),
