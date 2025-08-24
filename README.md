@@ -5,19 +5,16 @@ Trying out new things. Learning Go. Balancing loads. Scaling horizontally ⚖️
   
 Testing:
 * How do we make sure a node is unreachable before removing it
-  * Pause contianer for a bit, remove it later unless needed again?
+  * Close request queue, fulfill all waiting, close node
 * Horizontal scaling
   * Update the health of a container as soon as it is good to go
-    * Need to scale horizontally faster
-* `getRouteObject`
+  * Add container pool for faster scaling
+* Test with multiple routes, `getRouteConfig` method
 
 Working on:
-* Add a request queue for each node
-* Container pool
+* Add a request queue for each node (currently working)
 * How to stop non container nodes
 * Fix balancer receiever methods
-* More config rules?
-  * URLs, rules for proxy, etc.
 * Replace hardcoded values with config
 * Test out websocket connection more
 
@@ -65,7 +62,11 @@ Things to research:
 
 ### items completed
 
+
 * Config
+  * use docker SDK
+  * More config rules?
+    * URLs, rules for proxy, etc.
   * Add different route options? for exmaple:
  ```YAML
 routes:
