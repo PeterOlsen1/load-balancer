@@ -20,6 +20,7 @@ type Node struct {
 	ContainerID string      `json:"id"`
 	Address     string      `json:"address"`
 	Metrics     NodeMetrics `json:"metrics"`
+	Queue       NodeQueue   `json:"queue"`
 }
 
 // Explaining some fields

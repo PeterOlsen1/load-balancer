@@ -28,6 +28,8 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 		return
 	}
 
+	//add to queue here
+
 	node.Metrics.Lock.Lock()
 	node.Metrics.Connections++
 

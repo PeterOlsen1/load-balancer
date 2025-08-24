@@ -81,7 +81,7 @@ func StopContainer(containerID string) error {
 	}
 
 	ctx := context.Background()
-	timeout := 10
+	timeout := 1
 
 	err = cli.ContainerStop(ctx, containerID, container.StopOptions{Timeout: &timeout})
 	if err != nil {

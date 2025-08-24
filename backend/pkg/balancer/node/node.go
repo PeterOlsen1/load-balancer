@@ -9,7 +9,7 @@ import (
 )
 
 func FromURL(url string) *Node {
-	return &Node{
+	out := &Node{
 		ContainerID: "",
 		Address:     url,
 		Metrics: NodeMetrics{
@@ -18,6 +18,9 @@ func FromURL(url string) *Node {
 			Connections:  0,
 		},
 	}
+
+	go out.CheckHealth()
+	return out
 }
 
 // Send a request to the node backend to check the health
@@ -25,10 +28,13 @@ func FromURL(url string) *Node {
 // If an OK status is returned, set node to healthy. Else, unhealthy
 func (node *Node) CheckHealth() error {
 	node.Metrics.Lock.Lock()
-	if node.Metrics.Health == "paused" {
+	isPaused := node.Metrics.Health == "paused"
+	node.Metrics.Lock.Unlock()
+
+	if isPaused {
 		return nil
 	}
-	node.Metrics.Lock.Unlock()
+
 	address := node.Address
 
 	start := time.Now()
@@ -40,14 +46,18 @@ func (node *Node) CheckHealth() error {
 		ws.EventEmitter.Error("Fetching node health", err)
 		return err
 	}
+
 	node.Metrics.Lock.Lock()
 	defer node.Metrics.Lock.Unlock()
+	
 	respTime := float32(duration.Microseconds() / 1000)
 	node.Metrics.ResponseTime = respTime
 
 	health := "healthy"
 	if resp.StatusCode != http.StatusOK {
 		health = "unhealthy"
+		go node.Queue.CloseQueue()
+
 		logger.Health(health, node.Address, respTime)
 		ws.EventEmitter.Health(health, node.Address, respTime)
 	} else {
@@ -61,9 +71,10 @@ func (node *Node) CheckHealth() error {
 
 func (node *Node) Pause() {
 	node.Metrics.Lock.Lock()
-	defer node.Metrics.Lock.Unlock()
-
 	node.Metrics.Health = "paused"
+	node.Metrics.Lock.Unlock()
+
+	node.Queue.CloseQueue()
 }
 
 func (node *Node) Unpause() {
@@ -74,32 +85,6 @@ func (node *Node) Unpause() {
 	node.CheckHealth()
 }
 
-// Stops the server associated with any given node
-// through the docker stop command.
-//
-// If this node has no server, instantly return nil
-func (node *Node) StopServer() error {
-	if node.ContainerID == "" {
-		return nil
-	}
-
-	return nil
-}
-
 func (n *Node) Equals(other *Node) bool {
 	return n.Address == other.Address && n.ContainerID == other.ContainerID
-}
-
-// Returns a node from a URL, instead of spinning up a docker container.
-// This is to be used when the user already has a service running,
-// and wants to just input it as a node.
-//
-// This would require interaction from the frontend
-func FromUrl(url string) *Node {
-	out := Node{
-		Address: url,
-	}
-
-	go out.CheckHealth()
-	return &out
 }
