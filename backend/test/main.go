@@ -8,10 +8,10 @@ import (
 )
 
 func main() {
-	testRequests(50)
+	testRequests(50, 0)
 }
 
-func testRequests(numRequests int) {
+func testRequests(numRequests int, waitTime time.Duration) {
 	fmt.Printf("testing %d requests:\n", numRequests)
 	var wg sync.WaitGroup
 
@@ -32,6 +32,8 @@ func testRequests(numRequests int) {
 				numSuccessful++
 			}
 		}(i)
+
+		time.Sleep(waitTime * time.Millisecond)
 	}
 
 	wg.Wait()

@@ -67,14 +67,22 @@ func (r *Route) RemoveNode(inputNode *node.Node) error {
 
 	var filtered []*node.Node
 	for _, n := range r.Nodes {
-		if inputNode.Equals(n) {
+		if !inputNode.Equals(n) {
 			filtered = append(filtered, n)
-			inputNode.StopServer()
 		}
 	}
+
+	err := inputNode.StopServer()
+	if err != nil {
+		return err
+	}
+
 	r.Nodes = filtered
 	delete(Balancer.NodeTable, inputNode.ContainerID)
 
+	for _, n := range r.Nodes {
+		fmt.Println(n.Address)
+	}
 	return nil
 }
 

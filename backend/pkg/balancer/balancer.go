@@ -101,7 +101,7 @@ func (b *BalancerType) InitBalancer() error {
 					node.Metrics.Lock.Lock()
 					if routeStruct.Docker != nil && len(routeStruct.Nodes) > 1 && time.Since(node.Metrics.LastRequestTime).Milliseconds() > time.Duration(routeStruct.Docker.RequestScaleThreshold).Milliseconds() {
 						//lock the metrics so that other requests can't make a request
-						fmt.Println("removing server")
+						fmt.Println("removing server:", node.Address)
 						routeStruct.RemoveNode(node)
 					}
 					node.Metrics.Lock.Unlock()
