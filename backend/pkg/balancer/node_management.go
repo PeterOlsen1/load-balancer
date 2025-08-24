@@ -44,7 +44,7 @@ func StartServer(dockerInfo *config.DockerConfig) (*node.Node, error) {
 		ContainerID: containerID,
 		Address:     fmt.Sprintf("http://localhost:%d", port),
 		Metrics: node.NodeMetrics{
-			Health: "healthy",
+			Health: "unknown",
 		},
 	}
 

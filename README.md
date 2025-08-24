@@ -3,6 +3,13 @@ Trying out new things. Learning Go. Balancing loads. Scaling horizontally ⚖️
 
 ## current work
 
+Docker RESEARCH!!!
+* How do we want to handle cold starts
+  * Use docker SDK in go
+  * Use a warmed up container (docker commit)
+  * Use container pool
+  * Docker compose? (doesn't seem like the tool here, more for multiple different services)
+  
 Testing:
 * How do we make sure a node is unreachable before removing it
 * Horizontal scaling

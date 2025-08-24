@@ -1,7 +1,6 @@
 package balancer
 
 import (
-	"fmt"
 	"load-balancer/pkg/balancer/node"
 	"load-balancer/pkg/config"
 	"load-balancer/pkg/queue"
@@ -78,13 +77,11 @@ func (b *BalancerType) InitBalancer() error {
 			defer ticker.Stop()
 
 			for range ticker.C {
-				for _, r := range b.Routes {
-					r.lock.Lock()
-					for _, n := range r.Nodes {
-						n.CheckHealth()
-					}
-					r.lock.Unlock()
+				routeStruct.lock.Lock()
+				for _, n := range routeStruct.Nodes {
+					go n.CheckHealth()
 				}
+				routeStruct.lock.Unlock()
 			}
 		}()
 
@@ -94,14 +91,11 @@ func (b *BalancerType) InitBalancer() error {
 			defer ticker.Stop()
 
 			for range ticker.C {
-				fmt.Println("checking servers...")
 				routeStruct.lock.Lock()
 				for i := len(routeStruct.Nodes) - 1; i >= 0; i-- {
 					node := routeStruct.Nodes[i]
 					node.Metrics.Lock.Lock()
-					if routeStruct.Docker != nil && len(routeStruct.Nodes) > 1 && time.Since(node.Metrics.LastRequestTime).Milliseconds() > time.Duration(routeStruct.Docker.RequestScaleThreshold).Milliseconds() {
-						//lock the metrics so that other requests can't make a request
-						fmt.Println("removing server:", node.Address)
+					if routeStruct.Docker != nil && len(routeStruct.Nodes) > 1 && time.Since(node.Metrics.LastRequestTime).Milliseconds() > time.Duration(routeStruct.InactiveTimeout).Milliseconds() {
 						routeStruct.RemoveNode(node)
 					}
 					node.Metrics.Lock.Unlock()
