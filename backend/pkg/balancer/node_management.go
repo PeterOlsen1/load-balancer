@@ -79,8 +79,9 @@ func (r *Route) RemoveNode(inputNode *node.Node) error {
 	return nil
 }
 
-func (r *Route) CleanupNodes() {
+func (r *Route) CleanupNodes() error {
 	var wg sync.WaitGroup
+	var loopErr error
 
 	for _, n := range r.Nodes {
 		if n == nil {
@@ -90,18 +91,23 @@ func (r *Route) CleanupNodes() {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			n.StopServer()
+			err := n.StopServer()
+			if err != nil {
+				loopErr = err
+			}
 		}()
 	}
 
 	wg.Wait()
 	r.Nodes = nil
+	return loopErr
 }
 
-func (b *BalancerType) CleanupNodes() {
+func (b *BalancerType) CleanupNodes() error {
 	logger.Info("cleaning up nodes")
 	ws.EventEmitter.Info("cleaning up nodes")
 	var wg sync.WaitGroup
+	var loopErr error
 
 	for _, r := range b.Routes {
 		if r == nil {
@@ -111,9 +117,13 @@ func (b *BalancerType) CleanupNodes() {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			r.CleanupNodes()
+			err := r.CleanupNodes()
+			if err != nil {
+				loopErr = err
+			}
 		}()
 	}
 
 	wg.Wait()
+	return loopErr
 }

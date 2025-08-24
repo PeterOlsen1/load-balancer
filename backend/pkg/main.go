@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"load-balancer/pkg/balancer"
 	_ "load-balancer/pkg/balancer/receiver"
 	"load-balancer/pkg/config"
@@ -17,6 +18,7 @@ func main() {
 
 	err := config.LoadConfig(*configPath)
 	if err != nil {
+		fmt.Println("Could not read config! Exiting...")
 		os.Exit(1)
 	}
 	logger.InitLogger()
@@ -25,7 +27,11 @@ func main() {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		<-c
-		balancer.Balancer.CleanupNodes()
+		err := balancer.Balancer.CleanupNodes()
+		if err != nil {
+			fmt.Println("Error cleaning up nodes:", err)
+			os.Exit(1)
+		}
 		os.Exit(0)
 	}()
 
