@@ -2,7 +2,7 @@
 # run 'docker ps' to see running docker containers
 # run 'docker stop {id}' to stop a running container
 
-FROM node:23
+FROM node:23-alpine
 
 WORKDIR /app
 
@@ -14,6 +14,8 @@ RUN npm install -g typescript
 
 COPY . .
 
+RUN npm run build
+
 EXPOSE 3000
 
-CMD ["npm", "run", "build"]
+CMD ["node", "build/server.js"]
