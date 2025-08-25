@@ -85,7 +85,7 @@ func (node *Node) CheckHealth() error {
 		logger.Health(health, node.Address, respTime)
 		ws.EventEmitter.Health(health, node.Address, respTime)
 	} else {
-		go node.OpenQueue()
+		// go node.OpenQueue()
 
 		logger.Health(health, node.Address, respTime)
 		ws.EventEmitter.Health(health, node.Address, respTime)

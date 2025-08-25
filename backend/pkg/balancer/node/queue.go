@@ -18,10 +18,7 @@ func (n *Node) WatchQueue() {
 
 			n.processRequest(conn)
 		default:
-			q.Lock.Lock()
 			if !q.Open {
-				q.Lock.Unlock()
-
 				for len(q.Queue) > 0 {
 					conn, err := q.Dequeue()
 					if err != nil {
@@ -32,7 +29,6 @@ func (n *Node) WatchQueue() {
 				}
 				return // Exit the loop if the queue is closed
 			}
-			q.Lock.Unlock()
 		}
 	}
 }
