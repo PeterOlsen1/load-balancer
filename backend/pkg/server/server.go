@@ -29,16 +29,5 @@ func connectionHandler(resp http.ResponseWriter, req *http.Request) {
 	balancer.Balancer.ProxyRequest(&conn)
 
 	<-conn.Done
+	close(conn.Done)
 }
-
-// // test endpoint for adding new container functionality
-// func addNewContainer(resp http.ResponseWriter, req *http.Request) {
-// 	node, err := balancer.StartServer(balancer.PORT)
-// 	if err != nil {
-// 		return
-// 	}
-
-// 	balancer.Balancer.AddNode(node)
-// 	balancer.PORT++
-// 	fmt.Fprintf(resp, "Added new container: %s", node.DockerInfo.Id)
-// }

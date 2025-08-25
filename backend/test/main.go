@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	testRequests(1000, 50000)
+	testRequests(100, 500)
 }
 
 func testRequests(numRequests int, waitTime time.Duration) {
@@ -39,8 +39,11 @@ func testRequests(numRequests int, waitTime time.Duration) {
 	wg.Wait()
 	elapsed := time.Since(start)
 
-	avg := elapsed.Nanoseconds() / int64(numRequests)
-	avgMs := avg / 1_000_000
-	fmt.Printf("Average time per request: %d ns (%d ms)\n", avg, avgMs)
-	fmt.Printf("Successful: %d Failed: %d\n", numSuccessful, numFailed)
+	avgNs := elapsed.Nanoseconds() / int64(numRequests)
+	avgMs := float64(avgNs) / 1_000_000.0
+	// ANSI escape codes for bold text: \033[1m (start bold), \033[0m (reset)
+	fmt.Println("\033[1m==== TESTING COMPLETE ====\033[0m")
+	fmt.Printf("\033[1mAverage time per request:\033[0m %d ns (%f ms)\n", avgNs, avgMs)
+	fmt.Printf("\033[1mRequests / second:\033[0m %f\n", 1000/avgMs)
+	fmt.Printf("\033[1mSuccessful:\033[0m %d \033[1mFailed:\033[0m %d\n", numSuccessful, numFailed)
 }

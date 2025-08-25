@@ -95,12 +95,14 @@ func (q *NodeQueue) TakeFromBack(numEntries int) ([]*types.Connection, error) {
 func (n *Node) CloseQueue() {
 	n.Queue.Lock.Lock()
 	n.Queue.Open = false
+	close(n.Queue.signal)
 	n.Queue.Lock.Unlock()
 }
 
 func (n *Node) OpenQueue() {
 	n.Queue.Lock.Lock()
 	n.Queue.Open = true
+	n.Queue.signal = make(chan struct{})
 	n.Queue.Lock.Unlock()
 	go n.WatchQueue()
 }
