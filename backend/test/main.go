@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	testRequests(100, 500)
+	testRequests(1000, 0)
 }
 
 func testRequests(numRequests int, waitTime time.Duration) {
@@ -33,7 +33,9 @@ func testRequests(numRequests int, waitTime time.Duration) {
 			}
 		}(i)
 
-		time.Sleep(waitTime * time.Nanosecond)
+		if waitTime > 0 {
+			time.Sleep(waitTime * time.Nanosecond)
+		}
 	}
 
 	wg.Wait()
@@ -41,7 +43,7 @@ func testRequests(numRequests int, waitTime time.Duration) {
 
 	avgNs := elapsed.Nanoseconds() / int64(numRequests)
 	avgMs := float64(avgNs) / 1_000_000.0
-	// ANSI escape codes for bold text: \033[1m (start bold), \033[0m (reset)
+
 	fmt.Println("\033[1m==== TESTING COMPLETE ====\033[0m")
 	fmt.Printf("\033[1mAverage time per request:\033[0m %d ns (%f ms)\n", avgNs, avgMs)
 	fmt.Printf("\033[1mRequests / second:\033[0m %f\n", 1000/avgMs)

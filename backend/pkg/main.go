@@ -35,8 +35,6 @@ func main() {
 		os.Exit(0)
 	}()
 
-	//unused
-	// go balancer.WatchQueue()
 	balancer.Balancer.InitBalancer()
 	server.Serve(config.Config.Server.Host, config.Config.Server.Port)
 }

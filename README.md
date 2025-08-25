@@ -15,11 +15,13 @@ Working on:
 * What to do when container queue is full?
   * Pop some off of the back
 * How to stop non container nodes
-* Fix balancer receiever methods
-* Replace hardcoded values with config
-* Test out websocket connection more
+
+Later issues:
+* Web frontend
+* Fix reciever methods in balancer
 
 Future ideas:
+* Batch process requests from node queue?
 * Add rate tracking?
 * Deploying to AWS or something?
 
@@ -63,6 +65,7 @@ Things to research:
 
 ### items completed
 
+* Fix memory leak with idle looping in queue watching. don't use default case!
 * Add a request queue for each node
 * Config
   * use docker SDK

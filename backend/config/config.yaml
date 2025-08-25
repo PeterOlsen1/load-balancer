@@ -10,7 +10,7 @@ routes:
   - path: /*
     name: allServer
     strategy: round-robin
-    max_nodes: 0
+    max_nodes: 0 # this one doesn't seem like a good config value.
     health_timeout_ms: 5000
     inactive_timeout_ms: 5000
     node_request_limit: 1000

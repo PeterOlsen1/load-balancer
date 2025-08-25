@@ -17,18 +17,17 @@ func (n *Node) WatchQueue() {
 			}
 
 			n.processRequest(conn)
-		default:
-			if !q.Open {
-				for len(q.Queue) > 0 {
-					conn, err := q.Dequeue()
-					if err != nil {
-						continue
-					}
-
-					go n.processRequest(conn)
+		case <-q.closeSignal:
+			fmt.Println("closing queue, stop watching")
+			for len(q.Queue) > 0 {
+				conn, err := q.Dequeue()
+				if err != nil {
+					continue
 				}
-				return // Exit the loop if the queue is closed
+
+				go n.processRequest(conn)
 			}
+			return
 		}
 	}
 }
@@ -95,6 +94,9 @@ func (q *NodeQueue) TakeFromBack(numEntries int) ([]*types.Connection, error) {
 func (n *Node) CloseQueue() {
 	n.Queue.Lock.Lock()
 	n.Queue.Open = false
+	n.Queue.closeSignal <- struct{}{}
+
+	close(n.Queue.closeSignal)
 	close(n.Queue.signal)
 	n.Queue.Lock.Unlock()
 }
@@ -103,6 +105,7 @@ func (n *Node) OpenQueue() {
 	n.Queue.Lock.Lock()
 	n.Queue.Open = true
 	n.Queue.signal = make(chan struct{})
+	n.Queue.closeSignal = make(chan struct{})
 	n.Queue.Lock.Unlock()
 	go n.WatchQueue()
 }
