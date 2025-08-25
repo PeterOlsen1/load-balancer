@@ -13,7 +13,7 @@ routes:
     max_nodes: 0
     health_timeout_ms: 5000
     inactive_timeout_ms: 5000
-    node_request_limit: 50
+    node_request_limit: 1000
     docker:
       image: node-server
       internal_port: 3000

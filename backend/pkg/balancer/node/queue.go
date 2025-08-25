@@ -25,7 +25,7 @@ func (n *Node) WatchQueue() {
 						continue
 					}
 
-					n.processRequest(conn)
+					go n.processRequest(conn)
 				}
 				return // Exit the loop if the queue is closed
 			}
@@ -43,13 +43,15 @@ func InitNodeQueue(capacity int) *NodeQueue {
 
 func (q *NodeQueue) Enqueue(conn *types.Connection) error {
 	q.Lock.Lock()
-	defer q.Lock.Unlock()
 
 	if len(q.Queue) == cap(q.Queue) {
+		q.Lock.Unlock()
 		return fmt.Errorf("queue is at capacity")
 	}
 
 	q.Queue = append(q.Queue, conn)
+	q.Lock.Unlock()
+
 	q.signal <- struct{}{}
 	return nil
 }

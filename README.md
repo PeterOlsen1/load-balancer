@@ -12,7 +12,8 @@ Testing:
 * Test with multiple routes, `getRouteConfig` method
 
 Working on:
-* Add a request queue for each node (currently working)
+* What to do when container queue is full?
+  * Pop some off of the back
 * How to stop non container nodes
 * Fix balancer receiever methods
 * Replace hardcoded values with config
@@ -62,7 +63,7 @@ Things to research:
 
 ### items completed
 
-
+* Add a request queue for each node
 * Config
   * use docker SDK
   * More config rules?
