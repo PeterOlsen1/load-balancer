@@ -58,6 +58,7 @@ func (r *Route) CleanupNodes() error {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
+			// n.CloseQueue()
 			err := docker.StopContainer(n.ContainerID)
 			if err != nil {
 				loopErr = err

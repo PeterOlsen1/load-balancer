@@ -15,6 +15,7 @@ func FromContainer(containerID string, address string, routeConfig *config.Route
 	}
 
 	go out.CheckHealth()
+	go out.WatchQueue()
 	return out
 }
 
@@ -31,5 +32,6 @@ func FromURL(url string, routeConfig *config.RouteConfig) *Node {
 	}
 
 	go out.CheckHealth()
+	go out.WatchQueue()
 	return out
 }

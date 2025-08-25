@@ -46,6 +46,7 @@ func (r *Route) roundRobin() *node.Node {
 		roundRobinIndex++
 
 		if loops > n {
+			logger.Err("Could not find node to proxy", fmt.Errorf("found no healthy nodes"))
 			return nil
 		} else {
 			loops++

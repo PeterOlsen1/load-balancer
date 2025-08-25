@@ -21,11 +21,14 @@ func connectionHandler(resp http.ResponseWriter, req *http.Request) {
 	conn := types.Connection{
 		Response: resp,
 		Request:  req,
+		Done:     make(chan bool, 1),
 	}
 
 	logger.Request(&conn)
 	ws.EventEmitter.Request(&conn)
 	balancer.Balancer.ProxyRequest(&conn)
+
+	<-conn.Done
 }
 
 // // test endpoint for adding new container functionality

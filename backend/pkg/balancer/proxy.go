@@ -140,8 +140,6 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 	node.Metrics.Lock.Lock()
 	node.Metrics.Connections++
 
-	fmt.Println("connections:", node.Metrics.Connections)
-
 	// add new node if we are above x connections
 	// if we have one connection (slow) and more than one node, remove it
 	// ^ could be improved upon,

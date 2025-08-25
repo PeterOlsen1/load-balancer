@@ -13,6 +13,7 @@ type Connection struct {
 	Response http.ResponseWriter
 	Request  *http.Request
 	lock     sync.Mutex
+	Done     chan bool
 }
 
 type LockedConnection struct {

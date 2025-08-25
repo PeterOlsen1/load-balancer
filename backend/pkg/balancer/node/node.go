@@ -43,6 +43,8 @@ func (node *Node) processRequest(conn *types.Connection) {
 		errors.Send500(conn, "Copying backend response")
 		return
 	}
+
+	conn.Done <- true
 }
 
 // Send a request to the node backend to check the health
