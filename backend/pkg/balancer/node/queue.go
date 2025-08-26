@@ -6,11 +6,11 @@ import (
 )
 
 func (n *Node) WatchQueue() {
-	q := &n.Queue
+	q := n.Queue
 
 	for {
 		select {
-		case <-q.signal:
+		case <-q.connSignal:
 			conn, err := q.Dequeue()
 			if err != nil {
 				continue
@@ -41,9 +41,10 @@ func InitNodeQueue(capacity int) *NodeQueue {
 	}
 
 	return &NodeQueue{
-		Queue:  q,
-		Open:   true,
-		signal: make(chan struct{}),
+		Queue:       q,
+		Open:        true,
+		connSignal:  make(chan struct{}),
+		closeSignal: make(chan struct{}),
 	}
 }
 
@@ -58,7 +59,7 @@ func (q *NodeQueue) Enqueue(conn *types.Connection) error {
 	q.Queue = append(q.Queue, conn)
 	q.Lock.Unlock()
 
-	q.signal <- struct{}{}
+	q.connSignal <- struct{}{}
 	return nil
 }
 
@@ -104,14 +105,14 @@ func (n *Node) CloseQueue() {
 	n.Queue.closeSignal <- struct{}{}
 
 	close(n.Queue.closeSignal)
-	close(n.Queue.signal)
+	close(n.Queue.connSignal)
 	n.Queue.Lock.Unlock()
 }
 
 func (n *Node) OpenQueue() {
 	n.Queue.Lock.Lock()
 	n.Queue.Open = true
-	n.Queue.signal = make(chan struct{})
+	n.Queue.connSignal = make(chan struct{})
 	n.Queue.closeSignal = make(chan struct{})
 	n.Queue.Lock.Unlock()
 	go n.WatchQueue()

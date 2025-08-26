@@ -26,7 +26,7 @@ func connectionHandler(resp http.ResponseWriter, req *http.Request) {
 
 	logger.Request(&conn)
 	ws.EventEmitter.Request(&conn)
-	balancer.Balancer.ProxyRequest(&conn)
+	balancer.Balancer.HandleRequest(&conn)
 
 	<-conn.Done
 	close(conn.Done)

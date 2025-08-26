@@ -6,9 +6,13 @@ import (
 	"load-balancer/pkg/balancer/node"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/ws"
+	"sync"
 )
 
+// this WILL be bad once we get more routes. cross that bridge when it comes.
+// add round robin object to each route?
 var roundRobinIndex = 0
+var roundRobinIndexMu sync.Mutex
 
 func (r *Route) GetProxyNode(ip string) *node.Node {
 	switch r.Strategy {
@@ -27,23 +31,26 @@ func (r *Route) GetProxyNode(ip string) *node.Node {
 
 func (r *Route) roundRobin() *node.Node {
 	r.Lock.Lock()
-	if len(r.Nodes) == 0 {
+	defer r.Lock.Unlock()
+
+	n := len(r.Nodes)
+	if n == 0 {
 		logger.Err("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
 		ws.EventEmitter.Error("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
 		return nil
 	}
 
-	idx := roundRobinIndex % len(r.Nodes)
-	node := r.Nodes[idx]
+	roundRobinIndexMu.Lock()
+	node := r.Nodes[roundRobinIndex]
 	roundRobinIndex++
-	r.Lock.Unlock()
+	roundRobinIndex %= n
+	roundRobinIndexMu.Unlock()
 
-	n := len(r.Nodes)
 	loops := 0
 	for node.Metrics.Health != "healthy" {
-		idx := roundRobinIndex % len(r.Nodes)
-		node = r.Nodes[idx]
+		node = r.Nodes[roundRobinIndex]
 		roundRobinIndex++
+		roundRobinIndex %= n
 
 		if loops > n {
 			logger.Err("Could not find node to proxy", fmt.Errorf("found no healthy nodes"))
@@ -62,7 +69,7 @@ func (r *Route) leastConnections() *node.Node {
 
 	var lowest *node.Node = nil
 	for _, n := range r.Nodes {
-		if n.Metrics.Connections < lowest.Metrics.Connections && n.Metrics.Health != "healthy" {
+		if n.Queue.Len() < lowest.Queue.Len() && n.Metrics.Health != "healthy" {
 			lowest = n
 		}
 	}

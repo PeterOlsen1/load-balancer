@@ -20,7 +20,7 @@ type Node struct {
 	ContainerID string      `json:"id"`
 	Address     string      `json:"address"`
 	Metrics     NodeMetrics `json:"metrics"`
-	Queue       NodeQueue   `json:"queue"`
+	Queue       *NodeQueue  `json:"queue"`
 }
 
 // Explaining some fields
@@ -44,6 +44,6 @@ type NodeQueue struct {
 	Lock        sync.Mutex          `json:"-"`
 	Queue       []*types.Connection `json:"queue"`
 	Open        bool                `json:"open"`
-	signal      chan (struct{})
+	connSignal  chan (struct{})
 	closeSignal chan (struct{})
 }

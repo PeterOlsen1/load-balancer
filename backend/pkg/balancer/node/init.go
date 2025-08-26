@@ -11,7 +11,7 @@ func FromContainer(containerID string, address string, routeConfig *config.Route
 			ResponseTime: 0,
 			Connections:  0,
 		},
-		Queue: *InitNodeQueue(routeConfig.RequestLimit),
+		Queue: InitNodeQueue(routeConfig.RequestLimit),
 	}
 
 	go out.CheckHealth()
@@ -28,7 +28,7 @@ func FromURL(url string, routeConfig *config.RouteConfig) *Node {
 			ResponseTime: 0,
 			Connections:  0,
 		},
-		Queue: *InitNodeQueue(routeConfig.RequestLimit),
+		Queue: InitNodeQueue(routeConfig.RequestLimit),
 	}
 
 	go out.CheckHealth()

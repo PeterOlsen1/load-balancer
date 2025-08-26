@@ -11,7 +11,7 @@ routes:
     name: allServer
     strategy: round-robin
     max_nodes: 0 # this one doesn't seem like a good config value.
-    health_timeout_ms: 5000
+    health_timeout_ms: 500
     inactive_timeout_ms: 5000
     node_request_limit: 1000
     docker:

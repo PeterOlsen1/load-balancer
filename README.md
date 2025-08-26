@@ -6,17 +6,19 @@ Trying out new things. Learning Go. Balancing loads. Scaling horizontally ⚖️
 Testing:
 * How do we make sure a node is unreachable before removing it
   * Close request queue, fulfill all waiting, close node
-* Horizontal scaling
-  * Update the health of a container as soon as it is good to go
-  * Add container pool for faster scaling
 * Test with multiple routes, `getRouteConfig` method
 
 Working on:
+* Rethink container stopping
+  * Don't fully stop containers, just stop sending requests their way, maybe stop after a long time?
 * What to do when container queue is full?
   * Pop some off of the back
+  * General shared queue
 * How to stop non container nodes
 
 Later issues:
+* Add documentation to types + methods
+* Add container pool to routes so we can keep some warmed up
 * Web frontend
 * Fix reciever methods in balancer
 
