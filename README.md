@@ -4,11 +4,13 @@ Trying out new things. Learning Go. Balancing loads. Scaling horizontally ⚖️
 ## current work
   
 Testing:
+* Request sent during node booting -> bad requests after
 * How do we make sure a node is unreachable before removing it
   * Close request queue, fulfill all waiting, close node
 * Test with multiple routes, `getRouteConfig` method
 
 Working on:
+* Does connection need to have a mutex on it?
 * Rethink container stopping
   * Don't fully stop containers, just stop sending requests their way, maybe stop after a long time?
 

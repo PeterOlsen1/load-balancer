@@ -1,14 +1,21 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"io"
 	"net/http"
 	"sync"
 	"time"
 )
 
+const DEFAULT_REQUESTS int = 100
+
 func main() {
-	testRequests(100, 0)
+	numRequests := flag.Int("requests", DEFAULT_REQUESTS, "Number of requests to send")
+	flag.Parse()
+
+	testRequests(*numRequests, 0)
 }
 
 func testRequests(numRequests int, waitTime time.Duration) {
@@ -25,8 +32,18 @@ func testRequests(numRequests int, waitTime time.Duration) {
 			defer wg.Done()
 			resp, err := http.Get("http://localhost:8080/")
 			if err != nil || resp.StatusCode != 200 {
-				fmt.Printf("Encountered error on test #%d: %v\n", i, err)
 				numFailed++
+
+				if resp != nil && resp.Body != nil {
+					body, readErr := io.ReadAll(resp.Body)
+					if readErr != nil {
+						fmt.Printf("Encountered error on test #%d: %v\n", i, readErr)
+					} else {
+						fmt.Printf("Encountered error on test #%d\n%s\n", i, string(body))
+					}
+				} else {
+					fmt.Printf("Encountered error on test #%d: %v\n", i, err)
+				}
 			} else {
 				fmt.Printf("Completed request #%d\n", i)
 				numSuccessful++

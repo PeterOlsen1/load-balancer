@@ -10,10 +10,11 @@ import (
 )
 
 type Connection struct {
-	Response http.ResponseWriter
-	Request  *http.Request
-	lock     sync.Mutex
-	Done     chan bool
+	Response   http.ResponseWriter
+	Request    *http.Request
+	lock       sync.Mutex
+	Done       chan bool
+	RetryCount int
 }
 
 type LockedConnection struct {

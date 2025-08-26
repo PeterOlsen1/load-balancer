@@ -11,14 +11,14 @@ import (
 func (r *Route) WatchQueue() {
 	q := r.Queue
 
-	for {
-		select {
-		case <-q.connSignal:
+	for range q.connSignal {
+		go func() {
 			conn, err := q.Dequeue()
+
 			if err != nil {
 				logger.Err("Failed to dequeue from route queue", err)
 				errors.Send500(conn, "Failed to dequeue from route queue")
-				continue
+				return
 			}
 
 			node := r.GetProxyNode(conn.Request.RemoteAddr)
@@ -30,7 +30,19 @@ func (r *Route) WatchQueue() {
 
 			err = node.Queue.Enqueue(conn)
 			if err != nil {
-				errors.Send500(conn, "Failed to add connection to node queue")
+				logger.Err("Node refused connection, retrying", err)
+				conn.RetryCount++
+				if conn.RetryCount > 3 {
+					fmt.Println("retry limit exceeded")
+					errors.Send500(conn, "Exceeded retry limit")
+					return
+				}
+
+				//add a delay so that the same request isn't processed over and over again
+				//set the duration to the response time of the last health check
+				time.Sleep(time.Duration(node.Metrics.ResponseTime) * time.Millisecond)
+
+				q.EnqueueFront(conn)
 				return
 			}
 
@@ -59,7 +71,7 @@ func (r *Route) WatchQueue() {
 			node.Metrics.Lock.Lock()
 			node.Metrics.LastRequestTime = time.Now()
 			node.Metrics.Lock.Unlock()
-		}
+		}()
 	}
 }
 

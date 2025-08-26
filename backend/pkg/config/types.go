@@ -36,7 +36,6 @@ type RouteConfig struct {
 	Path            string              `yaml:"path"`
 	Name            string              `yaml:"name"`
 	Strategy        string              `yaml:"strategy"`
-	MaxNodes        int                 `yaml:"max_nodes"`
 	HealthTimeout   int                 `yaml:"health_timeout_ms"`
 	InactiveTimeout int                 `yaml:"inactive_timeout_ms"`
 	RequestLimit    int                 `yaml:"node_request_limit"`

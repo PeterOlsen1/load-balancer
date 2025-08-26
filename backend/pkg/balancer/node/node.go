@@ -81,17 +81,15 @@ func (node *Node) CheckHealth() error {
 	if resp.StatusCode != http.StatusOK {
 		health = "unhealthy"
 		go node.CloseQueue()
-
-		logger.Health(health, node.Address, respTime)
-		ws.EventEmitter.Health(health, node.Address, respTime)
 	} else {
 		if !node.Queue.Open {
 			go node.OpenQueue()
 		}
-
-		logger.Health(health, node.Address, respTime)
-		ws.EventEmitter.Health(health, node.Address, respTime)
 	}
+
+	// logger.Health(health, node.Address, respTime)
+	ws.EventEmitter.Health(health, node.Address, respTime)
+
 	node.Metrics.Health = health
 
 	return nil

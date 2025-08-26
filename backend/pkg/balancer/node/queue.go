@@ -16,7 +16,7 @@ func (n *Node) WatchQueue() {
 				continue
 			}
 
-			n.processRequest(conn)
+			go n.processRequest(conn)
 		case <-q.closeSignal:
 			fmt.Println("closing queue, stop watching")
 			for len(q.Queue) > 0 {
@@ -72,7 +72,11 @@ func (q *NodeQueue) Dequeue() (*types.Connection, error) {
 	}
 
 	conn := q.Queue[0]
-	q.Queue = q.Queue[1:]
+
+	//slice shift queue while maintaining cap() function
+	copy(q.Queue, q.Queue[1:])
+	q.Queue = q.Queue[:len(q.Queue)-1]
+
 	return conn, nil
 }
 

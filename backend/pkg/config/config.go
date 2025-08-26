@@ -52,7 +52,6 @@ func setDefaultConfig() {
 				Path:            "/*",
 				Name:            "allServer",
 				Strategy:        "round-robin",
-				MaxNodes:        0,
 				HealthTimeout:   5000,
 				InactiveTimeout: 5000,
 				RequestLimit:    50,
