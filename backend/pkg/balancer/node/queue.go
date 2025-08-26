@@ -33,8 +33,15 @@ func (n *Node) WatchQueue() {
 }
 
 func InitNodeQueue(capacity int) *NodeQueue {
+	var q []*types.Connection
+	if capacity > 0 {
+		q = make([]*types.Connection, 0, capacity)
+	} else {
+		q = make([]*types.Connection, 0)
+	}
+
 	return &NodeQueue{
-		Queue:  make([]*types.Connection, 0, capacity),
+		Queue:  q,
 		Open:   true,
 		signal: make(chan struct{}),
 	}
@@ -43,7 +50,7 @@ func InitNodeQueue(capacity int) *NodeQueue {
 func (q *NodeQueue) Enqueue(conn *types.Connection) error {
 	q.Lock.Lock()
 
-	if len(q.Queue) == cap(q.Queue) {
+	if len(q.Queue) >= cap(q.Queue) {
 		q.Lock.Unlock()
 		return fmt.Errorf("queue is at capacity")
 	}
@@ -108,4 +115,8 @@ func (n *Node) OpenQueue() {
 	n.Queue.closeSignal = make(chan struct{})
 	n.Queue.Lock.Unlock()
 	go n.WatchQueue()
+}
+
+func (q *NodeQueue) Len() int {
+	return len(q.Queue)
 }

@@ -48,13 +48,10 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 		return
 	}
 
-	node.Metrics.Lock.Lock()
-	node.Metrics.Connections++
-
 	// add new node if we are above x connections
 	// if we have one connection (slow) and more than one node, remove it
 	// ^ could be improved upon,
-	if !node.Metrics.CreatedNewNode && len(node.Queue.Queue) > routeObject.Docker.RequestScaleThreshold {
+	if !node.Metrics.CreatedNewNode && node.Queue.Len() > routeObject.Docker.RequestScaleThreshold {
 		node.Metrics.CreatedNewNode = true
 		go func() {
 			node, err := routeObject.Scale()
@@ -66,18 +63,14 @@ func (b *BalancerType) ProxyRequest(conn *types.Connection) {
 			b.NodeTable[node.ContainerID] = node
 		}()
 	}
+
+	node.Metrics.Lock.Lock()
+
+	//if we are below 70% of connection threshold, it is okay to make a new node
+	if len(node.Queue.Queue) < int(float64(routeObject.Docker.RequestScaleThreshold)*0.7) {
+		node.Metrics.CreatedNewNode = false
+	}
+
+	node.Metrics.LastRequestTime = time.Now()
 	node.Metrics.Lock.Unlock()
-
-	defer func() {
-		node.Metrics.Lock.Lock()
-		node.Metrics.Connections--
-
-		//if we are below 70% of connection threshold, it is okay to make a new node
-		if len(node.Queue.Queue) < int(float64(routeObject.Docker.RequestScaleThreshold)*0.7) {
-			node.Metrics.CreatedNewNode = false
-		}
-
-		node.Metrics.LastRequestTime = time.Now()
-		node.Metrics.Lock.Unlock()
-	}()
 }

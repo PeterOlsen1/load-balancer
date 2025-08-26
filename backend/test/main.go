@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	testRequests(1000, 0)
+	testRequests(100, 0)
 }
 
 func testRequests(numRequests int, waitTime time.Duration) {
