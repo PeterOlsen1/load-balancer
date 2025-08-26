@@ -45,7 +45,7 @@ func testRequests(numRequests int, waitTime time.Duration) {
 					fmt.Printf("Encountered error on test #%d: %v\n", i, err)
 				}
 			} else {
-				fmt.Printf("Completed request #%d\n", i)
+				// fmt.Printf("Completed request #%d\n", i)
 				numSuccessful++
 			}
 		}(i)
@@ -62,7 +62,7 @@ func testRequests(numRequests int, waitTime time.Duration) {
 	avgMs := float64(avgNs) / 1_000_000.0
 
 	fmt.Println("\033[1m==== TESTING COMPLETE ====\033[0m")
-	fmt.Printf("\033[1mAverage time per request:\033[0m %d ns (%f ms)\n", avgNs, avgMs)
+	fmt.Printf("\033[1mAverage time per request:\033[0m %f ms (%d ns)\n", avgMs, avgNs)
 	fmt.Printf("\033[1mRequests / second:\033[0m %f\n", 1000/avgMs)
 	fmt.Printf("\033[1mSuccessful:\033[0m %d \033[1mFailed:\033[0m %d\n", numSuccessful, numFailed)
 }
