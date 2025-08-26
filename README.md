@@ -10,13 +10,12 @@ Testing:
 * Test with multiple routes, `getRouteConfig` method
 
 Working on:
-* Does connection need to have a mutex on it?
 * Rethink container stopping
   * Don't fully stop containers, just stop sending requests their way, maybe stop after a long time?
+  * Container pool to keep them warmed up?
 
 Later issues:
 * Add documentation to types + methods
-* Add container pool to routes so we can keep some warmed up
 * How to deal with non-container nodes, mostly just stopping them
 * Web frontend
 * Fix reciever methods in balancer

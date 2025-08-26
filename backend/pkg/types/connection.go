@@ -12,7 +12,6 @@ import (
 type Connection struct {
 	Response   http.ResponseWriter
 	Request    *http.Request
-	lock       sync.Mutex
 	Done       chan bool
 	RetryCount int
 }
@@ -22,10 +21,8 @@ type LockedConnection struct {
 	Lock sync.Mutex
 }
 
-func (conn *Connection) Body() (string, error) {
-	defer conn.lock.Unlock()
-	conn.lock.Lock()
-
+// debugging purposes, just prints the body
+func (conn *Connection) DebugBody() (string, error) {
 	bodyText, err := io.ReadAll(conn.Request.Body)
 	if err != nil {
 		return "", err
