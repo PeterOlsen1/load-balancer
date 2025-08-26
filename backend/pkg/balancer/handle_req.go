@@ -1,7 +1,6 @@
 package balancer
 
 import (
-	"fmt"
 	"load-balancer/pkg/balancer/route"
 	"load-balancer/pkg/errors"
 	"load-balancer/pkg/logger"
@@ -29,8 +28,7 @@ func (b *BalancerType) getRouteObject(conn *types.Connection) *route.Route {
 func (b *BalancerType) HandleRequest(conn *types.Connection) {
 	routeObject := b.getRouteObject(conn)
 	if routeObject == nil {
-		errors.Send500(conn, "Failed to find route match")
-		logger.Err("Failed to find route match", fmt.Errorf("finding route match"))
+		errors.Send400(conn, "Request does not match any defined routes")
 		return
 	}
 

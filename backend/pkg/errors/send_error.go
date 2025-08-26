@@ -23,5 +23,22 @@ func Send500(conn *types.Connection, reason string) {
 	}
 
 	conn.Done <- true
-	fmt.Println("done sending 500")
+}
+
+func Send400(conn *types.Connection, reason string) {
+	message := fmt.Sprintf("400 Bad request: %s", reason)
+	conn.Response.Header().Set("Content-Type", "text/plain")
+	conn.Response.Header().Set("Content-Length", fmt.Sprintf("%d", len(message)))
+	conn.Response.WriteHeader(400)
+
+	// Write the response body once
+	_, err := conn.Response.Write([]byte(message))
+	if err != nil {
+		fmt.Println("Error writing 400 response:", err)
+
+		logger.Err("Writing 400 response", err)
+		ws.EventEmitter.Error("Writing 400 response", err)
+	}
+
+	conn.Done <- true
 }
