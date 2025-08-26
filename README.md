@@ -11,14 +11,11 @@ Testing:
 Working on:
 * Rethink container stopping
   * Don't fully stop containers, just stop sending requests their way, maybe stop after a long time?
-* What to do when container queue is full?
-  * Pop some off of the back
-  * General shared queue
-* How to stop non container nodes
 
 Later issues:
 * Add documentation to types + methods
 * Add container pool to routes so we can keep some warmed up
+* How to deal with non-container nodes, mostly just stopping them
 * Web frontend
 * Fix reciever methods in balancer
 

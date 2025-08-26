@@ -14,10 +14,10 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 	}
 
 	if routeStruct.Docker != nil && len(routeStruct.Servers) == 0 {
-		for range 1 {
+		for i := range cfg.Docker.InitialContainers {
 			_, err := routeStruct.Scale()
 			if err != nil {
-				fmt.Println("failed starting 3 initial containers")
+				fmt.Printf("failed starting initial container #%d\n", i)
 				return nil, err
 			}
 		}

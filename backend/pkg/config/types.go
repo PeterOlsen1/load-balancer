@@ -25,6 +25,7 @@ type DockerConfig struct {
 	InternalPort          int    `yaml:"internal_port"`
 	RequestScaleThreshold int    `yaml:"request_scale_threshold"`
 	NoRequestsTimeout     int    `yaml:"no_requests_timeout_ms"`
+	InitialContainers     int    `yaml:"initial_containers"`
 }
 
 type RouteServerConfig struct {
