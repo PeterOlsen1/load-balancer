@@ -1,6 +1,9 @@
 # load-balancer
 Trying out new things. Learning Go. Balancing loads. Scaling horizontally ⚖️
 
+Running the docker image in `./server`, this project achieved up to 8000 requests / second (10 containers),
+whereas the original server was only able to achieve ~2800.
+
 ## current work
   
 Testing:

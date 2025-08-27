@@ -32,8 +32,6 @@ func testN(numRequests int, numTests int) float64 {
 	fmt.Println("\033[1m==== TESTING COMPLETE ====\033[0m")
 	fmt.Printf("\033[1m# of tests:\033[0m %d\n", numTests)
 	fmt.Printf("\033[1mAverage req/s:\033[0m %f\n", avg)
-	// fmt.Printf("\033[1mRequests / second:\033[0m %f\n", 1000/avgMs)
-	// fmt.Printf("\033[1mSuccessful:\033[0m %d \033[1mFailed:\033[0m %d\n", numSuccessful, numFailed)
 	return avg
 }
 

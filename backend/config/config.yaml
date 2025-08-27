@@ -18,6 +18,6 @@ routes:
       internal_port: 3000
       request_scale_threshold: 150
       no_requests_timeout_ms: 5000
-      initial_containers: 2
+      initial_containers: 3
     servers:
     
