@@ -12,12 +12,12 @@ routes:
     strategy: round-robin
     health_timeout_ms: 500
     inactive_timeout_ms: 5000
-    node_request_limit: 300
+    node_request_limit: 50
     docker:
       image: node-server
       internal_port: 3000
       request_scale_threshold: 150
       no_requests_timeout_ms: 5000
-      initial_containers: 3
+      initial_containers: 2
     servers:
     

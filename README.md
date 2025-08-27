@@ -7,7 +7,6 @@ whereas the original server was only able to achieve ~2800.
 ## current work
   
 Testing:
-* Request sent during node booting -> bad requests after
 * How do we make sure a node is unreachable before removing it
   * Close request queue, fulfill all waiting, close node
 * Test with multiple routes, `getRouteConfig` method
@@ -20,7 +19,6 @@ Working on:
 Later issues:
 * Add documentation to types + methods
 * How to deal with non-container nodes, mostly just stopping them
-* Web frontend
 * Fix reciever methods in balancer
 
 Future ideas:

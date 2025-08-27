@@ -53,7 +53,7 @@ func init() {
 
 		var address *string = nil
 		for _, route := range b.Balancer.Routes {
-			for _, n := range route.Nodes {
+			for _, n := range route.NodePool.GetActive() {
 				if n.ContainerID == userRequest.ContainerID {
 					address = &n.Address
 					err := docker.StopContainer(n.ContainerID)

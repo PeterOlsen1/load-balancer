@@ -18,9 +18,6 @@ func (b *BalancerType) InitBalancer() error {
 		}
 
 		b.Routes = append(b.Routes, route)
-		for _, n := range route.Nodes {
-			b.NodeTable[n.ContainerID] = n
-		}
 	}
 
 	return nil

@@ -3,6 +3,7 @@ package route
 import (
 	"fmt"
 	"load-balancer/pkg/balancer/node"
+	"load-balancer/pkg/balancer/pool"
 	"load-balancer/pkg/config"
 	"time"
 )
@@ -11,6 +12,7 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 	routeStruct := Route{
 		RouteConfig: cfg,
 		Queue:       InitRouteQueue(),
+		NodePool:    pool.InitPool(),
 	}
 
 	if routeStruct.Docker != nil && len(routeStruct.Servers) == 0 {
@@ -24,7 +26,7 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 	}
 
 	for _, server := range routeStruct.Servers {
-		routeStruct.Nodes = append(routeStruct.Nodes, node.FromURL(server.URL, &routeStruct.RouteConfig))
+		routeStruct.NodePool.AddActive(node.FromURL(server.URL, &routeStruct.RouteConfig))
 	}
 
 	//goroutine to periodically check health of containers
@@ -41,11 +43,7 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 		defer ticker.Stop()
 
 		for range ticker.C {
-			routeStruct.Lock.Lock()
-			for _, n := range routeStruct.Nodes {
-				go n.CheckHealth()
-			}
-			routeStruct.Lock.Unlock()
+			routeStruct.NodePool.CheckHealth()
 		}
 	}()
 

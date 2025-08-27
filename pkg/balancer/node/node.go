@@ -50,13 +50,13 @@ func (node *Node) processRequest(conn *types.Connection) {
 // Send a request to the node backend to check the health
 //
 // If an OK status is returned, set node to healthy. Else, unhealthy
-func (node *Node) CheckHealth() error {
+func (node *Node) CheckHealth() (string, error) {
 	node.Metrics.Lock.Lock()
 	isPaused := node.Metrics.Health == "paused"
 	node.Metrics.Lock.Unlock()
 
 	if isPaused {
-		return nil
+		return "paused", nil
 	}
 
 	address := node.Address
@@ -68,7 +68,7 @@ func (node *Node) CheckHealth() error {
 	if err != nil {
 		logger.Err("Fetching node health", err)
 		ws.EventEmitter.Error("Fetching node health", err)
-		return err
+		return "unhealthy", err
 	}
 
 	node.Metrics.Lock.Lock()
@@ -92,7 +92,7 @@ func (node *Node) CheckHealth() error {
 
 	node.Metrics.Health = health
 
-	return nil
+	return health, nil
 }
 
 func (node *Node) Pause() {
