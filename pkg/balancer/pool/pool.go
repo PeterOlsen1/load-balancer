@@ -1,11 +1,18 @@
 package pool
 
-import "load-balancer/pkg/balancer/node"
+import (
+	"fmt"
+	"load-balancer/pkg/balancer/node"
+)
 
 func (p *NodePool) CheckHealth() {
+	fmt.Println(p.Active)
+	fmt.Println(p.Inactive)
+
 	for _, n := range p.Active {
 		res, err := n.CheckHealth()
 		if res != "healthy" || err != nil {
+			fmt.Println("unhealthy -> inactive")
 			p.mu.Lock()
 			p.RemoveActive(n)
 			p.AddInactive(n)
@@ -15,7 +22,8 @@ func (p *NodePool) CheckHealth() {
 
 	for _, n := range p.Inactive {
 		res, err := n.CheckHealth()
-		if res == "healthy" && err != nil {
+		if res == "healthy" && err == nil {
+			fmt.Println("healthy -> active")
 			p.mu.Lock()
 			p.RemoveInactive(n)
 			p.AddActive(n)
@@ -27,10 +35,10 @@ func (p *NodePool) CheckHealth() {
 func (p *NodePool) GetAll() []*node.Node {
 	out := make([]*node.Node, 0)
 
-	for _, n := range p.GetActive() {
+	for _, n := range p.Active {
 		out = append(out, n)
 	}
-	for _, n := range p.GetInactive() {
+	for _, n := range p.Inactive {
 		out = append(out, n)
 	}
 

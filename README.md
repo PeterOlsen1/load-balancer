@@ -5,13 +5,14 @@ Running the docker image in `./server`, this project achieved up to 8000 request
 whereas the original server was only able to achieve ~2800.
 
 ## current work
-  
+
 Testing:
 * How do we make sure a node is unreachable before removing it
   * Close request queue, fulfill all waiting, close node
 * Test with multiple routes, `getRouteConfig` method
 
 Working on:
+* Fix pool health check, some sort of locking issue is happening
 * Rethink container stopping
   * Don't fully stop containers, just stop sending requests their way, maybe stop after a long time?
   * Container pool to keep them warmed up?
