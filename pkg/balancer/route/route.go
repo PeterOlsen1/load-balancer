@@ -49,6 +49,22 @@ func (r *Route) Scale(cfg config.RouteConfig) error {
 	return nil
 }
 
+func (r *Route) CalculateLoad() float64 {
+	conns := r.Queue.Len()
+	numNodes := r.NodePool.GetActiveSize()
+	maxCapacity := numNodes * r.RouteConfig.RequestLimit
+
+	if maxCapacity <= 0 {
+		return 0
+	}
+
+	for _, n := range r.NodePool.GetActive() {
+		conns += n.Queue.Len()
+	}
+
+	return (float64(conns) / float64(maxCapacity)) * 100
+}
+
 func (r *Route) CleanupNodes() error {
 	var wg sync.WaitGroup
 	var loopErr error

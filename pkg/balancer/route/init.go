@@ -47,30 +47,20 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 		}
 	}()
 
-	// //goroutine to periodically check if we need to stop a container
-	// go func() {
-	// 	if routeStruct.InactiveTimeout <= 0 {
-	// 		//this might be a bad idea but I'm not sure how a negative time would work anyway
-	// 		return
-	// 	}
+	//goroutine to periodically check if we need to stop a container
+	go func() {
+		if routeStruct.InactiveTimeout <= 0 {
+			//this might be a bad idea but I'm not sure how a negative time would work anyway
+			return
+		}
 
-	// 	ticker := time.NewTicker(time.Duration(routeStruct.HealthTimeout) * time.Millisecond)
-	// 	defer ticker.Stop()
+		ticker := time.NewTicker(time.Duration(routeStruct.HealthTimeout) * time.Millisecond)
+		defer ticker.Stop()
 
-	// 	for range ticker.C {
-	// 		routeStruct.Lock.Lock()
-	// 		for i := len(routeStruct.Nodes) - 1; i >= 0; i-- {
-	// 			node := routeStruct.Nodes[i]
-	// 			node.Metrics.Lock.Lock()
-	// 			if routeStruct.Docker != nil && len(routeStruct.Nodes) > 1 && time.Since(node.Metrics.LastRequestTime).Milliseconds() > time.Duration(routeStruct.InactiveTimeout).Milliseconds() {
-	// 				delete(Balancer.NodeTable, node.ContainerID)
-	// 				routeStruct.RemoveNode(node)
-	// 			}
-	// 			node.Metrics.Lock.Unlock()
-	// 		}
-	// 		routeStruct.Lock.Unlock()
-	// 	}
-	// }()
+		// for range ticker.C {
+
+		// }
+	}()
 
 	go routeStruct.WatchQueue()
 
