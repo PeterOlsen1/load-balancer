@@ -12,7 +12,6 @@ Testing:
 * Test with multiple routes, `getRouteConfig` method
 
 Working on:
-* Fix pool health check, some sort of locking issue is happening
 * Rethink container stopping
   * Don't fully stop containers, just stop sending requests their way, maybe stop after a long time?
   * Container pool to keep them warmed up?
@@ -59,14 +58,10 @@ Things to research:
   * At what point do we decide to spin up a new instance
   * How do we decide which instance to send requests to?
 
-### frontend thoughts
-* Communicate to the backend with websockets
-  * Backend shoots logs to the frontend
-  * Logs + metrics about responses
-* Allow for user to manually start / update nodes
-
 ### items completed
 
+* Add connection pool
+  * Fix pool health check, some sort of locking issue is happening
 * Fix memory leak with idle looping in queue watching. don't use default case!
 * Add a request queue for each node
 * Config

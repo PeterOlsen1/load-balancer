@@ -53,24 +53,22 @@ func (r *Route) WatchQueue() {
 			if !node.Metrics.CreatedNewNode && node.Queue.Len() > r.Docker.RequestScaleThreshold {
 				node.Metrics.CreatedNewNode = true
 				go func() {
-					_, err := r.Scale()
+					err := r.Scale(r.RouteConfig)
 					if err != nil {
 						errors.Send500(conn, "Failed starting server on connection threshhold")
 						return
 					}
-
-					// b.NodeTable[node.ContainerID] = node
 				}()
 			}
 
 			// if we are below 70% of connection threshold, it is okay to make a new node
-			// if len(node.Queue.Queue) < int(float64(routeObject.Docker.RequestScaleThreshold)*0.7) {
-			// node.Metrics.CreatedNewNode = false
-			// }
+			if len(node.Queue.Queue) < int(float64(r.Docker.RequestScaleThreshold)*0.7) {
+				node.Metrics.CreatedNewNode = false
+			}
 
-			node.Metrics.Lock.Lock()
-			node.Metrics.LastRequestTime = time.Now()
-			node.Metrics.Lock.Unlock()
+			// node.Metrics.Lock.Lock()
+			// node.Metrics.LastRequestTime = time.Now()
+			// node.Metrics.Lock.Unlock()
 		}()
 	}
 }

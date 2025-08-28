@@ -6,7 +6,6 @@ import (
 	b "load-balancer/pkg/balancer"
 	"load-balancer/pkg/balancer/docker"
 	"load-balancer/pkg/balancer/node"
-	"load-balancer/pkg/balancer/route"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/ws"
 	"load-balancer/pkg/ws/input"
@@ -82,43 +81,43 @@ func init() {
 		return j, nil
 	})
 
-	ws.EventReciever.AddEventHandler("node_start", func(body []byte) ([]byte, error) {
-		userRequest := input.NodeStart{}
-		err := json.Unmarshal(body, &userRequest)
-		if err != nil {
-			logger.Err("Unmarshalling node_start JSON", err)
-			return nil, err
-		}
+	// ws.EventReciever.AddEventHandler("node_start", func(body []byte) ([]byte, error) {
+	// 	userRequest := input.NodeStart{}
+	// 	err := json.Unmarshal(body, &userRequest)
+	// 	if err != nil {
+	// 		logger.Err("Unmarshalling node_start JSON", err)
+	// 		return nil, err
+	// 	}
 
-		var routeObject *route.Route = nil
-		for _, route := range b.Balancer.Routes {
-			if route.Name == userRequest.RouteName {
-				routeObject = route
-				break
-			}
-		}
+	// 	var routeObject *route.Route = nil
+	// 	for _, route := range b.Balancer.Routes {
+	// 		if route.Name == userRequest.RouteName {
+	// 			routeObject = route
+	// 			break
+	// 		}
+	// 	}
 
-		newNode, err := routeObject.Scale()
-		if err != nil {
-			return nil, err
-		}
-		b.Balancer.NodeTable[newNode.ContainerID] = newNode
+	// 	newNode, err := routeObject.Scale(routeObject.RouteConfig)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	b.Balancer.NodeTable[newNode.ContainerID] = newNode
 
-		resp := NodeStartResponse{
-			BaseResponse: getBaseResponse("node_start"),
-			Message:      "Successfully started new node",
-			ContainerID:  newNode.ContainerID,
-			Address:      newNode.Address,
-		}
+	// 	resp := NodeStartResponse{
+	// 		BaseResponse: getBaseResponse("node_start"),
+	// 		Message:      "Successfully started new node",
+	// 		ContainerID:  newNode.ContainerID,
+	// 		Address:      newNode.Address,
+	// 	}
 
-		j, err := json.Marshal(resp)
-		if err != nil {
-			logger.Err("Marshalling node_start JSON", err)
-			return nil, err
-		}
+	// 	j, err := json.Marshal(resp)
+	// 	if err != nil {
+	// 		logger.Err("Marshalling node_start JSON", err)
+	// 		return nil, err
+	// 	}
 
-		return j, nil
-	})
+	// 	return j, nil
+	// })
 
 	ws.EventReciever.AddEventHandler("node_pause", func(body []byte) ([]byte, error) {
 		userRequest := input.NodePause{}

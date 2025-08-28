@@ -1,8 +1,10 @@
 package route
 
 import (
+	"fmt"
 	"load-balancer/pkg/balancer/docker"
-	"load-balancer/pkg/balancer/node"
+	"load-balancer/pkg/config"
+	"load-balancer/pkg/logger"
 	"load-balancer/pkg/port"
 	"sync"
 )
@@ -12,15 +14,39 @@ import (
 //
 // The goal here is that we'll have a few containers to
 // pick from, if we use one, make sure to warm up another
-func (r *Route) Scale() (*node.Node, error) {
-	port := port.ConsumePort()
-	node, err := docker.StartContainer(port, &r.RouteConfig)
+func (r *Route) Scale(cfg config.RouteConfig) error {
+	err := r.NodePool.UnpauseOne()
+
+	//err will != nil when len(inactive) == 0
 	if err != nil {
-		return nil, err
+		logger.Info(fmt.Sprintf("zero inactive containers, adding %d", cfg.Docker.InitialContainers))
+		for range cfg.Docker.InitialContainers {
+			port := port.ConsumePort()
+			node, err := docker.StartContainer(port, &r.RouteConfig)
+			if err != nil {
+				return err
+			}
+
+			node.Metrics.Health = "paused"
+			r.NodePool.AddInactive(node)
+		}
+	} else if r.NodePool.GetInactiveSize() < cfg.Docker.InitialContainers {
+		//always keep cfg.Docker.InitialContainers in the inactive pool
+		logger.Info(fmt.Sprintf("fewer inactive nodes than initial docker containers, adding %d", cfg.Docker.InitialContainers-r.NodePool.GetInactiveSize()))
+
+		for range cfg.Docker.InitialContainers - r.NodePool.GetInactiveSize() {
+			port := port.ConsumePort()
+			node, err := docker.StartContainer(port, &r.RouteConfig)
+			if err != nil {
+				return err
+			}
+
+			r.NodePool.AddInactive(node)
+			node.Metrics.Health = "paused"
+		}
 	}
 
-	r.NodePool.AddInactive(node)
-	return node, nil
+	return nil
 }
 
 func (r *Route) CleanupNodes() error {
