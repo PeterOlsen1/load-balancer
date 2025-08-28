@@ -5,17 +5,18 @@ import (
 	"load-balancer/pkg/balancer/node"
 )
 
+// Move all unhealthy nodes in active to inactive
+// Move all healthy nodes in inactive in active
+//
+// Paused nodes in inactive will not be moved, since they are
 func (p *NodePool) CheckHealth() {
-	fmt.Println(p.Active)
-	fmt.Println(p.Inactive)
-
 	for _, n := range p.Active {
 		res, err := n.CheckHealth()
 		if res != "healthy" || err != nil {
 			fmt.Println("unhealthy -> inactive")
 			p.mu.Lock()
-			p.RemoveActive(n)
-			p.AddInactive(n)
+			p.unsafeRemoveActive(n)
+			p.unsafeAddInactive(n)
 			p.mu.Unlock()
 		}
 	}
@@ -25,8 +26,8 @@ func (p *NodePool) CheckHealth() {
 		if res == "healthy" && err == nil {
 			fmt.Println("healthy -> active")
 			p.mu.Lock()
-			p.RemoveInactive(n)
-			p.AddActive(n)
+			p.unsafeRemoveInactive(n)
+			p.unsafeAddActive(n)
 			p.mu.Unlock()
 		}
 	}
@@ -71,6 +72,50 @@ func (p *NodePool) AddActive(n *node.Node) {
 	p.Active = append(p.Active, n)
 }
 
+func (p *NodePool) UnpauseOne() error {
+	if len(p.Inactive) == 0 {
+		return fmt.Errorf("inactive pool empty")
+	}
+
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	//loop through inactive nodes, health check, activate the first good one
+	for i, n := range p.Inactive {
+		if n.Metrics.Health != "unhealthy" {
+			n.Metrics.Health = "unknown"
+			health, err := n.CheckHealth()
+			if err != nil || health != "healthy" {
+				continue
+			}
+
+			p.Inactive = append(p.Inactive[:i], p.Inactive[i+1:]...)
+			p.unsafeAddActive(n)
+			return nil
+		}
+	}
+
+	return nil
+}
+
+func (p *NodePool) PauseOne() error {
+	if len(p.Active) == 0 {
+		return fmt.Errorf("active pool empty")
+	}
+
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	//loop through inactive nodes, health check, activate the first good one
+	n := p.Active[0]
+	n.Metrics.Health = "paused"
+
+	p.Active = p.Active[1:]
+	p.unsafeAddInactive(n)
+
+	return nil
+}
+
 func (p *NodePool) GetInactive() []*node.Node {
 	return p.Inactive
 }
@@ -94,5 +139,47 @@ func (p *NodePool) AddInactive(n *node.Node) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
+	p.Inactive = append(p.Inactive, n)
+}
+
+// This method does not lock the `p.mu` before performing
+// its operation, and is therefore unsafe.
+//
+// Only use when the calling method acquires a lock
+func (p *NodePool) unsafeRemoveActive(n *node.Node) {
+	for i, node := range p.Active {
+		if node == n {
+			p.Active = append(p.Active[:i], p.Active[i+1:]...)
+			break
+		}
+	}
+}
+
+// This method does not lock the `p.mu` before performing
+// its operation, and is therefore unsafe.
+//
+// Only use when the calling method acquires a lock
+func (p *NodePool) unsafeAddActive(n *node.Node) {
+	p.Active = append(p.Active, n)
+}
+
+// This method does not lock the `p.mu` before performing
+// its operation, and is therefore unsafe.
+//
+// Only use when the calling method acquires a lock
+func (p *NodePool) unsafeRemoveInactive(n *node.Node) {
+	for i, node := range p.Inactive {
+		if node == n {
+			p.Inactive = append(p.Inactive[:i], p.Inactive[i+1:]...)
+			break
+		}
+	}
+}
+
+// This method does not lock the `p.mu` before performing
+// its operation, and is therefore unsafe.
+//
+// Only use when the calling method acquires a lock
+func (p *NodePool) unsafeAddInactive(n *node.Node) {
 	p.Inactive = append(p.Inactive, n)
 }
