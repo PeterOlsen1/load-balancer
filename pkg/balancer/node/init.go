@@ -2,7 +2,7 @@ package node
 
 import "load-balancer/pkg/config"
 
-func FromContainer(containerID string, address string, routeConfig *config.RouteConfig) *Node {
+func FromContainer(containerID string, address string, routeConfig config.RouteConfig) *Node {
 	out := &Node{
 		ContainerID: containerID,
 		Address:     address,

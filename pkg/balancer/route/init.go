@@ -1,10 +1,11 @@
 package route
 
 import (
-	"fmt"
+	"load-balancer/pkg/balancer/docker"
 	"load-balancer/pkg/balancer/node"
 	"load-balancer/pkg/balancer/pool"
 	"load-balancer/pkg/config"
+	"load-balancer/pkg/port"
 	"time"
 )
 
@@ -15,14 +16,21 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 		NodePool:    pool.InitPool(),
 	}
 
+	//rethink this conditional
 	if routeStruct.Docker != nil && len(routeStruct.Servers) == 0 {
-		for i := range cfg.Docker.InitialContainers {
-			err := routeStruct.Scale(cfg)
+		//start # initial docker containers, add to inactive pool
+		for range cfg.Docker.InitialContainers {
+			port := port.ConsumePort()
+			node, err := docker.StartContainer(port, routeStruct.RouteConfig)
 			if err != nil {
-				fmt.Printf("failed starting initial container #%d\n", i)
 				return nil, err
 			}
+
+			routeStruct.NodePool.AddInactive(node)
 		}
+
+		//call the scale method here to refill the inactive pool
+		routeStruct.Scale(routeStruct.RouteConfig)
 	}
 
 	for _, server := range routeStruct.Servers {

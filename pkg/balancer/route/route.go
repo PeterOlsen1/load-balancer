@@ -22,7 +22,7 @@ func (r *Route) Scale(cfg config.RouteConfig) error {
 		logger.Info(fmt.Sprintf("zero inactive containers, adding %d", cfg.Docker.InitialContainers))
 		for range cfg.Docker.InitialContainers {
 			port := port.ConsumePort()
-			node, err := docker.StartContainer(port, &r.RouteConfig)
+			node, err := docker.StartContainer(port, r.RouteConfig)
 			if err != nil {
 				return err
 			}
@@ -36,7 +36,7 @@ func (r *Route) Scale(cfg config.RouteConfig) error {
 
 		for range cfg.Docker.InitialContainers - r.NodePool.GetInactiveSize() {
 			port := port.ConsumePort()
-			node, err := docker.StartContainer(port, &r.RouteConfig)
+			node, err := docker.StartContainer(port, r.RouteConfig)
 			if err != nil {
 				return err
 			}
