@@ -12,6 +12,7 @@ Testing:
 * Test with multiple routes, `getRouteConfig` method
 
 Working on:
+* Add methods to scale up / down container pool
 * Rethink container stopping
   * Don't fully stop containers, just stop sending requests their way, maybe stop after a long time?
   * Container pool to keep them warmed up?
