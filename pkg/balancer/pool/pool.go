@@ -3,13 +3,14 @@ package pool
 import (
 	"fmt"
 	"load-balancer/pkg/balancer/node"
+	"load-balancer/pkg/config"
 )
 
 // Move all unhealthy nodes in active to inactive
 // Move all healthy nodes in inactive in active
 //
 // Paused nodes in inactive will not be moved, since they are
-func (p *NodePool) CheckHealth() {
+func (p *NodePool) CheckHealth(cfg config.RouteConfig) {
 	for _, n := range p.Active {
 		res, err := n.CheckHealth()
 		if res != "healthy" || err != nil {
@@ -83,7 +84,7 @@ func (p *NodePool) UnpauseOne() error {
 	//loop through inactive nodes, health check, activate the first good one
 	for i, n := range p.Inactive {
 		if n.Metrics.Health != "unhealthy" {
-			n.Metrics.Health = "unknown"
+			n.Metrics.Health = "unknown" //set to unknown so health check doesn't insta-return from pause
 			health, err := n.CheckHealth()
 			if err != nil || health != "healthy" {
 				continue

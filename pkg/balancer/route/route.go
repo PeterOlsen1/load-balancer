@@ -7,6 +7,7 @@ import (
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/port"
 	"sync"
+	"time"
 )
 
 // the Scale() method should automatically decide whether to spin
@@ -15,6 +16,11 @@ import (
 // The goal here is that we'll have a few containers to
 // pick from, if we use one, make sure to warm up another
 func (r *Route) Scale(cfg config.RouteConfig) error {
+	if time.Since(r.LastScale) < 500*time.Millisecond {
+		return nil
+	}
+
+	r.LastScale = time.Now()
 	err := r.NodePool.UnpauseOne()
 
 	//err will != nil when len(inactive) == 0
@@ -47,6 +53,14 @@ func (r *Route) Scale(cfg config.RouteConfig) error {
 	}
 
 	return nil
+}
+
+// Scale down the amount of containers we have running only
+// if there are more than the initial amount
+func (r *Route) Descale(cfg config.RouteConfig) {
+	if r.NodePool.GetActiveSize() > cfg.Docker.InitialContainers {
+		r.NodePool.PauseOne()
+	}
 }
 
 func (r *Route) CalculateLoad() float64 {

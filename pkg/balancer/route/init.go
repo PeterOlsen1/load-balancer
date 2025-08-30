@@ -18,16 +18,22 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 
 	//rethink this conditional
 	if routeStruct.Docker != nil && len(routeStruct.Servers) == 0 {
-		//start # initial docker containers, add to inactive pool
+		//start # initial docker containers to inactive
 		for range cfg.Docker.InitialContainers {
-			port := port.ConsumePort()
-			node, err := docker.StartContainer(port, routeStruct.RouteConfig)
+			nodePort := port.ConsumePort()
+			node, err := docker.StartContainer(nodePort, routeStruct.RouteConfig)
 			if err != nil {
 				return nil, err
 			}
 
 			routeStruct.NodePool.AddInactive(node)
 		}
+
+		//wait for docker containers to start
+		time.Sleep(1 * time.Second)
+
+		//check health to move inactve -> active
+		routeStruct.NodePool.CheckHealth(cfg)
 
 		//call the scale method here to refill the inactive pool
 		routeStruct.Scale(routeStruct.RouteConfig)
@@ -51,7 +57,7 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 		defer ticker.Stop()
 
 		for range ticker.C {
-			routeStruct.NodePool.CheckHealth()
+			routeStruct.NodePool.CheckHealth(cfg)
 		}
 	}()
 
@@ -65,9 +71,15 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 		ticker := time.NewTicker(time.Duration(routeStruct.HealthTimeout) * time.Millisecond)
 		defer ticker.Stop()
 
-		// for range ticker.C {
-
-		// }
+		for range ticker.C {
+			load := routeStruct.CalculateLoad()
+			// fmt.Println("load:", load)
+			if load > 70 {
+				routeStruct.Scale(cfg)
+			} else if load < 10 {
+				routeStruct.Descale(cfg)
+			}
+		}
 	}()
 
 	go routeStruct.WatchQueue()

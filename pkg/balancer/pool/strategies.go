@@ -23,14 +23,14 @@ func (p *NodePool) RoundRobin() *node.Node {
 	}
 
 	roundRobinIndexMu.Lock()
-	node := nodes[roundRobinIndex]
+	node := nodes[roundRobinIndex%n]
 	roundRobinIndex++
 	roundRobinIndex %= n
 	roundRobinIndexMu.Unlock()
 
 	loops := 0
 	for node.Metrics.Health != "healthy" {
-		node = nodes[roundRobinIndex]
+		node = nodes[roundRobinIndex%n]
 		roundRobinIndex++
 		roundRobinIndex %= n
 

@@ -5,13 +5,15 @@ import (
 	"load-balancer/pkg/config"
 	"load-balancer/pkg/types"
 	"sync"
+	"time"
 )
 
 type Route struct {
 	config.RouteConfig
-	Lock     sync.Mutex
-	NodePool *pool.NodePool
-	Queue    *RouteQueue
+	Lock      sync.Mutex
+	NodePool  *pool.NodePool
+	Queue     *RouteQueue
+	LastScale time.Time
 }
 
 type RouteQueue struct {
