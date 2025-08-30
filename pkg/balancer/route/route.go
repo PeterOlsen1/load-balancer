@@ -16,17 +16,22 @@ import (
 // The goal here is that we'll have a few containers to
 // pick from, if we use one, make sure to warm up another
 func (r *Route) Scale(cfg config.RouteConfig) error {
+	fmt.Println("calling scale method!!!!")
 	if time.Since(r.LastScale) < 500*time.Millisecond {
 		return nil
 	}
+	fmt.Println("made it past time check")
 
 	r.LastScale = time.Now()
 	err := r.NodePool.UnpauseOne()
 
+	fmt.Println(r.NodePool.Active)
+	fmt.Println(r.NodePool.Inactive)
+
 	//err will != nil when len(inactive) == 0
 	if err != nil {
-		logger.Info(fmt.Sprintf("zero inactive containers, adding %d", cfg.Docker.InitialContainers))
-		for range cfg.Docker.InitialContainers {
+		logger.Info(fmt.Sprintf("zero inactive containers, adding %d", cfg.Pool.InactiveSize))
+		for range cfg.Pool.InactiveSize {
 			port := port.ConsumePort()
 			node, err := docker.StartContainer(port, r.RouteConfig)
 			if err != nil {
@@ -36,11 +41,11 @@ func (r *Route) Scale(cfg config.RouteConfig) error {
 			node.Metrics.Health = "paused"
 			r.NodePool.AddInactive(node)
 		}
-	} else if r.NodePool.GetInactiveSize() < cfg.Docker.InitialContainers {
+	} else if r.NodePool.GetInactiveSize() < cfg.Pool.InactiveSize {
 		//always keep cfg.Docker.InitialContainers in the inactive pool
-		logger.Info(fmt.Sprintf("fewer inactive nodes than initial docker containers, adding %d", cfg.Docker.InitialContainers-r.NodePool.GetInactiveSize()))
+		logger.Info(fmt.Sprintf("fewer inactive nodes than initial docker containers, adding %d", cfg.Pool.InactiveSize-r.NodePool.GetInactiveSize()))
 
-		for range cfg.Docker.InitialContainers - r.NodePool.GetInactiveSize() {
+		for range cfg.Pool.InactiveSize - r.NodePool.GetInactiveSize() {
 			port := port.ConsumePort()
 			node, err := docker.StartContainer(port, r.RouteConfig)
 			if err != nil {
@@ -58,7 +63,7 @@ func (r *Route) Scale(cfg config.RouteConfig) error {
 // Scale down the amount of containers we have running only
 // if there are more than the initial amount
 func (r *Route) Descale(cfg config.RouteConfig) {
-	if r.NodePool.GetActiveSize() > cfg.Docker.InitialContainers {
+	if r.NodePool.GetActiveSize() > cfg.Pool.ActiveSize {
 		r.NodePool.PauseOne()
 	}
 }
@@ -76,6 +81,9 @@ func (r *Route) CalculateLoad() float64 {
 		conns += n.Queue.Len()
 	}
 
+	if conns > 5 {
+		fmt.Println("conns:", conns)
+	}
 	return (float64(conns) / float64(maxCapacity)) * 100
 }
 

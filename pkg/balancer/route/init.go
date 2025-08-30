@@ -19,7 +19,7 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 	//rethink this conditional
 	if routeStruct.Docker != nil && len(routeStruct.Servers) == 0 {
 		//start # initial docker containers to inactive
-		for range cfg.Docker.InitialContainers {
+		for range cfg.Pool.ActiveSize {
 			nodePort := port.ConsumePort()
 			node, err := docker.StartContainer(nodePort, routeStruct.RouteConfig)
 			if err != nil {
@@ -72,6 +72,7 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 		defer ticker.Stop()
 
 		for range ticker.C {
+			return
 			load := routeStruct.CalculateLoad()
 			// fmt.Println("load:", load)
 			if load > 70 {

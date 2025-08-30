@@ -30,7 +30,19 @@ type DockerConfig struct {
 	InternalPort          int    `yaml:"internal_port"`
 	RequestScaleThreshold int    `yaml:"request_scale_threshold"`
 	NoRequestsTimeout     int    `yaml:"no_requests_timeout_ms"`
-	InitialContainers     int    `yaml:"initial_containers"`
+}
+
+type PoolConfig struct {
+	// The number of containers to keep warm for spikes in requests.
+	// These containers do not recieve reqeusts until moved to active
+	InactiveSize int `yaml:"inactive_size"`
+
+	// The minimum number of containers to keep active.
+	// More containers may be pulled from the inactive pool if necessary
+	//
+	// These containers recieve reqeusts, but are moved to inactive if a
+	// reqeust to /health fails
+	ActiveSize int `yaml:"active_size"`
 }
 
 type RouteServerConfig struct {
@@ -45,5 +57,6 @@ type RouteConfig struct {
 	InactiveTimeout int                 `yaml:"inactive_timeout_ms"`
 	RequestLimit    int                 `yaml:"node_request_limit"`
 	Docker          *DockerConfig       `yaml:"docker"`
+	Pool            PoolConfig          `yaml:"pool"`
 	Servers         []RouteServerConfig `yaml:"servers"`
 }

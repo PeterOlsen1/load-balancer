@@ -46,11 +46,9 @@ func (r *Route) WatchQueue() {
 				return
 			}
 
-			r.Lock.Lock()
 			if r.CalculateLoad() > 100 {
 				r.Scale(r.RouteConfig)
 			}
-			r.Lock.Unlock()
 
 			//do some proprietary health checks of the node down here
 			// add new node if we are above x connections

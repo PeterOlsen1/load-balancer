@@ -64,7 +64,10 @@ func setDefaultConfig() {
 					InternalPort:          3000,
 					RequestScaleThreshold: 15,
 					NoRequestsTimeout:     5000,
-					InitialContainers:     3,
+				},
+				Pool: PoolConfig{
+					InactiveSize: 3,
+					ActiveSize:   2,
 				},
 				Servers: []RouteServerConfig{},
 			},

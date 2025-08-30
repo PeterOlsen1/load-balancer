@@ -64,7 +64,6 @@ func testRequests(numRequests int, waitTime time.Duration, log bool) float64 {
 					fmt.Printf("Encountered error on test #%d: %v\n", i, err)
 				}
 			} else {
-				// fmt.Printf("Completed request #%d\n", i)
 				numSuccessful++
 			}
 		}(i)
