@@ -2,6 +2,7 @@ package output
 
 import (
 	"encoding/json"
+	"load-balancer/pkg/config"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/types"
 	"time"
@@ -19,7 +20,7 @@ func getBaseEvent(eventType string) BaseEvent {
 }
 
 func (s *Emitter) SendMessage(message string) error {
-	if s.LockedConn == nil {
+	if s.LockedConn == nil || !config.Config.Emitter.Enabled {
 		return nil
 	}
 

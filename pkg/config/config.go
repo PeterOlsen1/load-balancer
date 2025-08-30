@@ -47,6 +47,10 @@ func setDefaultConfig() {
 			Level:  "all",
 			Folder: "./logs",
 		},
+		Emitter: EmitterConfig{
+			Enabled: true,
+			Path:    "/events",
+		},
 		Routes: []RouteConfig{
 			{
 				Path:            "/*",

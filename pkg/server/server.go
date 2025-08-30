@@ -3,10 +3,12 @@ package server
 import (
 	"fmt"
 	"load-balancer/pkg/balancer"
+	"load-balancer/pkg/config"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/types"
 	"load-balancer/pkg/ws"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -22,7 +24,14 @@ func Serve(address string, port int) error {
 		IdleTimeout:  60 * time.Second,
 	}
 
-	http.HandleFunc("/ws", ws.WsHandler)
+	if config.Config.Emitter.Enabled {
+		if config.Config.Emitter.Path == "" {
+			fmt.Println("Event emitter is enabled, but no path is specified. Exiting...")
+			os.Exit(1)
+		}
+
+		http.HandleFunc(config.Config.Emitter.Path, ws.WsHandler)
+	}
 	http.HandleFunc("/", connectionHandler)
 	return server.ListenAndServe()
 }

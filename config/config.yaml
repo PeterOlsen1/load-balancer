@@ -6,6 +6,10 @@ logging:
   level: error
   folder: "./logs"
 
+emitter:
+  enabled: true
+  path: "/events"
+
 routes:
   - path: /*
     name: allServer

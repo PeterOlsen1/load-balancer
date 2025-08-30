@@ -3,9 +3,14 @@ package config
 type ConfigType struct {
 	Server  ServerConfig  `yaml:"server"`
 	Logging LoggingConfig `yaml:"logging"`
+	Emitter EmitterConfig `yaml:"emitter"`
 	Routes  []RouteConfig `yaml:"routes"`
 }
 
+type EmitterConfig struct {
+	Enabled bool   `yaml:"enabled"`
+	Path    string `yaml:"path"`
+}
 type ServerConfig struct {
 	Port int    `yaml:"port"`
 	Host string `yaml:"host"`
