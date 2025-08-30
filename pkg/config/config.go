@@ -59,10 +59,8 @@ func setDefaultConfig() {
 				HealthTimeout: 5000,
 				RequestLimit:  50,
 				Docker: &DockerConfig{
-					Image:                 "node-server",
-					InternalPort:          3000,
-					RequestScaleThreshold: 15,
-					NoRequestsTimeout:     5000,
+					Image:        "node-server",
+					InternalPort: 3000,
 				},
 				Pool: PoolConfig{
 					InactiveSize: 3,
