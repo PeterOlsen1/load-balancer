@@ -96,7 +96,7 @@ func ContainerUnpause(containerID string) {
 }
 
 func Request(conn *types.Connection) {
-	if ll != "all" {
+	if ll != "all" || ll == "no-requests" {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=REQUEST ip=%s method=%s path=\"%s\" user_agent=\"%s\"", time.Now().Format(time.RFC3339), conn.Request.RemoteAddr, conn.Request.Method, conn.Request.URL.Path, conn.Request.UserAgent())
@@ -136,7 +136,7 @@ func Health(status string, address string, respTime float32) {
 }
 
 func Proxy(path string, proxiedTo string, ip string) {
-	if ll != "all" {
+	if ll != "all" && ll != "no-requests" {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=PROXY ip=%s path=\"%s\" proxied_to=\"%s\"", time.Now().Format(time.RFC3339), ip, path, proxiedTo)

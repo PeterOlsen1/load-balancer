@@ -52,7 +52,7 @@ func (r *Route) Scale(cfg config.RouteConfig) error {
 		}
 	}
 
-	fmt.Println(r.NodePool.GetInactiveSize(), cfg.Pool.InactiveSize)
+	fmt.Println("Node pools after scale")
 	fmt.Println(r.NodePool.Active)
 	fmt.Println(r.NodePool.Inactive)
 
@@ -63,8 +63,11 @@ func (r *Route) Scale(cfg config.RouteConfig) error {
 // if there are more than the initial amount
 func (r *Route) Descale(cfg config.RouteConfig) {
 	if r.NodePool.GetActiveSize() > cfg.Pool.ActiveSize {
-		fmt.Println("descaling...")
-		r.NodePool.PauseOne()
+		fmt.Println("Descaling...")
+		err := r.NodePool.PauseOne()
+		if err != nil {
+			logger.Err("descaling one container", err)
+		}
 	}
 }
 

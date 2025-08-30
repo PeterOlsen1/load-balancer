@@ -47,10 +47,10 @@ func (r *Route) WatchQueue() {
 			}
 
 			load := r.CalculateLoad()
-			if load > 20 {
-				fmt.Println("load:", load)
-			}
-			if r.CalculateLoad() > 70 {
+			// if load > 20 {
+			// 	fmt.Println("load:", load)
+			// }
+			if load > 70 {
 				r.Scale(r.RouteConfig)
 			}
 		}()
@@ -58,11 +58,8 @@ func (r *Route) WatchQueue() {
 }
 
 func InitRouteQueue() *RouteQueue {
-	var q []*types.Connection
-	q = make([]*types.Connection, 0)
-
 	return &RouteQueue{
-		Queue:      q,
+		Queue:      make([]*types.Connection, 0),
 		connSignal: make(chan struct{}),
 	}
 }

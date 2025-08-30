@@ -27,6 +27,7 @@ func main() {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		<-c
+		fmt.Println("Cleaning up nodes...")
 		err := balancer.Balancer.CleanupNodes()
 		if err != nil {
 			fmt.Println("Error cleaning up nodes:", err)
