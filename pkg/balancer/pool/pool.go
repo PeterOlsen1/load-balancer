@@ -4,17 +4,18 @@ import (
 	"fmt"
 	"load-balancer/pkg/balancer/node"
 	"load-balancer/pkg/config"
+	"load-balancer/pkg/logger"
 )
 
 // Move all unhealthy nodes in active to inactive
 // Move all healthy nodes in inactive in active
 //
-// Paused nodes in inactive will not be moved, since they are
+// Paused nodes in inactive will not be moved
 func (p *NodePool) CheckHealth(cfg config.RouteConfig) {
 	for _, n := range p.Active {
 		res, err := n.CheckHealth()
 		if res != "healthy" || err != nil {
-			fmt.Println("unhealthy -> inactive")
+			logger.Info("Moving unhealthy node to inactive")
 			p.mu.Lock()
 			p.unsafeRemoveActive(n)
 			p.unsafeAddInactive(n)
@@ -25,11 +26,20 @@ func (p *NodePool) CheckHealth(cfg config.RouteConfig) {
 	for _, n := range p.Inactive {
 		res, err := n.CheckHealth()
 		if res == "healthy" && err == nil {
-			fmt.Println("healthy -> active")
+			logger.Info("Moving healthy node to active")
 			p.mu.Lock()
 			p.unsafeRemoveInactive(n)
 			p.unsafeAddActive(n)
 			p.mu.Unlock()
+		}
+	}
+
+	if p.GetActiveSize() < cfg.Pool.ActiveSize {
+		diff := cfg.Pool.ActiveSize - p.GetActiveSize()
+		logger.Info(fmt.Sprintf("Pool has fewer active nodes than config, unpausing %d", diff))
+
+		for range diff {
+			p.UnpauseOne()
 		}
 	}
 }
@@ -92,6 +102,8 @@ func (p *NodePool) UnpauseOne() error {
 
 			p.Inactive = append(p.Inactive[:i], p.Inactive[i+1:]...)
 			p.unsafeAddActive(n)
+
+			logger.Info(fmt.Sprintf("Unpaused one node: %s", n.Address))
 			return nil
 		}
 	}
@@ -113,6 +125,8 @@ func (p *NodePool) PauseOne() error {
 
 	p.Active = p.Active[1:]
 	p.unsafeAddInactive(n)
+
+	logger.Info(fmt.Sprintf("Paused one node: %s", n.Address))
 
 	return nil
 }

@@ -53,12 +53,11 @@ func setDefaultConfig() {
 		},
 		Routes: []RouteConfig{
 			{
-				Path:            "/*",
-				Name:            "allServer",
-				Strategy:        "round-robin",
-				HealthTimeout:   5000,
-				InactiveTimeout: 5000,
-				RequestLimit:    50,
+				Path:          "/*",
+				Name:          "allServer",
+				Strategy:      "round-robin",
+				HealthTimeout: 5000,
+				RequestLimit:  50,
 				Docker: &DockerConfig{
 					Image:                 "node-server",
 					InternalPort:          3000,

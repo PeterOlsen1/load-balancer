@@ -62,26 +62,27 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 	}()
 
 	//goroutine to periodically check if we need to stop a container
-	go func() {
-		if routeStruct.InactiveTimeout <= 0 {
-			//this might be a bad idea but I'm not sure how a negative time would work anyway
-			return
-		}
+	// TODO: move this logic to queue function
+	// go func() {
+	// 	if routeStruct.InactiveTimeout <= 0 {
+	// 		//this might be a bad idea but I'm not sure how a negative time would work anyway
+	// 		return
+	// 	}
 
-		ticker := time.NewTicker(time.Duration(routeStruct.HealthTimeout) * time.Millisecond)
-		defer ticker.Stop()
+	// 	ticker := time.NewTicker(time.Duration(routeStruct.HealthTimeout) * time.Millisecond)
+	// 	defer ticker.Stop()
 
-		for range ticker.C {
-			return
-			load := routeStruct.CalculateLoad()
-			// fmt.Println("load:", load)
-			if load > 70 {
-				routeStruct.Scale(cfg)
-			} else if load < 10 {
-				routeStruct.Descale(cfg)
-			}
-		}
-	}()
+	// 	for range ticker.C {
+	// 		return
+	// 		load := routeStruct.CalculateLoad()
+	// 		// fmt.Println("load:", load)
+	// 		if load > 70 {
+	// 			routeStruct.Scale(cfg)
+	// 		} else if load < 10 {
+	// 			routeStruct.Descale(cfg)
+	// 		}
+	// 	}
+	// }()
 
 	go routeStruct.WatchQueue()
 

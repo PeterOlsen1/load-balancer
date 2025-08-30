@@ -50,13 +50,12 @@ type RouteServerConfig struct {
 }
 
 type RouteConfig struct {
-	Path            string              `yaml:"path"`
-	Name            string              `yaml:"name"`
-	Strategy        string              `yaml:"strategy"`
-	HealthTimeout   int                 `yaml:"health_timeout_ms"`
-	InactiveTimeout int                 `yaml:"inactive_timeout_ms"`
-	RequestLimit    int                 `yaml:"node_request_limit"`
-	Docker          *DockerConfig       `yaml:"docker"`
-	Pool            PoolConfig          `yaml:"pool"`
-	Servers         []RouteServerConfig `yaml:"servers"`
+	Path          string              `yaml:"path"`
+	Name          string              `yaml:"name"`
+	Strategy      string              `yaml:"strategy"`
+	HealthTimeout int                 `yaml:"health_timeout_ms"`
+	RequestLimit  int                 `yaml:"node_request_limit"`
+	Docker        *DockerConfig       `yaml:"docker"`
+	Pool          PoolConfig          `yaml:"pool"`
+	Servers       []RouteServerConfig `yaml:"servers"`
 }

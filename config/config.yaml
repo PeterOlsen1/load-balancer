@@ -15,7 +15,6 @@ routes:
     name: allServer
     strategy: round-robin
     health_timeout_ms: 500
-    inactive_timeout_ms: 5000
     node_request_limit: 5
     docker:
       image: node-server

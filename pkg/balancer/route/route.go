@@ -16,17 +16,12 @@ import (
 // The goal here is that we'll have a few containers to
 // pick from, if we use one, make sure to warm up another
 func (r *Route) Scale(cfg config.RouteConfig) error {
-	fmt.Println("calling scale method!!!!")
 	if time.Since(r.LastScale) < 500*time.Millisecond {
 		return nil
 	}
-	fmt.Println("made it past time check")
 
 	r.LastScale = time.Now()
 	err := r.NodePool.UnpauseOne()
-
-	fmt.Println(r.NodePool.Active)
-	fmt.Println(r.NodePool.Inactive)
 
 	//err will != nil when len(inactive) == 0
 	if err != nil {
