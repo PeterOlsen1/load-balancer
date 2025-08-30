@@ -7,13 +7,11 @@ whereas the original server was only able to achieve ~2800.
 ## current work
 
 Testing:
+* Test load threshold with multiple containers, see what it takes to get more running
 * Test with multiple routes, `getRouteConfig` method
 
 Working on:
 * Make startup faster
-* Rethink container stopping
-  * Don't fully stop containers, just stop sending requests their way, maybe stop after a long time?
-  * Container pool to keep them warmed up?
 
 Later issues:
 * Deal with URLs vs docker containers
