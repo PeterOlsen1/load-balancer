@@ -52,6 +52,10 @@ func (r *Route) Scale(cfg config.RouteConfig) error {
 		}
 	}
 
+	fmt.Println(r.NodePool.GetInactiveSize(), cfg.Pool.InactiveSize)
+	fmt.Println(r.NodePool.Active)
+	fmt.Println(r.NodePool.Inactive)
+
 	return nil
 }
 
@@ -59,6 +63,7 @@ func (r *Route) Scale(cfg config.RouteConfig) error {
 // if there are more than the initial amount
 func (r *Route) Descale(cfg config.RouteConfig) {
 	if r.NodePool.GetActiveSize() > cfg.Pool.ActiveSize {
+		fmt.Println("descaling...")
 		r.NodePool.PauseOne()
 	}
 }
@@ -76,9 +81,6 @@ func (r *Route) CalculateLoad() float64 {
 		conns += n.Queue.Len()
 	}
 
-	if conns > 5 {
-		fmt.Println("conns:", conns)
-	}
 	return (float64(conns) / float64(maxCapacity)) * 100
 }
 

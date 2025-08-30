@@ -18,14 +18,26 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 
 	//rethink this conditional
 	if routeStruct.Docker != nil && len(routeStruct.Servers) == 0 {
-		//start # initial docker containers to inactive
+		//start active container, don't pause so health can move to active later
 		for range cfg.Pool.ActiveSize {
 			nodePort := port.ConsumePort()
 			node, err := docker.StartContainer(nodePort, routeStruct.RouteConfig)
 			if err != nil {
-				return nil, err
+				continue
 			}
 
+			routeStruct.NodePool.AddInactive(node)
+		}
+
+		//start inactive containers and pause them
+		for range cfg.Pool.InactiveSize {
+			nodePort := port.ConsumePort()
+			node, err := docker.StartContainer(nodePort, routeStruct.RouteConfig)
+			if err != nil {
+				continue
+			}
+
+			node.Metrics.Health = "paused"
 			routeStruct.NodePool.AddInactive(node)
 		}
 
@@ -34,9 +46,6 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 
 		//check health to move inactve -> active
 		routeStruct.NodePool.CheckHealth(cfg)
-
-		//call the scale method here to refill the inactive pool
-		routeStruct.Scale(routeStruct.RouteConfig)
 	}
 
 	for _, server := range routeStruct.Servers {
@@ -62,27 +71,20 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 	}()
 
 	//goroutine to periodically check if we need to stop a container
-	// TODO: move this logic to queue function
-	// go func() {
-	// 	if routeStruct.InactiveTimeout <= 0 {
-	// 		//this might be a bad idea but I'm not sure how a negative time would work anyway
-	// 		return
-	// 	}
+	go func() {
+		//allow the server to start up before sending stop requests
+		time.Sleep(1500 * time.Millisecond)
 
-	// 	ticker := time.NewTicker(time.Duration(routeStruct.HealthTimeout) * time.Millisecond)
-	// 	defer ticker.Stop()
+		ticker := time.NewTicker(time.Duration(routeStruct.HealthTimeout) * time.Millisecond)
+		defer ticker.Stop()
 
-	// 	for range ticker.C {
-	// 		return
-	// 		load := routeStruct.CalculateLoad()
-	// 		// fmt.Println("load:", load)
-	// 		if load > 70 {
-	// 			routeStruct.Scale(cfg)
-	// 		} else if load < 10 {
-	// 			routeStruct.Descale(cfg)
-	// 		}
-	// 	}
-	// }()
+		for range ticker.C {
+			load := routeStruct.CalculateLoad()
+			if load < 10 {
+				routeStruct.Descale(cfg)
+			}
+		}
+	}()
 
 	go routeStruct.WatchQueue()
 

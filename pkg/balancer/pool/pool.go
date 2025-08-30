@@ -102,6 +102,9 @@ func (p *NodePool) UnpauseOne() error {
 
 			p.Inactive = append(p.Inactive[:i], p.Inactive[i+1:]...)
 			p.unsafeAddActive(n)
+			if !n.Queue.Open {
+				n.OpenQueue()
+			}
 
 			logger.Info(fmt.Sprintf("Unpaused one node: %s", n.Address))
 			return nil
@@ -125,6 +128,9 @@ func (p *NodePool) PauseOne() error {
 
 	p.Active = p.Active[1:]
 	p.unsafeAddInactive(n)
+	if n.Queue.Open {
+		n.CloseQueue()
+	}
 
 	logger.Info(fmt.Sprintf("Paused one node: %s", n.Address))
 
@@ -147,7 +153,7 @@ func (p *NodePool) RemoveInactive(n *node.Node) {
 }
 
 func (p *NodePool) GetInactiveSize() int {
-	return len(p.Active)
+	return len(p.Inactive)
 }
 
 func (p *NodePool) AddInactive(n *node.Node) {

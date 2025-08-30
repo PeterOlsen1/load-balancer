@@ -7,17 +7,16 @@ whereas the original server was only able to achieve ~2800.
 ## current work
 
 Testing:
-* How do we make sure a node is unreachable before removing it
-  * Close request queue, fulfill all waiting, close node
 * Test with multiple routes, `getRouteConfig` method
 
 Working on:
-* Add methods to scale up / down container pool
+* Make startup faster
 * Rethink container stopping
   * Don't fully stop containers, just stop sending requests their way, maybe stop after a long time?
   * Container pool to keep them warmed up?
 
 Later issues:
+* Deal with URLs vs docker containers
 * Add documentation to types + methods
 * How to deal with non-container nodes, mostly just stopping them
 * Fix reciever methods in balancer
