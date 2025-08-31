@@ -3,7 +3,7 @@ server:
   host: localhost
 
 logging:
-  level: no-requests
+  level: none
   folder: "./logs"
 
 emitter:
@@ -21,7 +21,9 @@ routes:
       internal_port: 3000
       no_requests_timeout_ms: 5000
     pool:
-      inactive_size: 2
-      active_size: 2
+      activation_interval_ms: 100
+      inactive_size: 5
+      active_size: 10
+      max_active: 20
     servers:
     

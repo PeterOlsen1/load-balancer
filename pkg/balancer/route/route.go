@@ -16,7 +16,11 @@ import (
 // The goal here is that we'll have a few containers to
 // pick from, if we use one, make sure to warm up another
 func (r *Route) Scale(cfg config.RouteConfig) error {
-	if time.Since(r.LastScale) < 500*time.Millisecond {
+	if time.Since(r.LastScale) < time.Duration(cfg.Pool.ActivationInterval)*time.Millisecond {
+		return nil
+	}
+
+	if r.NodePool.GetActiveSize() >= cfg.Pool.MaxActive {
 		return nil
 	}
 

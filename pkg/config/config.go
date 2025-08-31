@@ -63,8 +63,10 @@ func setDefaultConfig() {
 					InternalPort: 3000,
 				},
 				Pool: PoolConfig{
-					InactiveSize: 3,
-					ActiveSize:   2,
+					InactiveSize:       3,
+					ActiveSize:         2,
+					MaxActive:          10,
+					ActivationInterval: 500,
 				},
 				Servers: []RouteServerConfig{},
 			},

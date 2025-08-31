@@ -70,6 +70,19 @@ type PoolConfig struct {
 	// These containers recieve reqeusts, but are moved to inactive if a
 	// reqeust to /health fails
 	ActiveSize int `yaml:"active_size"`
+
+	// The maximum number of active containers we can have
+	//
+	// This means that the total number of max containers we can have is
+	// max_active + inactive_size
+	MaxActive int `yaml:"max_active"`
+
+	// The amount of time between each node activation.
+	// A node activation refers to moving a node from "inactive" to "active"
+	// while the balancer is under load.
+	//
+	// If this is set too low, too many containers will be created under load
+	ActivationInterval int `yaml:"activation_interval_ms"`
 }
 
 type RouteServerConfig struct {
