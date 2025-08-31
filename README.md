@@ -7,7 +7,6 @@ whereas the original server was only able to achieve ~2800.
 ## current work
 
 Testing:
-* is it better to have more inactive nodes than active? test this out
 * add testing method for sustained connections at n / second
 * Test load threshold with multiple containers, see what it takes to get more running
 * Test with multiple routes, `getRouteConfig` method

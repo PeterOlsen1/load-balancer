@@ -2,11 +2,17 @@
 
 REQUESTS ?= 100
 
+SECONDS ?= 3
+RPS ?= 100
+
 all:
 	go run ./pkg/main.go
 
 test:
 	go run ./test/main.go -requests=$(REQUESTS)
+
+test-rps:
+	go run ./test/main.go -seconds=${SECONDS} -rps=${RPS}
 
 clean:
 	rm -rf ./logs

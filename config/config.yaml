@@ -15,15 +15,15 @@ routes:
     name: allServer
     strategy: round-robin
     health_timeout_ms: 500
-    node_request_limit: 100
+    node_request_limit: 200
     docker:
       image: node-server
       internal_port: 3000
       no_requests_timeout_ms: 5000
     pool:
       activation_interval_ms: 100
-      inactive_size: 5
-      active_size: 10
+      inactive_size: 3
+      active_size: 2
       max_active: 20
     servers:
     

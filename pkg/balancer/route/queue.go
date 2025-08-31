@@ -47,9 +47,7 @@ func (r *Route) WatchQueue() {
 			}
 
 			load := r.CalculateLoad()
-			// if load > 20 {
-			// 	fmt.Println("load:", load)
-			// }
+			fmt.Println(load)
 			if load > 70 {
 				r.Scale(r.RouteConfig)
 			}
