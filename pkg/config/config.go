@@ -67,6 +67,7 @@ func setDefaultConfig() {
 					ActiveSize:         2,
 					MaxActive:          10,
 					ActivationInterval: 500,
+					CleanupInterval:    5000,
 				},
 				Servers: []RouteServerConfig{},
 			},

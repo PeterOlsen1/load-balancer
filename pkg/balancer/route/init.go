@@ -75,7 +75,7 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 		//allow the server to start up before sending stop requests
 		time.Sleep(1500 * time.Millisecond)
 
-		ticker := time.NewTicker(time.Duration(routeStruct.HealthTimeout) * time.Millisecond)
+		ticker := time.NewTicker(time.Duration(cfg.Pool.CleanupInterval) * time.Millisecond)
 		defer ticker.Stop()
 
 		for range ticker.C {

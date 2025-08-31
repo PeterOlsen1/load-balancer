@@ -83,6 +83,11 @@ type PoolConfig struct {
 	//
 	// If this is set too low, too many containers will be created under load
 	ActivationInterval int `yaml:"activation_interval_ms"`
+
+	// The amount of time between node cleanup checks.
+	// Every n ms, a goroutine will check the load.
+	// If load < 10%, a node will be paused
+	CleanupInterval int `yaml:"cleanup_interval_ms"`
 }
 
 type RouteServerConfig struct {

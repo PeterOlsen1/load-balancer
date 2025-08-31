@@ -22,6 +22,7 @@ routes:
       no_requests_timeout_ms: 5000
     pool:
       activation_interval_ms: 100
+      cleanup_interval_ms: 5000
       inactive_size: 3
       active_size: 2
       max_active: 20
