@@ -8,5 +8,5 @@ import (
 type NodePool struct {
 	Active   []*node.Node
 	Inactive []*node.Node
-	mu       sync.Mutex
+	Mu       sync.Mutex
 }

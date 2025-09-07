@@ -15,22 +15,22 @@ func (p *NodePool) CheckHealth(cfg config.RouteConfig) {
 	for _, n := range p.Active {
 		res, err := n.CheckHealth()
 		if res != "healthy" || err != nil {
-			logger.Info("Moving unhealthy node to inactive")
-			p.mu.Lock()
+			logger.Info(fmt.Sprintf("Moving unhealthy node to inactive: %s", n.Address))
+			p.Mu.Lock()
 			p.unsafeRemoveActive(n)
 			p.unsafeAddInactive(n)
-			p.mu.Unlock()
+			p.Mu.Unlock()
 		}
 	}
 
 	for _, n := range p.Inactive {
 		res, err := n.CheckHealth()
 		if res == "healthy" && err == nil {
-			logger.Info("Moving healthy node to active")
-			p.mu.Lock()
+			logger.Info(fmt.Sprintf("Moving healthy node to active: %s", n.Address))
+			p.Mu.Lock()
 			p.unsafeRemoveInactive(n)
 			p.unsafeAddActive(n)
-			p.mu.Unlock()
+			p.Mu.Unlock()
 		}
 	}
 
@@ -47,13 +47,8 @@ func (p *NodePool) CheckHealth(cfg config.RouteConfig) {
 func (p *NodePool) GetAll() []*node.Node {
 	out := make([]*node.Node, 0)
 
-	for _, n := range p.Active {
-		out = append(out, n)
-	}
-	for _, n := range p.Inactive {
-		out = append(out, n)
-	}
-
+	out = append(out, p.Active...)
+	out = append(out, p.Inactive...)
 	return out
 }
 
@@ -62,8 +57,8 @@ func (p *NodePool) GetActive() []*node.Node {
 }
 
 func (p *NodePool) RemoveActive(n *node.Node) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
 	for i, node := range p.Active {
 		if node == n {
 			p.Active = append(p.Active[:i], p.Active[i+1:]...)
@@ -73,12 +68,14 @@ func (p *NodePool) RemoveActive(n *node.Node) {
 }
 
 func (p *NodePool) GetActiveSize() int {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
 	return len(p.Active)
 }
 
 func (p *NodePool) AddActive(n *node.Node) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
 
 	p.Active = append(p.Active, n)
 }
@@ -88,8 +85,8 @@ func (p *NodePool) UnpauseOne() error {
 		return fmt.Errorf("inactive pool empty")
 	}
 
-	p.mu.Lock()
-	defer p.mu.Unlock()
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
 
 	//loop through inactive nodes, health check, activate the first good one
 	for i, n := range p.Inactive {
@@ -119,8 +116,8 @@ func (p *NodePool) PauseOne() error {
 		return fmt.Errorf("active pool empty")
 	}
 
-	p.mu.Lock()
-	defer p.mu.Unlock()
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
 
 	//loop through inactive nodes, health check, activate the first good one
 	n := p.Active[0]
@@ -142,8 +139,8 @@ func (p *NodePool) GetInactive() []*node.Node {
 }
 
 func (p *NodePool) RemoveInactive(n *node.Node) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
 	for i, node := range p.Inactive {
 		if node == n {
 			p.Inactive = append(p.Inactive[:i], p.Inactive[i+1:]...)
@@ -153,17 +150,19 @@ func (p *NodePool) RemoveInactive(n *node.Node) {
 }
 
 func (p *NodePool) GetInactiveSize() int {
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
 	return len(p.Inactive)
 }
 
 func (p *NodePool) AddInactive(n *node.Node) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+	p.Mu.Lock()
+	defer p.Mu.Unlock()
 
 	p.Inactive = append(p.Inactive, n)
 }
 
-// This method does not lock the `p.mu` before performing
+// This method does not lock the `p.Mu` before performing
 // its operation, and is therefore unsafe.
 //
 // Only use when the calling method acquires a lock
@@ -176,7 +175,7 @@ func (p *NodePool) unsafeRemoveActive(n *node.Node) {
 	}
 }
 
-// This method does not lock the `p.mu` before performing
+// This method does not lock the `p.Mu` before performing
 // its operation, and is therefore unsafe.
 //
 // Only use when the calling method acquires a lock
@@ -184,7 +183,7 @@ func (p *NodePool) unsafeAddActive(n *node.Node) {
 	p.Active = append(p.Active, n)
 }
 
-// This method does not lock the `p.mu` before performing
+// This method does not lock the `p.Mu` before performing
 // its operation, and is therefore unsafe.
 //
 // Only use when the calling method acquires a lock
@@ -197,7 +196,7 @@ func (p *NodePool) unsafeRemoveInactive(n *node.Node) {
 	}
 }
 
-// This method does not lock the `p.mu` before performing
+// This method does not lock the `p.Mu` before performing
 // its operation, and is therefore unsafe.
 //
 // Only use when the calling method acquires a lock
