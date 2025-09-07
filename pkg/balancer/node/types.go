@@ -40,9 +40,8 @@ type NodeMetrics struct {
 }
 
 type NodeQueue struct {
-	Lock        sync.Mutex          `json:"-"`
-	Queue       []*types.Connection `json:"queue"`
-	Open        bool                `json:"open"`
-	connSignal  chan (struct{})
-	closeSignal chan (struct{})
+	Queue       chan *types.Connection // Channel-based queue
+	Open        bool                   // Indicates if the queue is open
+	connSignal  chan *types.Connection // Signal channel for new connections
+	closeSignal chan struct{}          // Signal channel for closing the queue
 }

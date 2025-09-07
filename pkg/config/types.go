@@ -121,7 +121,11 @@ type RouteConfig struct {
 	// The max number of requests that a node can have in its queue at a time.
 	//
 	// This number is also used to calculate the load % of a given route
-	RequestLimit int `yaml:"node_request_limit"`
+	NodeQueueSize int `yaml:"node_queue_size"`
+
+	// The max size of the route queue where connections go before being sent to nodes.
+	// It is recommended to keep this high since requests dropped from the route queue will send a 500
+	RouteQueueSize uint `yaml:"route_queue_size"`
 
 	// Docker configuration, see DockerConfig type for more info
 	Docker *DockerConfig `yaml:"docker"`

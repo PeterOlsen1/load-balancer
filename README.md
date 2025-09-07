@@ -6,7 +6,15 @@ whereas the original server was only able to achieve ~2800.
 
 ## current work
 
+Optimizations:
+* Use go chans instead of queues (avoid locks)
+* Use worker pool to limit goroutines in request handling (watch queue methods)
+* Use connection pools for backend requests to reuse existing connections
+* Async logging
+* Batch process requests
+
 Testing:
+* Check out `wrk`, `hey`, or `k6` for stress testing
 * add testing method for sustained connections at n / second
 * Test load threshold with multiple containers, see what it takes to get more running
 * Test with multiple routes, `getRouteConfig` method

@@ -90,7 +90,7 @@ func (r *Route) Descale(cfg config.RouteConfig) {
 func (r *Route) CalculateLoad() float64 {
 	conns := r.Queue.Len()
 	numNodes := r.NodePool.GetActiveSize()
-	maxCapacity := numNodes * r.RouteConfig.RequestLimit
+	maxCapacity := numNodes * r.RouteConfig.NodeQueueSize
 
 	if maxCapacity <= 0 {
 		return 0

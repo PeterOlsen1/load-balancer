@@ -14,7 +14,7 @@ import (
 func InitRoute(cfg config.RouteConfig) (*Route, error) {
 	routeStruct := Route{
 		RouteConfig: cfg,
-		Queue:       InitRouteQueue(),
+		Queue:       InitRouteQueue(cfg.RouteQueueSize),
 		NodePool:    pool.InitPool(),
 	}
 
