@@ -40,20 +40,32 @@ func (r *Route) Scale(cfg config.RouteConfig) error {
 			node.Metrics.Health = "paused"
 			r.NodePool.AddInactive(node)
 		}
-	} else if r.NodePool.GetInactiveSize() < cfg.Pool.InactiveSize {
+	}
+
+	inactiveSize := r.NodePool.GetInactiveSize();
+	
+	if inactiveSize < cfg.Pool.InactiveSize {
 		//always keep cfg.Docker.InitialContainers in the inactive pool
-		logger.Info(fmt.Sprintf("fewer inactive nodes than initial docker containers, adding %d", cfg.Pool.InactiveSize-r.NodePool.GetInactiveSize()))
+		logger.Info(fmt.Sprintf("fewer inactive nodes than initial docker containers, adding %d", cfg.Pool.InactiveSize-inactiveSize))
 
-		for range cfg.Pool.InactiveSize - r.NodePool.GetInactiveSize() {
-			port := port.ConsumePort()
-			node, err := docker.StartContainer(port, r.RouteConfig)
-			if err != nil {
-				return err
-			}
+		var wg sync.WaitGroup
 
-			r.NodePool.AddInactive(node)
-			node.Metrics.Health = "paused"
+		for range cfg.Pool.InactiveSize - inactiveSize {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				port := port.ConsumePort()
+				node, err := docker.StartContainer(port, r.RouteConfig)
+				if err != nil {
+					// error is logged in StartContainer method
+					return
+				}
+				node.Metrics.Health = "paused"
+				r.NodePool.AddInactive(node)
+			}()
 		}
+
+		wg.Wait()
 	}
 
 	fmt.Println("Node pools after scale")
@@ -89,28 +101,4 @@ func (r *Route) CalculateLoad() float64 {
 	}
 
 	return (float64(conns) / float64(maxCapacity)) * 100
-}
-
-func (r *Route) CleanupNodes() error {
-	var wg sync.WaitGroup
-	var loopErr error
-
-	for _, n := range r.NodePool.GetAll() {
-		if n == nil {
-			continue
-		}
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			// n.CloseQueue()
-			err := docker.StopContainer(n.ContainerID)
-			if err != nil {
-				loopErr = err
-			}
-		}()
-	}
-
-	wg.Wait()
-	return loopErr
 }

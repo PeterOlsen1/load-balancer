@@ -10,7 +10,6 @@ import (
 
 type Route struct {
 	config.RouteConfig
-	Lock      sync.Mutex
 	NodePool  *pool.NodePool
 	Queue     *RouteQueue
 	LastScale time.Time
