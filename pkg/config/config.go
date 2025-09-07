@@ -34,6 +34,10 @@ func LoadConfig(configPath string) error {
 		nameMap[route.Name] = true
 	}
 
+	if Config.Logging.Level > 4 {
+		Config.Logging.Level = 4
+	}
+
 	return nil
 }
 
@@ -44,7 +48,7 @@ func setDefaultConfig() {
 			Host: "localhost",
 		},
 		Logging: LoggingConfig{
-			Level:  "all",
+			Level:  4,
 			Folder: "./logs",
 		},
 		Emitter: EmitterConfig{

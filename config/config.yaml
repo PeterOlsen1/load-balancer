@@ -3,7 +3,7 @@ server:
   host: localhost
 
 logging:
-  level: no-requests
+  level: 1
   folder: "./logs"
 
 emitter:

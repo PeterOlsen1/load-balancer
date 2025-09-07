@@ -12,7 +12,6 @@ Testing:
 * Test with multiple routes, `getRouteConfig` method
 
 Working on:
-* Rethink logging levels, integer scale
 * Make startup faster
 
 Later issues:

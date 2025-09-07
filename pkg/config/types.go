@@ -38,7 +38,7 @@ type LoggingConfig struct {
 	//  - All: all logging statements are written, including REQUEST, PROXY, and INFO
 	//	- Error: only error statements are written
 	//	- None: no logs are written
-	Level string `yaml:"level"`
+	Level uint `yaml:"level"`
 
 	// Path to the folder where logs will be stored
 	Folder string `yaml:"folder"`

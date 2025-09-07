@@ -14,7 +14,7 @@ import (
 )
 
 var logfile string
-var ll string
+var ll uint
 var logDir string
 var logLock sync.Mutex
 var linesWritten int
@@ -47,7 +47,7 @@ func InitLogger() {
 }
 
 func Err(msg string, err error) {
-	if ll == "none" {
+	if ll == 4 {
 		return
 	}
 
@@ -56,7 +56,7 @@ func Err(msg string, err error) {
 }
 
 func Info(msg string) {
-	if ll == "error" || ll == "none" {
+	if ll >= 3 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=INFO msg=\"%s\"", time.Now().Format(time.RFC3339), msg)
@@ -64,7 +64,7 @@ func Info(msg string) {
 }
 
 func ContainerStart(containerID string) {
-	if ll == "error" || ll == "none" {
+	if ll >= 3 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=CONTAINER_START container_ID=\"%s\"", time.Now().Format(time.RFC3339), containerID)
@@ -72,7 +72,7 @@ func ContainerStart(containerID string) {
 }
 
 func ContainerStop(containerID string) {
-	if ll == "error" || ll == "none" {
+	if ll >= 3 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=CONTAINER_STOP container_ID=\"%s\"", time.Now().Format(time.RFC3339), containerID)
@@ -80,7 +80,7 @@ func ContainerStop(containerID string) {
 }
 
 func ContainerPause(containerID string) {
-	if ll == "error" || ll == "none" {
+	if ll >= 3 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=CONTAINER_PAUSE container_ID=\"%s\"", time.Now().Format(time.RFC3339), containerID)
@@ -88,7 +88,7 @@ func ContainerPause(containerID string) {
 }
 
 func ContainerUnpause(containerID string) {
-	if ll == "error" || ll == "none" {
+	if ll >= 3 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=CONTAINER_UNPAUSE container_ID=\"%s\"", time.Now().Format(time.RFC3339), containerID)
@@ -96,7 +96,7 @@ func ContainerUnpause(containerID string) {
 }
 
 func Request(conn *types.Connection) {
-	if ll != "all" || ll == "no-requests" {
+	if ll >= 1 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=REQUEST ip=%s method=%s path=\"%s\" user_agent=\"%s\"", time.Now().Format(time.RFC3339), conn.Request.RemoteAddr, conn.Request.Method, conn.Request.URL.Path, conn.Request.UserAgent())
@@ -104,7 +104,7 @@ func Request(conn *types.Connection) {
 }
 
 func WsRequest(body []byte, ip string) {
-	if ll != "all" {
+	if ll >= 1 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=WS_MESSAGE body=\"%s\" ip=\"%s\"", time.Now().Format(time.RFC3339), string(body), ip)
@@ -112,7 +112,7 @@ func WsRequest(body []byte, ip string) {
 }
 
 func WsConnect(req *http.Request) {
-	if ll != "all" {
+	if ll >= 1 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=WS_CONNECT ip=%s", time.Now().Format(time.RFC3339), req.RemoteAddr)
@@ -120,7 +120,7 @@ func WsConnect(req *http.Request) {
 }
 
 func WsClose(req *http.Request) {
-	if ll != "all" {
+	if ll >= 1 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=WS_CLOSE ip=%s", time.Now().Format(time.RFC3339), req.RemoteAddr)
@@ -128,7 +128,7 @@ func WsClose(req *http.Request) {
 }
 
 func Health(status string, address string, respTime float32) {
-	if ll != "all" {
+	if ll >= 1 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=HEALTH status=%s address=\"%s\" response_time=%f", time.Now().Format(time.RFC3339), status, address, respTime)
@@ -136,7 +136,7 @@ func Health(status string, address string, respTime float32) {
 }
 
 func Proxy(path string, proxiedTo string, ip string) {
-	if ll != "all" && ll != "no-requests" {
+	if ll >= 2 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=PROXY ip=%s path=\"%s\" proxied_to=\"%s\"", time.Now().Format(time.RFC3339), ip, path, proxiedTo)
