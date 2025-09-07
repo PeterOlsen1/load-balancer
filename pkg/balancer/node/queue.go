@@ -18,7 +18,6 @@ func (n *Node) WatchQueue() {
 
 			go n.processRequest(conn)
 		case <-q.closeSignal:
-			fmt.Println("closing queue, stop watching")
 			for len(q.Queue) > 0 {
 				conn, err := q.Dequeue()
 				if err != nil {
@@ -78,29 +77,6 @@ func (q *NodeQueue) Dequeue() (*types.Connection, error) {
 	q.Queue = q.Queue[:len(q.Queue)-1]
 
 	return conn, nil
-}
-
-func (q *NodeQueue) TakeFromBack(numEntries int) ([]*types.Connection, error) {
-	if numEntries == 0 {
-		return nil, nil
-	}
-
-	q.Lock.Lock()
-	defer q.Lock.Unlock()
-
-	if len(q.Queue) == 0 {
-		return nil, fmt.Errorf("queue is empty")
-	}
-
-	if numEntries > len(q.Queue) {
-		numEntries = len(q.Queue)
-	}
-
-	conns := make([]*types.Connection, numEntries)
-	copy(conns, q.Queue[len(q.Queue)-numEntries:])
-
-	q.Queue = q.Queue[:len(q.Queue)-numEntries]
-	return conns, nil
 }
 
 func (n *Node) CloseQueue() {
