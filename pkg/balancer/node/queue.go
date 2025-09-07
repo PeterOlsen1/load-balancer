@@ -81,20 +81,26 @@ func (q *NodeQueue) Dequeue() (*types.Connection, error) {
 
 func (n *Node) CloseQueue() {
 	n.Queue.Lock.Lock()
+	defer n.Queue.Lock.Unlock()
+
+	if !n.Queue.Open || n.Queue.closeSignal == nil {
+		return
+	}
+
 	n.Queue.Open = false
 	n.Queue.closeSignal <- struct{}{}
 
 	close(n.Queue.closeSignal)
 	close(n.Queue.connSignal)
-	n.Queue.Lock.Unlock()
 }
 
 func (n *Node) OpenQueue() {
 	n.Queue.Lock.Lock()
+	defer n.Queue.Lock.Unlock()
+
 	n.Queue.Open = true
 	n.Queue.connSignal = make(chan struct{})
 	n.Queue.closeSignal = make(chan struct{})
-	n.Queue.Lock.Unlock()
 	go n.WatchQueue()
 }
 

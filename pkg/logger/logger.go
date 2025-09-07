@@ -143,6 +143,15 @@ func Proxy(path string, proxiedTo string, ip string) {
 	writeToFile(logLine)
 }
 
+func PoolSize(active int, inactive int) {
+	if ll >= 1 {
+		return
+	}
+
+	logLine := fmt.Sprintf("time=%s type=INFO active=%d inactive=%d", time.Now().Format(time.RFC3339), active, inactive)
+	writeToFile(logLine)
+}
+
 func writeToFile(logLine string) {
 	logLock.Lock()
 	defer logLock.Unlock()

@@ -1,11 +1,13 @@
 package route
 
 import (
+	"fmt"
 	"load-balancer/pkg/balancer/docker"
 	"load-balancer/pkg/balancer/node"
 	"load-balancer/pkg/balancer/pool"
 	"load-balancer/pkg/config"
 	"load-balancer/pkg/port"
+	"sync"
 	"time"
 )
 
@@ -16,37 +18,49 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 		NodePool:    pool.InitPool(),
 	}
 
+	var wg sync.WaitGroup
+
 	//rethink this conditional
-	if routeStruct.Docker != nil && len(routeStruct.Servers) == 0 {
+	if routeStruct.Docker != nil { // && len(routeStruct.Servers) == 0
+		fmt.Println("Starting containers...")
+
 		//start active container, don't pause so health can move to active later
 		for range cfg.Pool.ActiveSize {
-			nodePort := port.ConsumePort()
-			node, err := docker.StartContainer(nodePort, routeStruct.RouteConfig)
-			if err != nil {
-				continue
-			}
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
 
-			routeStruct.NodePool.AddInactive(node)
+				nodePort := port.ConsumePort()
+				node, err := docker.StartContainer(nodePort, routeStruct.RouteConfig)
+				if err != nil {
+					return
+				}
+
+				routeStruct.NodePool.AddInactive(node)
+			}()
 		}
 
 		//start inactive containers and pause them
 		for range cfg.Pool.InactiveSize {
-			nodePort := port.ConsumePort()
-			node, err := docker.StartContainer(nodePort, routeStruct.RouteConfig)
-			if err != nil {
-				continue
-			}
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
 
-			node.Metrics.Health = "paused"
-			routeStruct.NodePool.AddInactive(node)
+				nodePort := port.ConsumePort()
+				node, err := docker.StartContainer(nodePort, routeStruct.RouteConfig)
+				if err != nil {
+					return
+				}
+
+				node.Metrics.Health = "paused"
+				routeStruct.NodePool.AddInactive(node)
+			}()
 		}
-
-		//wait for docker containers to start
-		time.Sleep(1 * time.Second)
-
-		//check health to move inactve -> active
-		routeStruct.NodePool.CheckHealth(cfg)
 	}
+
+	wg.Wait()
+	time.Sleep(1 * time.Second)
+	routeStruct.NodePool.CheckHealth(cfg)
 
 	for _, server := range routeStruct.Servers {
 		routeStruct.NodePool.AddActive(node.FromURL(server.URL, &routeStruct.RouteConfig))

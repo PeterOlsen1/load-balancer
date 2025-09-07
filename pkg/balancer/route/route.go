@@ -42,8 +42,8 @@ func (r *Route) Scale(cfg config.RouteConfig) error {
 		}
 	}
 
-	inactiveSize := r.NodePool.GetInactiveSize();
-	
+	inactiveSize := r.NodePool.GetInactiveSize()
+
 	if inactiveSize < cfg.Pool.InactiveSize {
 		//always keep cfg.Docker.InitialContainers in the inactive pool
 		logger.Info(fmt.Sprintf("fewer inactive nodes than initial docker containers, adding %d", cfg.Pool.InactiveSize-inactiveSize))

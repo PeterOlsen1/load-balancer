@@ -12,12 +12,8 @@ Testing:
 * Test with multiple routes, `getRouteConfig` method
 
 Working on:
-* Make startup faster
-
-Later issues:
 * Deal with URLs vs docker containers
 * Add documentation to types + methods
-* How to deal with non-container nodes, mostly just stopping them
 * Fix reciever methods in balancer
 
 Future ideas:

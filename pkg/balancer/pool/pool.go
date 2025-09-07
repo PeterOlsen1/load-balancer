@@ -30,6 +30,8 @@ func (p *NodePool) CheckHealth(cfg config.RouteConfig) {
 			p.Mu.Lock()
 			p.unsafeRemoveInactive(n)
 			p.unsafeAddActive(n)
+
+			logger.PoolSize(len(p.Active), len(p.Inactive))
 			p.Mu.Unlock()
 		}
 	}
@@ -97,6 +99,7 @@ func (p *NodePool) UnpauseOne() error {
 				continue
 			}
 
+			//remove from inactive, add to active
 			p.Inactive = append(p.Inactive[:i], p.Inactive[i+1:]...)
 			p.unsafeAddActive(n)
 			if !n.Queue.Open {
@@ -104,9 +107,11 @@ func (p *NodePool) UnpauseOne() error {
 			}
 
 			logger.Info(fmt.Sprintf("Unpaused one node: %s", n.Address))
-			return nil
+			break
 		}
 	}
+
+	logger.PoolSize(len(p.Active), len(p.Inactive))
 
 	return nil
 }
@@ -130,6 +135,7 @@ func (p *NodePool) PauseOne() error {
 	}
 
 	logger.Info(fmt.Sprintf("Paused one node: %s", n.Address))
+	logger.PoolSize(len(p.Active), len(p.Inactive))
 
 	return nil
 }
