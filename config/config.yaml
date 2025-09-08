@@ -24,8 +24,8 @@ routes:
     pool:
       activation_interval_ms: 100
       cleanup_interval_ms: 5000
-      inactive_size: 6
-      active_size: 4
+      inactive_size: 4
+      active_size: 6
       max_active: 20
     servers:
     
