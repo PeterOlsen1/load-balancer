@@ -3,7 +3,7 @@ server:
   host: localhost
 
 logging:
-  level: 0
+  level: 2
   folder: "./logs"
 
 emitter:
@@ -23,8 +23,8 @@ routes:
     pool:
       activation_interval_ms: 100
       cleanup_interval_ms: 5000
-      inactive_size: 2
-      active_size: 2
+      inactive_size: 4
+      active_size: 6
       max_active: 20
     servers:
     
