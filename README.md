@@ -1,22 +1,16 @@
 # load-balancer
 Trying out new things. Learning Go. Balancing loads. Scaling horizontally ⚖️
 
-Running the docker image in `./server`, this project achieved up to 8000 requests / second (10 containers),
-whereas the original server was only able to achieve ~2800.
-
 ## current work
 
 Optimizations:
-* Fix circle of pauses / descaling
+* Add minheap for least connections
 * Use worker pool to limit goroutines in request handling (watch queue methods)
-* Use connection pools for backend requests to reuse existing connections
-  * Look into go http.Transport
 * Async logging
 * Batch process requests
 
 Testing:
 * Check out `wrk`, `hey`, or `k6` for stress testing
-* add testing method for sustained connections at n / second
 * Test load threshold with multiple containers, see what it takes to get more running
 * Test with multiple routes, `getRouteConfig` method
 * Error to fix on command: `wrk -t10 -c500 -d20s http://localhost:8080`
@@ -65,6 +59,8 @@ Things to research:
 
 ### items completed
 
+* Use connection pools for backend requests to reuse existing connections
+  * Look into go http.Transport
 * Use go chans instead of queues (avoid locks) - did this, it was slower
 * Add connection pool
   * Fix pool health check, some sort of locking issue is happening
