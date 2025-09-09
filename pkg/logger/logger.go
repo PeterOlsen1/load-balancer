@@ -144,7 +144,7 @@ func Proxy(path string, proxiedTo string, ip string) {
 }
 
 func PoolSize(active int, inactive int) {
-	if ll >= 1 {
+	if ll >= 2 {
 		return
 	}
 

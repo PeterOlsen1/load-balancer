@@ -13,37 +13,41 @@ import (
 // Paused nodes in inactive will not be moved
 func (p *NodePool) CheckHealth(cfg config.RouteConfig) {
 	for _, n := range p.Active {
-		res, err := n.CheckHealth()
-		if res != "healthy" || err != nil {
-			logger.Info(fmt.Sprintf("Moving unhealthy node to inactive: %s", n.Address))
-			p.Mu.Lock()
-			p.unsafeRemoveActive(n)
-			p.unsafeAddInactive(n)
-			p.Mu.Unlock()
-		}
+		go func(n *node.Node) {
+			res, err := n.CheckHealth()
+			if res != "healthy" || err != nil {
+				logger.Info(fmt.Sprintf("Moving unhealthy node to inactive: %s", n.Address))
+				p.Mu.Lock()
+				p.unsafeRemoveActive(n)
+				p.unsafeAddInactive(n)
+				p.Mu.Unlock()
+			}
+		}(n)
 	}
 
 	for _, n := range p.Inactive {
-		res, err := n.CheckHealth()
-		if res == "healthy" && err == nil {
-			logger.Info(fmt.Sprintf("Moving healthy node to active: %s", n.Address))
-			p.Mu.Lock()
-			p.unsafeRemoveInactive(n)
-			p.unsafeAddActive(n)
+		go func(n *node.Node) {
+			res, err := n.CheckHealth()
+			if res == "healthy" && err == nil {
+				logger.Info(fmt.Sprintf("Moving healthy node to active: %s", n.Address))
+				p.Mu.Lock()
+				p.unsafeRemoveInactive(n)
+				p.unsafeAddActive(n)
 
-			logger.PoolSize(len(p.Active), len(p.Inactive))
-			p.Mu.Unlock()
-		}
+				logger.PoolSize(len(p.Active), len(p.Inactive))
+				p.Mu.Unlock()
+			}
+		}(n)
 	}
 
-	if p.GetActiveSize() < cfg.Pool.ActiveSize {
-		diff := cfg.Pool.ActiveSize - p.GetActiveSize()
-		logger.Info(fmt.Sprintf("Pool has fewer active nodes than config, unpausing %d", diff))
+	// if p.GetActiveSize() < cfg.Pool.ActiveSize {
+	// 	diff := cfg.Pool.ActiveSize - p.GetActiveSize()
+	// 	logger.Info(fmt.Sprintf("Pool has fewer active nodes than config, unpausing %d", diff))
 
-		for range diff {
-			p.UnpauseOne()
-		}
-	}
+	// 	for range diff {
+	// 		p.UnpauseOne()
+	// 	}
+	// }
 }
 
 func (p *NodePool) GetAll() []*node.Node {

@@ -25,3 +25,6 @@ clean-containers:
 
 # increase max current connections (mac os)
 # sudo sysctl -w kern.ipc.somaxconn=1024
+
+# Test with wrk
+# wrk -t10 -c500 -d20s http://localhost:8080

@@ -1,6 +1,21 @@
 package node
 
-import "load-balancer/pkg/config"
+import (
+	"load-balancer/pkg/config"
+	"net/http"
+	"time"
+)
+
+var transport = &http.Transport{
+	MaxIdleConns:        100,
+	MaxIdleConnsPerHost: 30,
+	IdleConnTimeout:     30 * time.Second,
+}
+
+var httpClient = &http.Client{
+	Transport: transport,
+	Timeout:   10 * time.Second,
+}
 
 func FromContainer(containerID string, address string, routeConfig config.RouteConfig) *Node {
 	out := &Node{

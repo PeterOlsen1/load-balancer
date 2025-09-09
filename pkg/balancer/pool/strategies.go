@@ -14,7 +14,6 @@ var roundRobinIndexMu sync.Mutex
 
 func (p *NodePool) RoundRobin() *node.Node {
 	n := p.GetActiveSize()
-	nodes := p.GetActive()
 
 	if n == 0 {
 		logger.Err("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
@@ -23,6 +22,11 @@ func (p *NodePool) RoundRobin() *node.Node {
 	}
 
 	roundRobinIndexMu.Lock()
+	nodes := p.GetActive()
+	n = len(p.Active)
+	if n == 0 {
+		return nil
+	}
 	node := nodes[roundRobinIndex%n]
 	roundRobinIndex++
 	roundRobinIndex %= n
@@ -48,7 +52,7 @@ func (p *NodePool) RoundRobin() *node.Node {
 func (p *NodePool) LeastConnections() *node.Node {
 	var lowest *node.Node = nil
 	for _, n := range p.GetActive() {
-		if n.Queue.Len() < lowest.Queue.Len() && n.Metrics.Health != "healthy" {
+		if (lowest == nil || n.Queue.Len() < lowest.Queue.Len()) && n.Metrics.Health == "healthy" {
 			lowest = n
 		}
 	}

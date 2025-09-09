@@ -22,7 +22,7 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 
 	//rethink this conditional
 	if routeStruct.Docker != nil { // && len(routeStruct.Servers) == 0
-		fmt.Println("Starting containers...")
+		fmt.Printf("Starting containers for route: %s\n", cfg.Name)
 
 		//start active container, don't pause so health can move to active later
 		for range cfg.Pool.ActiveSize {

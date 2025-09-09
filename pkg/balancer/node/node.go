@@ -26,7 +26,7 @@ func (node *Node) processRequest(conn *types.Connection) {
 	}
 
 	maps.Copy(req.Header, conn.Request.Header)
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		logger.Err("Backend request failed", err)
 		ws.EventEmitter.Error("Backend request failed", err)
@@ -62,7 +62,7 @@ func (node *Node) CheckHealth() (string, error) {
 	address := node.Address
 
 	start := time.Now()
-	resp, err := http.Get(fmt.Sprintf("%s/health", address))
+	resp, err := httpClient.Get(fmt.Sprintf("%s/health", address))
 	duration := time.Since(start)
 
 	if err != nil {

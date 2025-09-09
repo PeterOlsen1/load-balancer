@@ -7,9 +7,10 @@ whereas the original server was only able to achieve ~2800.
 ## current work
 
 Optimizations:
-* Use go chans instead of queues (avoid locks)
+* Fix circle of pauses / descaling
 * Use worker pool to limit goroutines in request handling (watch queue methods)
 * Use connection pools for backend requests to reuse existing connections
+  * Look into go http.Transport
 * Async logging
 * Batch process requests
 
@@ -18,6 +19,7 @@ Testing:
 * add testing method for sustained connections at n / second
 * Test load threshold with multiple containers, see what it takes to get more running
 * Test with multiple routes, `getRouteConfig` method
+* Error to fix on command: `wrk -t10 -c500 -d20s http://localhost:8080`
 
 Working on:
 * Deal with URLs vs docker containers
@@ -63,6 +65,7 @@ Things to research:
 
 ### items completed
 
+* Use go chans instead of queues (avoid locks) - did this, it was slower
 * Add connection pool
   * Fix pool health check, some sort of locking issue is happening
 * Fix memory leak with idle looping in queue watching. don't use default case!

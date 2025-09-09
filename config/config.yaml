@@ -3,7 +3,7 @@ server:
   host: localhost
 
 logging:
-  level: 1
+  level: 2
   folder: "./logs"
 
 emitter:
@@ -13,9 +13,9 @@ emitter:
 routes:
   - path: /*
     name: allServer
-    strategy: round-robin
+    strategy: least-connections
     health_timeout_ms: 500
-    route_queue_size: 1000
+    route_queue_size: 150
     node_queue_size: 100
     docker:
       image: node-server
@@ -24,8 +24,8 @@ routes:
     pool:
       activation_interval_ms: 100
       cleanup_interval_ms: 5000
-      inactive_size: 4
-      active_size: 6
+      inactive_size: 2
+      active_size: 4
       max_active: 20
     servers:
     
