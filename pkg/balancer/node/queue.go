@@ -2,25 +2,42 @@ package node
 
 import (
 	"fmt"
+	"load-balancer/pkg/batch"
 	"load-balancer/pkg/types"
+	"time"
 )
 
 func (n *Node) WatchQueue() {
 	q := n.Queue
+	batch := batch.InitBatch(100)
+	batchTicker := time.NewTicker(time.Millisecond * 20)
+	defer batchTicker.Stop()
 
 	for {
 		select {
+		case <-batchTicker.C:
+			for _, conn := range batch.Flush() {
+				go n.processRequest(conn)
+			}
 		case conn := <-q.connSignal:
 			if conn == nil {
 				return
 			}
 
-			go n.processRequest(conn)
+			err := batch.Add(conn)
+			if err != nil {
+				for _, conn := range batch.Flush() {
+					go n.processRequest(conn)
+				}
+			}
 		case <-q.closeSignal:
 			for conn := range q.connSignal {
 				if conn == nil {
 					break
 				}
+				go n.processRequest(conn)
+			}
+			for _, conn := range batch.Flush() {
 				go n.processRequest(conn)
 			}
 			return

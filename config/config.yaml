@@ -15,8 +15,8 @@ routes:
     name: allServer
     strategy: round-robin
     health_timeout_ms: 500
-    route_queue_size: 150
-    node_queue_size: 100
+    route_queue_size: 1000
+    node_queue_size: 500
     docker:
       image: node-server
       internal_port: 3000
@@ -25,7 +25,7 @@ routes:
       activation_interval_ms: 100
       cleanup_interval_ms: 5000
       inactive_size: 2
-      active_size: 4
+      active_size: 6
       max_active: 20
     servers:
     
