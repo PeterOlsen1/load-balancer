@@ -4,10 +4,8 @@ Trying out new things. Learning Go. Balancing loads. Scaling horizontally ⚖️
 ## current work
 
 Optimizations:
-* Add minheap for least connections
 * Use worker pool to limit goroutines in request handling (watch queue methods)
 * Async logging
-* Batch process requests
 
 Testing:
 * Check out `wrk`, `hey`, or `k6` for stress testing
@@ -21,7 +19,6 @@ Working on:
 * Fix reciever methods in balancer
 
 Future ideas:
-* Batch process requests from node queue?
 * Add rate tracking?
 * Deploying to AWS or something?
 
@@ -59,6 +56,8 @@ Things to research:
 
 ### items completed
 
+* Add minheap for least connections
+* Batch process requests from node queue
 * Use connection pools for backend requests to reuse existing connections
   * Look into go http.Transport
 * Use go chans instead of queues (avoid locks) - did this, it was slower
