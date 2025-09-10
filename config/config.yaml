@@ -13,7 +13,7 @@ emitter:
 routes:
   - path: /*
     name: allServer
-    strategy: least-connections
+    strategy: round-robin
     health_timeout_ms: 500
     route_queue_size: 150
     node_queue_size: 100
