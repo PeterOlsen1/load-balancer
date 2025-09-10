@@ -36,6 +36,9 @@ func (r *Route) WatchQueue() {
 				return
 			}
 
+			if r.RouteConfig.Strategy == "least-connections" {
+				r.NodePool.Heap.Add(node)
+			}
 			load := r.CalculateLoad()
 			if load > 50 {
 				fmt.Println(load)

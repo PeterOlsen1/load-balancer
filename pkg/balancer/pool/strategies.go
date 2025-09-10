@@ -50,11 +50,10 @@ func (p *NodePool) RoundRobin() *node.Node {
 }
 
 func (p *NodePool) LeastConnections() *node.Node {
-	var lowest *node.Node = nil
-	for _, n := range p.GetActive() {
-		if (lowest == nil || n.Queue.Len() < lowest.Queue.Len()) && n.Metrics.Health == "healthy" {
-			lowest = n
-		}
+	lowest, err := p.Heap.RemoveMin()
+	if err != nil {
+		logger.Err("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
+		ws.EventEmitter.Error("Could not find node to proxy", fmt.Errorf("nodes length is 0"))
 	}
 	return lowest
 }

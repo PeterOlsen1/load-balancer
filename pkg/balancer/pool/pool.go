@@ -62,17 +62,6 @@ func (p *NodePool) GetActive() []*node.Node {
 	return p.Active
 }
 
-func (p *NodePool) RemoveActive(n *node.Node) {
-	p.Mu.Lock()
-	defer p.Mu.Unlock()
-	for i, node := range p.Active {
-		if node == n {
-			p.Active = append(p.Active[:i], p.Active[i+1:]...)
-			break
-		}
-	}
-}
-
 func (p *NodePool) GetActiveSize() int {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
@@ -84,6 +73,7 @@ func (p *NodePool) AddActive(n *node.Node) {
 	defer p.Mu.Unlock()
 
 	p.Active = append(p.Active, n)
+	p.Heap.Push(n)
 }
 
 func (p *NodePool) UnpauseOne() error {
@@ -148,17 +138,6 @@ func (p *NodePool) GetInactive() []*node.Node {
 	return p.Inactive
 }
 
-func (p *NodePool) RemoveInactive(n *node.Node) {
-	p.Mu.Lock()
-	defer p.Mu.Unlock()
-	for i, node := range p.Inactive {
-		if node == n {
-			p.Inactive = append(p.Inactive[:i], p.Inactive[i+1:]...)
-			break
-		}
-	}
-}
-
 func (p *NodePool) GetInactiveSize() int {
 	p.Mu.Lock()
 	defer p.Mu.Unlock()
@@ -183,6 +162,7 @@ func (p *NodePool) unsafeRemoveActive(n *node.Node) {
 			break
 		}
 	}
+	p.Heap.RemoveNode(n)
 }
 
 // This method does not lock the `p.Mu` before performing
@@ -191,6 +171,7 @@ func (p *NodePool) unsafeRemoveActive(n *node.Node) {
 // Only use when the calling method acquires a lock
 func (p *NodePool) unsafeAddActive(n *node.Node) {
 	p.Active = append(p.Active, n)
+	p.Heap.Add(n)
 }
 
 // This method does not lock the `p.Mu` before performing
