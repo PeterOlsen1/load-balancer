@@ -63,6 +63,7 @@ func setDefaultConfig() {
 				HealthTimeout:  5000,
 				RouteQueueSize: 50,
 				NodeQueueSize:  1000,
+				WorkerThreads:  10,
 				Docker: &DockerConfig{
 					Image:        "node-server",
 					InternalPort: 3000,

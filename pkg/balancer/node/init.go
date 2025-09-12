@@ -26,10 +26,9 @@ func FromContainer(containerID string, address string, routeConfig config.RouteC
 			ResponseTime: 0,
 			Connections:  0,
 		},
-		Queue: InitNodeQueue(routeConfig.NodeQueueSize),
+		Queue: InitNodeQueue(routeConfig.NodeQueueSize, routeConfig.WorkerThreads),
 	}
 
-	go out.CheckHealth()
 	go out.WatchQueue()
 	return out
 }
@@ -43,7 +42,7 @@ func FromURL(url string, routeConfig *config.RouteConfig) *Node {
 			ResponseTime: 0,
 			Connections:  0,
 		},
-		Queue: InitNodeQueue(routeConfig.NodeQueueSize),
+		Queue: InitNodeQueue(routeConfig.NodeQueueSize, routeConfig.WorkerThreads),
 	}
 
 	go out.CheckHealth()
