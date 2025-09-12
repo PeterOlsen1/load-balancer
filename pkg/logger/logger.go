@@ -14,7 +14,7 @@ import (
 )
 
 var logfile string
-var ll uint
+var ll uint8
 var logDir string
 var logLock sync.Mutex
 var linesWritten int

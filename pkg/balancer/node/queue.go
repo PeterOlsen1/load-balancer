@@ -55,7 +55,7 @@ func (n *Node) WatchQueue() {
 	}
 }
 
-func InitNodeQueue(capacity int, workerThreads uint) *NodeQueue {
+func InitNodeQueue(capacity uint32, workerThreads uint16) *NodeQueue {
 	return &NodeQueue{
 		Queue:         make(chan *types.Connection, capacity),
 		Open:          true,

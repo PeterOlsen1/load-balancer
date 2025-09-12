@@ -13,7 +13,7 @@ type Connection struct {
 	Response   http.ResponseWriter
 	Request    *http.Request
 	Done       chan bool
-	RetryCount int
+	RetryCount uint8
 }
 
 type LockedConnection struct {

@@ -13,7 +13,7 @@ import (
 	"github.com/moby/moby/client"
 )
 
-func StartContainer(externalPort int, routeInfo config.RouteConfig) (*node.Node, error) {
+func StartContainer(externalPort uint16, routeInfo config.RouteConfig) (*node.Node, error) {
 	dockerInfo := routeInfo.Docker
 	cli, err := createDockerClient()
 	if err != nil {
