@@ -50,7 +50,7 @@ func (r *Route) WatchQueue() {
 	}
 }
 
-func InitRouteQueue(queueSize uint) *RouteQueue {
+func InitRouteQueue(queueSize uint32) *RouteQueue {
 	return &RouteQueue{
 		Queue: make(chan *types.Connection, queueSize),
 	}

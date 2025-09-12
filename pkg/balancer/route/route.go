@@ -20,7 +20,7 @@ func (r *Route) Scale(cfg config.RouteConfig) error {
 		return nil
 	}
 
-	if r.NodePool.GetActiveSize() >= cfg.Pool.MaxActive {
+	if uint16(r.NodePool.GetActiveSize()) >= cfg.Pool.MaxActive {
 		return nil
 	}
 
@@ -42,7 +42,7 @@ func (r *Route) Scale(cfg config.RouteConfig) error {
 		}
 	}
 
-	inactiveSize := r.NodePool.GetInactiveSize()
+	inactiveSize := uint16(r.NodePool.GetInactiveSize())
 
 	if inactiveSize < cfg.Pool.InactiveSize {
 		//always keep cfg.Docker.InitialContainers in the inactive pool
@@ -78,7 +78,7 @@ func (r *Route) Scale(cfg config.RouteConfig) error {
 // Scale down the amount of containers we have running only
 // if there are more than the initial amount
 func (r *Route) Descale(cfg config.RouteConfig) {
-	if r.NodePool.GetActiveSize() > cfg.Pool.ActiveSize {
+	if uint16(r.NodePool.GetActiveSize()) > cfg.Pool.ActiveSize {
 		fmt.Println("Descaling...")
 		err := r.NodePool.PauseOne()
 		if err != nil {
@@ -89,7 +89,7 @@ func (r *Route) Descale(cfg config.RouteConfig) {
 
 func (r *Route) CalculateLoad() float64 {
 	conns := r.Queue.Len()
-	numNodes := r.NodePool.GetActiveSize()
+	numNodes := uint32(r.NodePool.GetActiveSize())
 	maxCapacity := numNodes * r.RouteConfig.NodeQueueSize
 
 	if maxCapacity <= 0 {

@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func Serve(address string, port int) error {
+func Serve(address string, port uint16) error {
 	url := fmt.Sprintf("%s:%d", address, port)
 	fmt.Println("Starting server @", url)
 

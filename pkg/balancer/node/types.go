@@ -45,5 +45,5 @@ type NodeQueue struct {
 	connChan      chan *types.Connection // Signal channel for new connections
 	closeSignal   chan struct{}          // Signal channel for closing the queue
 	workChan      chan *types.Connection // connections to send to the worker pool
-	workerThreads uint
+	workerThreads uint16
 }

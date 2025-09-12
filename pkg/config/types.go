@@ -27,7 +27,7 @@ type EmitterConfig struct {
 }
 type ServerConfig struct {
 	// The port on which the server will run. Default is 8080
-	Port int `yaml:"port"`
+	Port uint16 `yaml:"port"`
 
 	// The host on which the server will run. Default is localhost
 	Host string `yaml:"host"`
@@ -38,7 +38,7 @@ type LoggingConfig struct {
 	//  - All: all logging statements are written, including REQUEST, PROXY, and INFO
 	//	- Error: only error statements are written
 	//	- None: no logs are written
-	Level uint `yaml:"level"`
+	Level uint8 `yaml:"level"`
 
 	// Path to the folder where logs will be stored
 	Folder string `yaml:"folder"`
@@ -56,38 +56,38 @@ type DockerConfig struct {
 	//	const app = express();
 	//	app.listen(3000);
 	// The `internal_port` variable would be 3000
-	InternalPort int `yaml:"internal_port"`
+	InternalPort uint16 `yaml:"internal_port"`
 }
 
 type PoolConfig struct {
 	// The number of containers to keep warm for spikes in requests.
 	// These containers do not recieve reqeusts until moved to active
-	InactiveSize int `yaml:"inactive_size"`
+	InactiveSize uint16 `yaml:"inactive_size"`
 
 	// The minimum number of containers to keep active.
 	// More containers may be pulled from the inactive pool if necessary
 	//
 	// These containers recieve reqeusts, but are moved to inactive if a
 	// reqeust to /health fails
-	ActiveSize int `yaml:"active_size"`
+	ActiveSize uint16 `yaml:"active_size"`
 
 	// The maximum number of active containers we can have
 	//
 	// This means that the total number of max containers we can have is
 	// max_active + inactive_size
-	MaxActive int `yaml:"max_active"`
+	MaxActive uint16 `yaml:"max_active"`
 
 	// The amount of time between each node activation.
 	// A node activation refers to moving a node from "inactive" to "active"
 	// while the balancer is under load.
 	//
 	// If this is set too low, too many containers will be created under load
-	ActivationInterval int `yaml:"activation_interval_ms"`
+	ActivationInterval uint64 `yaml:"activation_interval_ms"`
 
 	// The amount of time between node cleanup checks.
 	// Every n ms, a goroutine will check the load.
 	// If load < 10%, a node will be paused
-	CleanupInterval int `yaml:"cleanup_interval_ms"`
+	CleanupInterval uint64 `yaml:"cleanup_interval_ms"`
 }
 
 type RouteServerConfig struct {
@@ -97,7 +97,7 @@ type RouteServerConfig struct {
 	URL string `yaml:"url"`
 
 	// Weight of the server. TODO: implement server weights?
-	Weight int `yaml:"weight"`
+	Weight uint32 `yaml:"weight"`
 }
 
 type RouteConfig struct {
@@ -116,19 +116,19 @@ type RouteConfig struct {
 	Strategy string `yaml:"strategy"`
 
 	// The number of ms in between every check to /heath
-	HealthTimeout int `yaml:"health_timeout_ms"`
+	HealthTimeout uint64 `yaml:"health_timeout_ms"`
 
 	// The max number of requests that a node can have in its queue at a time.
 	//
 	// This number is also used to calculate the load % of a given route
-	NodeQueueSize int `yaml:"node_queue_size"`
+	NodeQueueSize uint32 `yaml:"node_queue_size"`
 
 	// The max size of the route queue where connections go before being sent to nodes.
 	// It is recommended to keep this high since requests dropped from the route queue will send a 500
-	RouteQueueSize uint `yaml:"route_queue_size"`
+	RouteQueueSize uint32 `yaml:"route_queue_size"`
 
 	// The number of worker threads to be wathing a queue at a time
-	WorkerThreads uint `yaml:"worker_threads"`
+	WorkerThreads uint16 `yaml:"worker_threads"`
 	
 	// Docker configuration, see DockerConfig type for more info
 	Docker *DockerConfig `yaml:"docker"`
