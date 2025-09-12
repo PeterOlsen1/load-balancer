@@ -127,6 +127,9 @@ type RouteConfig struct {
 	// It is recommended to keep this high since requests dropped from the route queue will send a 500
 	RouteQueueSize uint `yaml:"route_queue_size"`
 
+	// The number of worker threads to be wathing a queue at a time
+	WorkerThreads uint `yaml:"worker_threads"`
+	
 	// Docker configuration, see DockerConfig type for more info
 	Docker *DockerConfig `yaml:"docker"`
 
@@ -135,4 +138,5 @@ type RouteConfig struct {
 
 	// List of pre-running servers to proxy requests to. See RouteServerConfig type for more info
 	Servers []RouteServerConfig `yaml:"servers"`
+
 }

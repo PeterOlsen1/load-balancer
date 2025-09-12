@@ -40,8 +40,10 @@ type NodeMetrics struct {
 }
 
 type NodeQueue struct {
-	Queue       chan *types.Connection // Channel-based queue
-	Open        bool                   // Indicates if the queue is open
-	connSignal  chan *types.Connection // Signal channel for new connections
-	closeSignal chan struct{}          // Signal channel for closing the queue
+	Queue         chan *types.Connection // Channel-based queue
+	Open          bool                   // Indicates if the queue is open
+	connChan      chan *types.Connection // Signal channel for new connections
+	closeSignal   chan struct{}          // Signal channel for closing the queue
+	workChan      chan *types.Connection // connections to send to the worker pool
+	workerThreads uint
 }
