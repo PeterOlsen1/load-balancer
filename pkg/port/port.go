@@ -2,11 +2,11 @@ package port
 
 import "sync"
 
-var port int = 3000
+var port uint16 = 3000
 var portMutex sync.Mutex
 
-func ConsumePort() int {
-	var ret int
+func ConsumePort() uint16 {
+	var ret uint16
 	portMutex.Lock()
 	ret = port
 	port++
@@ -14,8 +14,8 @@ func ConsumePort() int {
 	return ret
 }
 
-func ConsumeMultiplePorts(numPorts int) []int {
-	var ret []int
+func ConsumeMultiplePorts(numPorts uint16) []uint16 {
+	var ret []uint16
 	portMutex.Lock()
 	for range numPorts {
 		ret = append(ret, port)

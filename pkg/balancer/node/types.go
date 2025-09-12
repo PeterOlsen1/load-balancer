@@ -34,7 +34,7 @@ type NodeMetrics struct {
 	Lock           sync.Mutex `json:"-"`
 	Health         string     `json:"health"`
 	ResponseTime   float32    `json:"response_time"`
-	Connections    int        `json:"connections"`
+	Connections    uint32     `json:"connections"`
 	CreatedNewNode bool       `json:"-"`
 	// LastRequestTime time.Time  `json:"last_request"`
 }

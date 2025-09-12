@@ -8,5 +8,5 @@ import (
 type Batch struct {
 	batch []*types.Connection
 	mu    sync.Mutex
-	cap   int
+	cap   uint32
 }

@@ -1,6 +1,6 @@
 package logger
 
-type LogLevel int
+type LogLevel uint8
 
 const (
 	All LogLevel = iota

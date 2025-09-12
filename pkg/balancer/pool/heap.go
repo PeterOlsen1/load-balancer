@@ -27,7 +27,7 @@ func (h *NodeHeap) Len() int {
 }
 
 func (h *NodeHeap) Less(i, j int) bool {
-	return (h.heap[i].Metrics.Connections + h.heap[i].Queue.Len()) < (h.heap[j].Metrics.Connections + h.heap[j].Queue.Len())
+	return (h.heap[i].Metrics.Connections + uint32(h.heap[i].Queue.Len())) < (h.heap[j].Metrics.Connections + uint32(h.heap[j].Queue.Len()))
 }
 
 func (h *NodeHeap) Swap(i, j int) {

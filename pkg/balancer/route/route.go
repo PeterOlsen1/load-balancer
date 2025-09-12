@@ -6,7 +6,6 @@ import (
 	"load-balancer/pkg/config"
 	"load-balancer/pkg/logger"
 	"load-balancer/pkg/port"
-	"sync"
 	"time"
 )
 
@@ -30,9 +29,9 @@ func (r *Route) Scale(cfg config.RouteConfig) error {
 	//err will != nil when len(inactive) == 0
 	if err != nil {
 		logger.Info(fmt.Sprintf("zero inactive containers, adding %d", cfg.Pool.InactiveSize))
-		for range cfg.Pool.InactiveSize {
-			port := port.ConsumePort()
-			node, err := docker.StartContainer(port, r.RouteConfig)
+		ports := port.ConsumeMultiplePorts(cfg.Pool.InactiveSize)
+		for i := range cfg.Pool.InactiveSize {
+			node, err := docker.StartContainer(ports[i], r.RouteConfig)
 			if err != nil {
 				return err
 			}
@@ -48,24 +47,18 @@ func (r *Route) Scale(cfg config.RouteConfig) error {
 		//always keep cfg.Docker.InitialContainers in the inactive pool
 		logger.Info(fmt.Sprintf("fewer inactive nodes than initial docker containers, adding %d", cfg.Pool.InactiveSize-inactiveSize))
 
-		var wg sync.WaitGroup
-
-		for range cfg.Pool.InactiveSize - inactiveSize {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				port := port.ConsumePort()
-				node, err := docker.StartContainer(port, r.RouteConfig)
-				if err != nil {
-					// error is logged in StartContainer method
-					return
-				}
-				node.Metrics.Health = "paused"
-				r.NodePool.AddInactive(node)
-			}()
+		diff := cfg.Pool.InactiveSize - inactiveSize
+		ports := port.ConsumeMultiplePorts(diff)
+		for i := range diff {
+			node, err := docker.StartContainer(ports[i], r.RouteConfig)
+			if err != nil {
+				// error is logged in StartContainer method
+				return err
+			}
+			node.Metrics.Health = "paused"
+			r.NodePool.AddInactive(node)
 		}
 
-		wg.Wait()
 	}
 
 	fmt.Println("Node pools after scale")
