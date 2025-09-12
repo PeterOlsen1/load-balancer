@@ -1,4 +1,4 @@
-.PHONY: all test clean clean-containers
+.PHONY: all test clean clean-containers test-work test-rps lint
 
 REQUESTS ?= 100
 
@@ -13,6 +13,12 @@ test:
 
 test-rps:
 	go run ./test/main.go -seconds=${SECONDS} -rps=${RPS}
+
+lint:
+	golangci-lint run -v --config .golangci.yaml
+
+test-wrk:
+	wrk -t10 -c1000 -d10s http://localhost:8080
 
 clean:
 	rm -rf ./logs
