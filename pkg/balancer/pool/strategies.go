@@ -21,22 +21,25 @@ func (p *NodePool) RoundRobin() *node.Node {
 		return nil
 	}
 
-	roundRobinIndexMu.Lock()
 	nodes := p.GetActive()
 	n = len(p.Active)
 	if n == 0 {
 		return nil
 	}
+	roundRobinIndexMu.Lock()
 	node := nodes[roundRobinIndex%n]
 	roundRobinIndex++
 	roundRobinIndex %= n
 	roundRobinIndexMu.Unlock()
 
 	loops := 0
-	for node.Metrics.Health != "healthy" {
+	// keep finding nodes until we find one that has space and is healthy
+	for node.Metrics.Health != "healthy" || !node.Queue.HasSpace() {
+		roundRobinIndexMu.Lock()
 		node = nodes[roundRobinIndex%n]
 		roundRobinIndex++
 		roundRobinIndex %= n
+		roundRobinIndexMu.Unlock()
 
 		if loops > n {
 			logger.Err("Could not find node to proxy", fmt.Errorf("found no healthy nodes"))
