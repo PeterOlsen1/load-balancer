@@ -1,0 +1,29 @@
+name: Refactor Issue
+description: Create an issue for refactoring code, configuration, or documentation
+title: "refactor: <short description>"
+labels: [refactor]
+assignees: ''
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What are we changing?
+      description: Describe what will be changed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why are we changing it?
+      description: Explain the motivation or reasoning for the change.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: What is the scope of this change?
+      description: Define the scope, systems affected, or boundaries of this change.
+    validations:
+      required: true

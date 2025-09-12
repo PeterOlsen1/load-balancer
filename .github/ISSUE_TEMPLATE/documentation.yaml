@@ -1,0 +1,12 @@
+name: 📝 Documentation Issue
+description: Report missing, outdated, or unclear documentation
+title: "docs: <short description>"
+labels: [documentation]
+body:
+  - type: textarea
+    id: what_to_document
+    attributes:
+      label: What are we wanting to document?
+      description: Describe what documentation is missing or needs improvement.
+    validations:
+      required: true

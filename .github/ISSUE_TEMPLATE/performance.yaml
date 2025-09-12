@@ -1,0 +1,20 @@
+name: 📊 Performance Issue
+description: Report a performance improvement
+title: "perf: <short description>"
+labels: [performance]
+body:
+  - type: textarea
+    id: change
+    attributes:
+      label: What is the change?
+      description: Describe the change made or proposed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: improvement
+    attributes:
+      label: How will it increase performance?
+      description: Explain how this change improves performance, including metrics if possible.
+    validations:
+      required: true
