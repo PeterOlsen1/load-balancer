@@ -1,4 +1,4 @@
-name: Refactor Issue 🔍
+name: 🔍 Refactor
 description: Create an issue for refactoring code, configuration, or documentation
 title: "refactor: <short description>"
 labels: [refactor]

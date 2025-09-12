@@ -1,4 +1,4 @@
-name: 📊 Performance Issue
+name: 📊 Performance
 description: Report a performance improvement
 title: "perf: <short description>"
 labels: [performance]
