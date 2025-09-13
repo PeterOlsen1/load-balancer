@@ -16,9 +16,5 @@ func InitWorkerPool[T any](numWorkers uint16, eventHandler func(e T)) WorkerPool
 		}()
 	}
 
-	return WorkerPool[T]{
-		numWorkers:   numWorkers,
-		eventChan:    make(chan T, 1000),
-		eventHandler: eventHandler,
-	}
+	return pool
 }
