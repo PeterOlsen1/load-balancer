@@ -13,5 +13,6 @@ func InitPool() *NodePool {
 		Active:   make([]*node.Node, 0),
 		Inactive: make([]*node.Node, 0),
 		Heap:     nodeHeap,
+		isClosed: false,
 	}
 }

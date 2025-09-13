@@ -61,9 +61,7 @@ func WsHandler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		lockedConn.Lock.Lock()
-		defer lockedConn.Lock.Unlock()
-		err = conn.WriteMessage(1, bytes)
+		err = lockedConn.WriteMessage(1, bytes)
 		if err != nil {
 			logger.Err("Writing websocket response", err)
 		}

@@ -12,15 +12,19 @@ import (
 //
 // Paused nodes in inactive will not be moved
 func (p *NodePool) CheckHealth(cfg config.RouteConfig) {
+	if p.isClosed {
+		return
+	}
+
 	for _, n := range p.Active {
 		go func(n *node.Node) {
 			res, err := n.CheckHealth()
 			if res != "healthy" || err != nil {
 				logger.Info(fmt.Sprintf("Moving unhealthy node to inactive: %s", n.Address))
-				p.Mu.Lock()
+				p.mu.Lock()
 				p.unsafeRemoveActive(n)
 				p.unsafeAddInactive(n)
-				p.Mu.Unlock()
+				p.mu.Unlock()
 			}
 		}(n)
 	}
@@ -30,12 +34,12 @@ func (p *NodePool) CheckHealth(cfg config.RouteConfig) {
 			res, err := n.CheckHealth()
 			if res == "healthy" && err == nil {
 				logger.Info(fmt.Sprintf("Moving healthy node to active: %s", n.Address))
-				p.Mu.Lock()
+				p.mu.Lock()
 				p.unsafeRemoveInactive(n)
 				p.unsafeAddActive(n)
 
 				logger.PoolSize(len(p.Active), len(p.Inactive))
-				p.Mu.Unlock()
+				p.mu.Unlock()
 			}
 		}(n)
 	}
@@ -63,14 +67,14 @@ func (p *NodePool) GetActive() []*node.Node {
 }
 
 func (p *NodePool) GetActiveSize() int {
-	p.Mu.Lock()
-	defer p.Mu.Unlock()
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	return len(p.Active)
 }
 
 func (p *NodePool) AddActive(n *node.Node) {
-	p.Mu.Lock()
-	defer p.Mu.Unlock()
+	p.mu.Lock()
+	defer p.mu.Unlock()
 
 	p.Active = append(p.Active, n)
 	p.Heap.Push(n)
@@ -81,8 +85,8 @@ func (p *NodePool) UnpauseOne() error {
 		return fmt.Errorf("inactive pool empty")
 	}
 
-	p.Mu.Lock()
-	defer p.Mu.Unlock()
+	p.mu.Lock()
+	defer p.mu.Unlock()
 
 	//loop through inactive nodes, health check, activate the first good one
 	for i, n := range p.Inactive {
@@ -115,8 +119,8 @@ func (p *NodePool) PauseOne() error {
 		return fmt.Errorf("active pool empty")
 	}
 
-	p.Mu.Lock()
-	defer p.Mu.Unlock()
+	p.mu.Lock()
+	defer p.mu.Unlock()
 
 	//loop through inactive nodes, health check, activate the first good one
 	n := p.Active[0]
@@ -139,19 +143,19 @@ func (p *NodePool) GetInactive() []*node.Node {
 }
 
 func (p *NodePool) GetInactiveSize() int {
-	p.Mu.Lock()
-	defer p.Mu.Unlock()
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	return len(p.Inactive)
 }
 
 func (p *NodePool) AddInactive(n *node.Node) {
-	p.Mu.Lock()
-	defer p.Mu.Unlock()
+	p.mu.Lock()
+	defer p.mu.Unlock()
 
 	p.Inactive = append(p.Inactive, n)
 }
 
-// This method does not lock the `p.Mu` before performing
+// This method does not lock the `p.mu` before performing
 // its operation, and is therefore unsafe.
 //
 // Only use when the calling method acquires a lock
@@ -165,7 +169,7 @@ func (p *NodePool) unsafeRemoveActive(n *node.Node) {
 	p.Heap.RemoveNode(n)
 }
 
-// This method does not lock the `p.Mu` before performing
+// This method does not lock the `p.mu` before performing
 // its operation, and is therefore unsafe.
 //
 // Only use when the calling method acquires a lock
@@ -174,7 +178,7 @@ func (p *NodePool) unsafeAddActive(n *node.Node) {
 	p.Heap.Add(n)
 }
 
-// This method does not lock the `p.Mu` before performing
+// This method does not lock the `p.mu` before performing
 // its operation, and is therefore unsafe.
 //
 // Only use when the calling method acquires a lock
@@ -187,10 +191,17 @@ func (p *NodePool) unsafeRemoveInactive(n *node.Node) {
 	}
 }
 
-// This method does not lock the `p.Mu` before performing
+// This method does not lock the `p.mu` before performing
 // its operation, and is therefore unsafe.
 //
 // Only use when the calling method acquires a lock
 func (p *NodePool) unsafeAddInactive(n *node.Node) {
 	p.Inactive = append(p.Inactive, n)
+}
+
+func (p *NodePool) Close() {
+	p.isClosed = true
+
+	// this is only called when shutting down, this is okay
+	p.mu.Lock()
 }

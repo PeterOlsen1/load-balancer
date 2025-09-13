@@ -18,7 +18,7 @@ type Connection struct {
 
 type LockedConnection struct {
 	Conn *websocket.Conn
-	Lock sync.Mutex
+	mu   sync.Mutex
 }
 
 // debugging purposes, just prints the body
@@ -29,4 +29,11 @@ func (conn *Connection) DebugBody() (string, error) {
 	}
 	conn.Request.Body = io.NopCloser(bytes.NewBuffer(bodyText))
 	return string(bodyText), err
+}
+
+func (c *LockedConnection) WriteMessage(messageType int, data []byte) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	return c.Conn.WriteMessage(messageType, data)
 }

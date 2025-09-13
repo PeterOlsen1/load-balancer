@@ -9,7 +9,8 @@ type NodePool struct {
 	Active   []*node.Node
 	Inactive []*node.Node
 	Heap     *NodeHeap
-	Mu       sync.Mutex
+	mu       sync.Mutex
+	isClosed bool
 }
 
 type NodeHeap struct {
