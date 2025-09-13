@@ -104,3 +104,7 @@ func (n *Node) OpenQueue() {
 func (q *NodeQueue) Len() int {
 	return len(q.connChan)
 }
+
+func (q *NodeQueue) HasSpace() bool {
+	return len(q.connChan) < cap(q.connChan)
+}
