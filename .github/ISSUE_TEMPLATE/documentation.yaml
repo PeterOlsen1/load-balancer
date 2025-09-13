@@ -1,6 +1,6 @@
 name: 📝 Documentation
 description: Report missing, outdated, or unclear documentation
-title: "docs: <short description>"
+title: "docs: "
 labels: [documentation]
 body:
   - type: textarea

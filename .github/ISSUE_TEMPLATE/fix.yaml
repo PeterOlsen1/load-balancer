@@ -1,6 +1,6 @@
 name: 🔨 Fix
 description: Report a bug or issue
-title: "fix: <short description>"
+title: "fix: "
 labels: [bug, fix]
 body:
   - type: textarea

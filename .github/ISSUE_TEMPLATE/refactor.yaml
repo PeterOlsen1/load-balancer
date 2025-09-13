@@ -1,6 +1,6 @@
 name: 🔍 Refactor
 description: Create an issue for refactoring code, configuration, or documentation
-title: "refactor: <short description>"
+title: "refactor: "
 labels: [refactor]
 body:
   - type: textarea

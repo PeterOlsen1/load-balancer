@@ -1,6 +1,6 @@
 name: 📊 Performance
 description: Report a performance improvement
-title: "perf: <short description>"
+title: "perf: "
 labels: [performance]
 body:
   - type: textarea
