@@ -100,7 +100,7 @@ func (p *NodePool) UnpauseOne() error {
 			//remove from inactive, add to active
 			p.Inactive = append(p.Inactive[:i], p.Inactive[i+1:]...)
 			p.unsafeAddActive(n)
-			if !n.Queue.Open {
+			if !n.Queue.IsOpen() {
 				n.OpenQueue()
 			}
 
@@ -128,7 +128,7 @@ func (p *NodePool) PauseOne() error {
 
 	p.Active = p.Active[1:]
 	p.unsafeAddInactive(n)
-	if n.Queue.Open {
+	if n.Queue.IsOpen() {
 		n.CloseQueue()
 	}
 

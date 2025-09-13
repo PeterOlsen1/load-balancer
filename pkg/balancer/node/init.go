@@ -2,6 +2,8 @@ package node
 
 import (
 	"load-balancer/pkg/config"
+	"load-balancer/pkg/types"
+	"load-balancer/pkg/workerpool"
 	"net/http"
 	"time"
 )
@@ -17,6 +19,12 @@ var httpClient = &http.Client{
 	Timeout:   10 * time.Second,
 }
 
+func (n *Node) getWorkerPoolEventHandler() func(*types.Connection) {
+	return func(conn *types.Connection) {
+		n.processRequest(conn)
+	}
+}
+
 func FromContainer(containerID string, address string, routeConfig config.RouteConfig) *Node {
 	out := &Node{
 		ContainerID: containerID,
@@ -26,8 +34,9 @@ func FromContainer(containerID string, address string, routeConfig config.RouteC
 			ResponseTime: 0,
 			Connections:  0,
 		},
-		Queue: InitNodeQueue(routeConfig.NodeQueueSize, routeConfig.WorkerThreads),
 	}
+	// add node queue later since we need to call the n.getWorkerPoolEventHandler method
+	out.Queue = InitNodeQueue(routeConfig.RouteQueueSize, routeConfig.WorkerThreads, out.getWorkerPoolEventHandler())
 
 	go out.WatchQueue()
 	return out
@@ -42,10 +51,21 @@ func FromURL(url string, routeConfig *config.RouteConfig) *Node {
 			ResponseTime: 0,
 			Connections:  0,
 		},
-		Queue: InitNodeQueue(routeConfig.NodeQueueSize, routeConfig.WorkerThreads),
 	}
+	// add node queue later since we need to call the n.getWorkerPoolEventHandler method
+	out.Queue = InitNodeQueue(routeConfig.NodeQueueSize, routeConfig.WorkerThreads, out.getWorkerPoolEventHandler())
 
 	go out.CheckHealth()
 	go out.WatchQueue()
 	return out
+}
+
+func InitNodeQueue(capacity uint32, workerThreads uint16, eventHandler func(*types.Connection)) *NodeQueue {
+	return &NodeQueue{
+		queue:       make(chan *types.Connection, capacity),
+		open:        true,
+		connChan:    make(chan *types.Connection, capacity),
+		closeSignal: make(chan struct{}),
+		workerPool:  workerpool.InitWorkerPool(workerThreads, eventHandler),
+	}
 }
