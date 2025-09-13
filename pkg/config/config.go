@@ -15,8 +15,9 @@ var defaultConfig = ConfigType{
 		Host: "localhost",
 	},
 	Logging: LoggingConfig{
-		Level:  4,
-		Folder: "./logs",
+		Level:    4,
+		Folder:   "./logs",
+		MaxLines: 50000,
 	},
 	Emitter: EmitterConfig{
 		Enabled: true,
