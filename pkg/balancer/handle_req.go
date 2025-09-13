@@ -32,5 +32,11 @@ func (b *BalancerType) HandleRequest(conn *types.Connection) {
 		return
 	}
 
-	routeObject.Queue.Enqueue(conn)
+	proxyNode := routeObject.GetProxyNode(conn.Request.RemoteAddr)
+	if proxyNode != nil {
+		proxyNode.Queue.Enqueue(conn)
+	} else {
+		routeObject.Queue.Enqueue(conn)
+	}
+
 }
