@@ -2,6 +2,7 @@ package node
 
 import (
 	"load-balancer/pkg/types"
+	"load-balancer/pkg/workerpool"
 	"sync"
 )
 
@@ -39,11 +40,16 @@ type NodeMetrics struct {
 	// LastRequestTime time.Time  `json:"last_request"`
 }
 
+// A batch-processed request queue that implements a worker pool for processing
+//
+// This queue is where all connections are first sent before going directly to a node.
+// This is done so that we can control the flow of requests,
+// requeue to different nodes upon failure of this one,
+// and easily calculate load level.
 type NodeQueue struct {
-	Queue         chan *types.Connection // Channel-based queue
-	Open          bool                   // Indicates if the queue is open
-	connChan      chan *types.Connection // Signal channel for new connections
-	closeSignal   chan struct{}          // Signal channel for closing the queue
-	workChan      chan *types.Connection // connections to send to the worker pool
-	workerThreads uint16
+	queue       chan *types.Connection // Channel-based queue
+	open        bool                   // Indicates if the queue is open
+	connChan    chan *types.Connection // Signal channel for new connections
+	closeSignal chan struct{}          // Signal channel for closing the queue
+	workerPool  workerpool.WorkerPool[*types.Connection]
 }

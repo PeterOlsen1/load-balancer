@@ -13,19 +13,11 @@ func (n *Node) WatchQueue() {
 	batchTicker := time.NewTicker(time.Millisecond * 20)
 	defer batchTicker.Stop()
 
-	for range n.Queue.workerThreads {
-		go func() {
-			for conn := range q.workChan {
-				n.processRequest(conn)
-			}
-		}()
-	}
-
 	for {
 		select {
 		case <-batchTicker.C:
 			for _, conn := range batch.Flush() {
-				q.workChan <- conn
+				q.workerPool.Event(conn)
 			}
 		case conn := <-q.connChan:
 			if conn == nil {
@@ -35,7 +27,7 @@ func (n *Node) WatchQueue() {
 			err := batch.Add(conn)
 			if err != nil {
 				for _, conn := range batch.Flush() {
-					q.workChan <- conn
+					q.workerPool.Event(conn)
 				}
 			}
 		case <-q.closeSignal:
@@ -49,20 +41,9 @@ func (n *Node) WatchQueue() {
 				go n.processRequest(conn)
 			}
 
-			close(q.workChan)
+			q.workerPool.Close()
 			return
 		}
-	}
-}
-
-func InitNodeQueue(capacity uint32, workerThreads uint16) *NodeQueue {
-	return &NodeQueue{
-		Queue:         make(chan *types.Connection, capacity),
-		Open:          true,
-		connChan:      make(chan *types.Connection, capacity),
-		closeSignal:   make(chan struct{}),
-		workChan:      make(chan *types.Connection, capacity),
-		workerThreads: workerThreads,
 	}
 }
 
@@ -85,18 +66,18 @@ func (q *NodeQueue) Dequeue() (*types.Connection, error) {
 }
 
 func (n *Node) CloseQueue() {
-	if !n.Queue.Open || n.Queue.closeSignal == nil {
+	if !n.Queue.open || n.Queue.closeSignal == nil {
 		return
 	}
 
-	n.Queue.Open = false
+	n.Queue.open = false
 	close(n.Queue.closeSignal)
 	close(n.Queue.connChan)
 }
 
 func (n *Node) OpenQueue() {
-	n.Queue.Open = true
-	n.Queue.connChan = make(chan *types.Connection, cap(n.Queue.Queue))
+	n.Queue.open = true
+	n.Queue.connChan = make(chan *types.Connection, cap(n.Queue.queue))
 	n.Queue.closeSignal = make(chan struct{})
 	go n.WatchQueue()
 }
@@ -107,4 +88,8 @@ func (q *NodeQueue) Len() int {
 
 func (q *NodeQueue) HasSpace() bool {
 	return len(q.connChan) < cap(q.connChan)
+}
+
+func (q *NodeQueue) IsOpen() bool {
+	return q.open
 }

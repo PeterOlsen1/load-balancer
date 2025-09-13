@@ -82,7 +82,7 @@ func (node *Node) CheckHealth() (string, error) {
 		health = "unhealthy"
 		go node.CloseQueue()
 	} else {
-		if !node.Queue.Open {
+		if !node.Queue.open {
 			go node.OpenQueue()
 		}
 	}
