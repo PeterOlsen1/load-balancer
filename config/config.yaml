@@ -5,6 +5,7 @@ server:
 logging:
   level: 2
   folder: "./logs"
+  max_lines: 50000
 
 emitter:
   enabled: false

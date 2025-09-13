@@ -42,6 +42,9 @@ type LoggingConfig struct {
 
 	// Path to the folder where logs will be stored
 	Folder string `yaml:"folder"`
+
+	// The number of lines we write until rotating the log file
+	MaxLines uint32 `yaml:"max_lines"`
 }
 
 type DockerConfig struct {
@@ -129,7 +132,7 @@ type RouteConfig struct {
 
 	// The number of worker threads to be wathing a queue at a time
 	WorkerThreads uint16 `yaml:"worker_threads"`
-	
+
 	// Docker configuration, see DockerConfig type for more info
 	Docker *DockerConfig `yaml:"docker"`
 
@@ -138,5 +141,4 @@ type RouteConfig struct {
 
 	// List of pre-running servers to proxy requests to. See RouteServerConfig type for more info
 	Servers []RouteServerConfig `yaml:"servers"`
-
 }

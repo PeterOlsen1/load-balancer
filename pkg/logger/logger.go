@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"sync"
 	"time"
 
 	"load-balancer/pkg/config"
@@ -13,22 +12,17 @@ import (
 	"github.com/google/uuid"
 )
 
-var logfile string
-var ll uint8
-var logDir string
-var logLock sync.Mutex
-var linesWritten int
-var maxLogLines int = 50000 //TODO: replace with config
+var logger Logger
 
 func makeLogfile() (string, error) {
-	err := os.MkdirAll(logDir, os.ModePerm)
+	err := os.MkdirAll(logger.logDir, os.ModePerm)
 	if err != nil {
 		fmt.Println("error making logfile", err)
 		return "", err
 	}
 
 	out := fmt.Sprintf("%s/app_%s_%s.log",
-		logDir,
+		logger.logDir,
 		time.Now().Format("2006-01-02"),
 		uuid.New().String()[:8],
 	)
@@ -36,18 +30,25 @@ func makeLogfile() (string, error) {
 }
 
 func InitLogger() {
-	ll = config.Config.Logging.Level
-	logDir = config.Config.Logging.Folder
+	logger.logLevel = config.Config.Logging.Level
+	logger.logDir = config.Config.Logging.Folder
 
 	f, err := makeLogfile()
 	if err != nil {
 		return
 	}
-	logfile = f
+
+	logCfg := config.Config.Logging
+	logger = Logger{
+		maxLines: logCfg.MaxLines,
+		logFile:  f,
+		logLevel: logCfg.Level,
+		logDir:   logCfg.Folder,
+	}
 }
 
 func Err(msg string, err error) {
-	if ll == 4 {
+	if logger.logLevel == 4 {
 		return
 	}
 
@@ -56,7 +57,7 @@ func Err(msg string, err error) {
 }
 
 func Info(msg string) {
-	if ll >= 3 {
+	if logger.logLevel >= 3 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=INFO msg=\"%s\"", time.Now().Format(time.RFC3339), msg)
@@ -64,7 +65,7 @@ func Info(msg string) {
 }
 
 func ContainerStart(containerID string) {
-	if ll >= 3 {
+	if logger.logLevel >= 3 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=CONTAINER_START container_ID=\"%s\"", time.Now().Format(time.RFC3339), containerID)
@@ -72,7 +73,7 @@ func ContainerStart(containerID string) {
 }
 
 func ContainerStop(containerID string) {
-	if ll >= 3 {
+	if logger.logLevel >= 3 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=CONTAINER_STOP container_ID=\"%s\"", time.Now().Format(time.RFC3339), containerID)
@@ -80,7 +81,7 @@ func ContainerStop(containerID string) {
 }
 
 func ContainerPause(containerID string) {
-	if ll >= 3 {
+	if logger.logLevel >= 3 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=CONTAINER_PAUSE container_ID=\"%s\"", time.Now().Format(time.RFC3339), containerID)
@@ -88,7 +89,7 @@ func ContainerPause(containerID string) {
 }
 
 func ContainerUnpause(containerID string) {
-	if ll >= 3 {
+	if logger.logLevel >= 3 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=CONTAINER_UNPAUSE container_ID=\"%s\"", time.Now().Format(time.RFC3339), containerID)
@@ -96,7 +97,7 @@ func ContainerUnpause(containerID string) {
 }
 
 func Request(conn *types.Connection) {
-	if ll >= 1 {
+	if logger.logLevel >= 1 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=REQUEST ip=%s method=%s path=\"%s\" user_agent=\"%s\"", time.Now().Format(time.RFC3339), conn.Request.RemoteAddr, conn.Request.Method, conn.Request.URL.Path, conn.Request.UserAgent())
@@ -104,7 +105,7 @@ func Request(conn *types.Connection) {
 }
 
 func WsRequest(body []byte, ip string) {
-	if ll >= 1 {
+	if logger.logLevel >= 1 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=WS_MESSAGE body=\"%s\" ip=\"%s\"", time.Now().Format(time.RFC3339), string(body), ip)
@@ -112,7 +113,7 @@ func WsRequest(body []byte, ip string) {
 }
 
 func WsConnect(req *http.Request) {
-	if ll >= 1 {
+	if logger.logLevel >= 1 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=WS_CONNECT ip=%s", time.Now().Format(time.RFC3339), req.RemoteAddr)
@@ -120,7 +121,7 @@ func WsConnect(req *http.Request) {
 }
 
 func WsClose(req *http.Request) {
-	if ll >= 1 {
+	if logger.logLevel >= 1 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=WS_CLOSE ip=%s", time.Now().Format(time.RFC3339), req.RemoteAddr)
@@ -128,7 +129,7 @@ func WsClose(req *http.Request) {
 }
 
 func Health(status string, address string, respTime float32) {
-	if ll >= 1 {
+	if logger.logLevel >= 1 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=HEALTH status=%s address=\"%s\" response_time=%f", time.Now().Format(time.RFC3339), status, address, respTime)
@@ -136,7 +137,7 @@ func Health(status string, address string, respTime float32) {
 }
 
 func Proxy(path string, proxiedTo string, ip string) {
-	if ll >= 2 {
+	if logger.logLevel >= 2 {
 		return
 	}
 	logLine := fmt.Sprintf("time=%s type=PROXY ip=%s path=\"%s\" proxied_to=\"%s\"", time.Now().Format(time.RFC3339), ip, path, proxiedTo)
@@ -144,7 +145,7 @@ func Proxy(path string, proxiedTo string, ip string) {
 }
 
 func PoolSize(active int, inactive int) {
-	if ll >= 2 {
+	if logger.logLevel >= 2 {
 		return
 	}
 
@@ -153,10 +154,10 @@ func PoolSize(active int, inactive int) {
 }
 
 func writeToFile(logLine string) {
-	logLock.Lock()
-	defer logLock.Unlock()
+	logger.mu.Lock()
+	defer logger.mu.Unlock()
 
-	f, err := os.OpenFile(logfile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(logger.logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Printf("Failed to open log file: %v\n", err)
 		return
@@ -166,17 +167,17 @@ func writeToFile(logLine string) {
 		fmt.Printf("Failed to write to log file: %v\n", err)
 	}
 
-	linesWritten++
-	if linesWritten > maxLogLines {
-		fmt.Println("50000 log lines bro, starting a new log")
+	logger.linesWritten++
+	if logger.linesWritten > logger.maxLines {
 		newLogFile, err := makeLogfile()
 		if err != nil {
 			fmt.Printf("Failed to create new log file: %v\n", err)
 			return
 		}
-		fmt.Fprintf(f, "%d log lines written, moving to new file %s", maxLogLines, newLogFile)
+		fmt.Printf("50000 log lines, starting a new logfile: %s\n", newLogFile)
+		fmt.Fprintf(f, "%d log lines written, moving to new file %s", logger.maxLines, newLogFile)
 
-		logfile = newLogFile
-		linesWritten = 0
+		logger.logFile = newLogFile
+		logger.linesWritten = 0
 	}
 }
