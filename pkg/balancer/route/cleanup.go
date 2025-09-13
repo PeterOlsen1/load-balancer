@@ -9,10 +9,8 @@ func (r *Route) CleanupNodes() error {
 	var wg sync.WaitGroup
 	var loopErr error
 
-	// capture lock so no other processes can add containers
-	r.NodePool.Mu.Lock()
-	defer r.NodePool.Mu.Unlock()
-
+	// locks mutex and does not unlock, health operations are also stopped
+	r.NodePool.Close()
 	for _, n := range r.NodePool.GetAll() {
 		if n == nil {
 			continue

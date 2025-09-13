@@ -24,10 +24,7 @@ func (s *Emitter) SendMessage(message string) error {
 		return nil
 	}
 
-	s.LockedConn.Lock.Lock()
-	defer s.LockedConn.Lock.Unlock()
-
-	err := s.LockedConn.Conn.WriteMessage(1, []byte(message))
+	err := s.LockedConn.WriteMessage(1, []byte(message))
 	if err != nil {
 		logger.Err("Sending websocket message", err)
 	}

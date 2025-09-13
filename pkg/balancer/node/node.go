@@ -51,9 +51,9 @@ func (node *Node) processRequest(conn *types.Connection) {
 //
 // If an OK status is returned, set node to healthy. Else, unhealthy
 func (node *Node) CheckHealth() (string, error) {
-	node.Metrics.Lock.Lock()
+	node.Metrics.mu.Lock()
 	isPaused := node.Metrics.Health == "paused"
-	node.Metrics.Lock.Unlock()
+	node.Metrics.mu.Unlock()
 
 	if isPaused {
 		return "paused", nil
@@ -71,8 +71,8 @@ func (node *Node) CheckHealth() (string, error) {
 		return "unhealthy", err
 	}
 
-	node.Metrics.Lock.Lock()
-	defer node.Metrics.Lock.Unlock()
+	node.Metrics.mu.Lock()
+	defer node.Metrics.mu.Unlock()
 
 	respTime := float32(duration.Microseconds() / 1000)
 	node.Metrics.ResponseTime = respTime
@@ -96,17 +96,17 @@ func (node *Node) CheckHealth() (string, error) {
 }
 
 func (node *Node) Pause() {
-	node.Metrics.Lock.Lock()
+	node.Metrics.mu.Lock()
 	node.Metrics.Health = "paused"
-	node.Metrics.Lock.Unlock()
+	node.Metrics.mu.Unlock()
 
 	node.CloseQueue()
 }
 
 func (node *Node) Unpause() {
-	node.Metrics.Lock.Lock()
+	node.Metrics.mu.Lock()
 	node.Metrics.Health = "unknown"
-	node.Metrics.Lock.Unlock()
+	node.Metrics.mu.Unlock()
 
 	node.CheckHealth()
 }
