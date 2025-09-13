@@ -9,27 +9,18 @@ import (
 
 func (n *Node) WatchQueue() {
 	q := n.Queue
-	batch := batch.InitBatch(100)
-	batchTicker := time.NewTicker(time.Millisecond * 20)
-	defer batchTicker.Stop()
+	batch := batch.InitBatch(100, 20*time.Millisecond, func(conn *types.Connection) {
+		q.workerPool.Event(conn)
+	})
 
 	for {
 		select {
-		case <-batchTicker.C:
-			for _, conn := range batch.Flush() {
-				q.workerPool.Event(conn)
-			}
 		case conn := <-q.connChan:
 			if conn == nil {
 				return
 			}
 
-			err := batch.Add(conn)
-			if err != nil {
-				for _, conn := range batch.Flush() {
-					q.workerPool.Event(conn)
-				}
-			}
+			batch.Add(conn)
 		case <-q.closeSignal:
 			for conn := range q.connChan {
 				if conn == nil {
@@ -37,11 +28,11 @@ func (n *Node) WatchQueue() {
 				}
 				go n.processRequest(conn)
 			}
-			for _, conn := range batch.Flush() {
+			batch.FlushCustom(func(conn *types.Connection) {
 				go n.processRequest(conn)
-			}
+			})
 
-			q.workerPool.Close()
+			batch.Close()
 			return
 		}
 	}
