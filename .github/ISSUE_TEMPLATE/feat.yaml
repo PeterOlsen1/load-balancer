@@ -1,0 +1,20 @@
+name: ✨ Feature
+description: Suggest a new feature or enhancement
+title: "feat:"
+labels: [enhancement, feature]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What is the feature?
+      description: Describe the feature in detail.
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why is this feature needed?
+      description: Describe the problem this feature will solve.
+    validations:
+      required: true
