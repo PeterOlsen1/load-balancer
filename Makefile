@@ -14,11 +14,11 @@ test:
 test-rps:
 	go run ./test/main.go -seconds=${SECONDS} -rps=${RPS}
 
-lint:
-	golangci-lint run -v --config .golangci.yml
-
 test-wrk:
 	wrk -t10 -c1000 -d10s http://localhost:8080
+
+up-fds:
+	ulimit -n $((1 << 16))
 
 clean:
 	rm -rf ./logs

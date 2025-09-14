@@ -1,6 +1,6 @@
 package workerpool
 
-func InitWorkerPool[T any](numWorkers uint16, eventHandler func(e T)) WorkerPool[T] {
+func InitWorkerPool[T any](numWorkers uint16, eventHandler func(e T)) *WorkerPool[T] {
 	pool := WorkerPool[T]{
 		numWorkers:   numWorkers,
 		eventChan:    make(chan T, 1000),
@@ -16,5 +16,5 @@ func InitWorkerPool[T any](numWorkers uint16, eventHandler func(e T)) WorkerPool
 		}()
 	}
 
-	return pool
+	return &pool
 }

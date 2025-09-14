@@ -51,5 +51,5 @@ type NodeQueue struct {
 	open        bool                   // Indicates if the queue is open
 	connChan    chan *types.Connection // Signal channel for new connections
 	closeSignal chan struct{}          // Signal channel for closing the queue
-	workerPool  workerpool.WorkerPool[*types.Connection]
+	workerPool  *workerpool.WorkerPool[*types.Connection]
 }
