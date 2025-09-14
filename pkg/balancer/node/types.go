@@ -21,6 +21,7 @@ type Node struct {
 	Address     string      `json:"address"`
 	Metrics     NodeMetrics `json:"metrics"`
 	Queue       *NodeQueue  `json:"queue"`
+	Weight      uint32      `json:"weight"`
 }
 
 // Explaining some fields
