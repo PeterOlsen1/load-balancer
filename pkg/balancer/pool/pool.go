@@ -44,14 +44,14 @@ func (p *NodePool) CheckHealth(cfg config.RouteConfig) {
 		}(n)
 	}
 
-	if p.GetActiveSize() < cfg.Pool.ActiveSize {
-		diff := cfg.Pool.ActiveSize - p.GetActiveSize()
-		logger.Info(fmt.Sprintf("Pool has fewer active nodes than config, unpausing %d", diff))
+	// if p.GetActiveSize() < cfg.Pool.ActiveSize {
+	// 	diff := cfg.Pool.ActiveSize - p.GetActiveSize()
+	// 	logger.Info(fmt.Sprintf("Pool has fewer active nodes than config, unpausing %d", diff))
 
-		for range diff {
-			p.UnpauseOne()
-		}
-	}
+	// 	for range diff {
+	// 		p.UnpauseOne()
+	// 	}
+	// }
 }
 
 func (p *NodePool) GetAll() []*node.Node {

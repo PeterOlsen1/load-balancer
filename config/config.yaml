@@ -31,4 +31,6 @@ routes:
       max_active: 20
     servers:
       - url: http://localhost:3000
-    
+        weight: 1
+      - url: http://localhost:3001
+        weight: 1
