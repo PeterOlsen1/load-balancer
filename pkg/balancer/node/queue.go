@@ -9,8 +9,10 @@ import (
 
 func (n *Node) WatchQueue() {
 	q := n.Queue
-	batch := batch.InitBatch(100, 20*time.Millisecond, func(conn *types.Connection) {
-		q.workerPool.Event(conn)
+	batch := batch.InitBatch(100, 20*time.Millisecond, func(conns []*types.Connection) {
+		for _, conn := range conns {
+			q.workerPool.Event(conn)
+		}
 	})
 
 	for {
@@ -28,8 +30,10 @@ func (n *Node) WatchQueue() {
 				}
 				go n.processRequest(conn)
 			}
-			batch.FlushCustom(func(conn *types.Connection) {
-				go n.processRequest(conn)
+			batch.FlushCustom(func(conns []*types.Connection) {
+				for _, conn := range conns {
+					go n.processRequest(conn)
+				}
 			})
 
 			batch.Close()

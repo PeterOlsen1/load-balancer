@@ -24,5 +24,5 @@ type Batch[T any] struct {
 	//
 	// When flushing, this function will be applied to all
 	// members of the batch
-	onFlush func(T)
+	onFlush func([]T)
 }

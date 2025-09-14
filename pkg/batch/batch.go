@@ -20,11 +20,9 @@ func (b *Batch[T]) Add(item T) {
 //
 // Done to avoid deadlock in the add method when we add + flush
 func (b *Batch[T]) flushUnsafe() {
-	//apply flush func
-	flushed := b.batch
-	for _, item := range flushed {
-		b.onFlush(item)
-	}
+	//copy batch and apply fush function
+	batchCopy := append([]T(nil), b.batch...)
+	b.onFlush(batchCopy)
 
 	b.batch = make([]T, 0, b.cap)
 }
@@ -41,15 +39,13 @@ func (b *Batch[T]) Flush() {
 
 // This method is basically the same as Flush, but the user can provide
 // a custom method to be applied to eveyr item
-func (b *Batch[T]) FlushCustom(onFlush func(T)) {
+func (b *Batch[T]) FlushCustom(onFlush func([]T)) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
 	//apply custom flush func
-	flushed := b.batch
-	for _, item := range flushed {
-		onFlush(item)
-	}
+	batchCopy := append([]T(nil), b.batch...)
+	onFlush(batchCopy)
 
 	b.batch = make([]T, 0, b.cap)
 }

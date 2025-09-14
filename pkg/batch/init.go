@@ -2,7 +2,7 @@ package batch
 
 import "time"
 
-func InitBatch[T any](cap uint32, flushInterval time.Duration, onFlush func(T)) *Batch[T] {
+func InitBatch[T any](cap uint32, flushInterval time.Duration, onFlush func([]T)) *Batch[T] {
 	b := &Batch[T]{
 		batch:     make([]T, 0, cap),
 		cap:       cap,

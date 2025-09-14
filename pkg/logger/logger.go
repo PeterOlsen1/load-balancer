@@ -6,8 +6,10 @@ import (
 	"os"
 	"time"
 
+	"load-balancer/pkg/batch"
 	"load-balancer/pkg/config"
 	"load-balancer/pkg/types"
+	"load-balancer/pkg/workerpool"
 
 	"github.com/google/uuid"
 )
@@ -38,13 +40,62 @@ func InitLogger() {
 		return
 	}
 
+	//setup batch and callback function
+	batch := batch.InitBatch(100, time.Millisecond*500, func(b []string) {
+		logger.mu.Lock()
+		defer logger.mu.Unlock()
+
+		fRef, err := os.OpenFile(logger.logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			fmt.Printf("Failed to open log file: %v\n", err)
+			return
+		}
+
+		for _, line := range b {
+			if _, err := fRef.WriteString(line + "\n"); err != nil {
+				continue
+			}
+
+			logger.linesWritten++
+			if logger.linesWritten > logger.maxLines {
+				newLogFile, err := makeLogfile()
+				if err != nil {
+					fmt.Printf("Failed to create new log file: %v\n", err)
+					return
+				}
+				fmt.Printf("50000 log lines, starting a new logfile: %s\n", newLogFile)
+				fmt.Fprintf(fRef, "%d log lines written, moving to new file %s", logger.maxLines, newLogFile)
+
+				logger.logFile = newLogFile
+				logger.linesWritten = 0
+
+				fRef, err = os.OpenFile(logger.logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+				if err != nil {
+					fmt.Printf("Failed to open log file: %v\n", err)
+					return
+				}
+			}
+		}
+	})
+
+	//setup pool and callback function
+	pool := workerpool.InitWorkerPool(10, func(logLine string) {
+		batch.Add(logLine)
+	})
+
 	logCfg := config.Config.Logging
 	logger = Logger{
-		maxLines: logCfg.MaxLines,
-		logFile:  f,
-		logLevel: logCfg.Level,
-		logDir:   logCfg.Folder,
+		maxLines:   logCfg.MaxLines,
+		logFile:    f,
+		logLevel:   logCfg.Level,
+		logDir:     logCfg.Folder,
+		logBatch:   batch,
+		workerPool: pool,
 	}
+}
+
+func CleanupLogger() {
+	logger.logBatch.Flush()
 }
 
 func Err(msg string, err error) {
@@ -154,30 +205,5 @@ func PoolSize(active int, inactive int) {
 }
 
 func writeToFile(logLine string) {
-	logger.mu.Lock()
-	defer logger.mu.Unlock()
-
-	f, err := os.OpenFile(logger.logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		fmt.Printf("Failed to open log file: %v\n", err)
-		return
-	}
-	defer f.Close()
-	if _, err := f.WriteString(logLine + "\n"); err != nil {
-		fmt.Printf("Failed to write to log file: %v\n", err)
-	}
-
-	logger.linesWritten++
-	if logger.linesWritten > logger.maxLines {
-		newLogFile, err := makeLogfile()
-		if err != nil {
-			fmt.Printf("Failed to create new log file: %v\n", err)
-			return
-		}
-		fmt.Printf("50000 log lines, starting a new logfile: %s\n", newLogFile)
-		fmt.Fprintf(f, "%d log lines written, moving to new file %s", logger.maxLines, newLogFile)
-
-		logger.logFile = newLogFile
-		logger.linesWritten = 0
-	}
+	logger.workerPool.Event(logLine)
 }
