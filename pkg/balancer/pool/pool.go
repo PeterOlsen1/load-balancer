@@ -66,10 +66,10 @@ func (p *NodePool) GetActive() []*node.Node {
 	return p.Active
 }
 
-func (p *NodePool) GetActiveSize() int {
+func (p *NodePool) GetActiveSize() uint16 {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	return len(p.Active)
+	return uint16(len(p.Active))
 }
 
 func (p *NodePool) AddActive(n *node.Node) {
@@ -142,10 +142,10 @@ func (p *NodePool) GetInactive() []*node.Node {
 	return p.Inactive
 }
 
-func (p *NodePool) GetInactiveSize() int {
+func (p *NodePool) GetInactiveSize() uint16 {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	return len(p.Inactive)
+	return uint16(len(p.Inactive))
 }
 
 func (p *NodePool) AddInactive(n *node.Node) {

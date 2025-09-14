@@ -19,10 +19,10 @@ routes:
     route_queue_size: 1000
     node_queue_size: 500
     worker_threads: 30
-    docker:
-      image: node-server
-      internal_port: 3000
-      no_requests_timeout_ms: 5000
+    # docker:
+      # image: node-server
+      # internal_port: 3000
+      # no_requests_timeout_ms: 5000
     pool:
       activation_interval_ms: 100
       cleanup_interval_ms: 5000
@@ -30,4 +30,7 @@ routes:
       active_size: 6
       max_active: 20
     servers:
-    
+      - url: http://localhost:3000
+        weight: 1
+      - url: http://localhost:3001
+        weight: 1

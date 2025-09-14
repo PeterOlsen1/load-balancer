@@ -1,3 +1,4 @@
 .DS_Store
 logs/
 thoughts.md
+node_modules/

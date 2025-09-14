@@ -20,12 +20,17 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 
 	var wg sync.WaitGroup
 
-	//rethink this conditional
-	if routeStruct.Docker != nil { // && len(routeStruct.Servers) == 0
+	// start servers first
+	for _, server := range routeStruct.Servers {
+		routeStruct.NodePool.AddActive(node.FromURL(server.URL, &routeStruct.RouteConfig))
+	}
+
+	// if docker configuration exists
+	if routeStruct.Docker != nil {
 		fmt.Printf("Starting containers for route: %s\n", cfg.Name)
 
 		//start active container, don't pause so health can move to active later
-		for range cfg.Pool.ActiveSize {
+		for range cfg.Pool.ActiveSize - routeStruct.NodePool.GetActiveSize() {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
@@ -61,10 +66,6 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 	wg.Wait()
 	time.Sleep(1 * time.Second)
 	routeStruct.NodePool.CheckHealth(cfg)
-
-	for _, server := range routeStruct.Servers {
-		routeStruct.NodePool.AddActive(node.FromURL(server.URL, &routeStruct.RouteConfig))
-	}
 
 	//goroutine to periodically check health of containers
 	go func() {

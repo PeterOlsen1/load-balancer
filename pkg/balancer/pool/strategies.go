@@ -9,7 +9,7 @@ import (
 	"sync"
 )
 
-var roundRobinIndex = 0
+var roundRobinIndex uint16 = 0
 var roundRobinIndexMu sync.Mutex
 
 func (p *NodePool) RoundRobin() *node.Node {
@@ -22,7 +22,7 @@ func (p *NodePool) RoundRobin() *node.Node {
 	}
 
 	nodes := p.GetActive()
-	n = len(p.Active)
+	n = uint16(len(nodes))
 	if n == 0 {
 		return nil
 	}
@@ -32,7 +32,7 @@ func (p *NodePool) RoundRobin() *node.Node {
 	roundRobinIndex %= n
 	roundRobinIndexMu.Unlock()
 
-	loops := 0
+	var loops uint16 = 0
 	// keep finding nodes until we find one that has space and is healthy
 	for node.Metrics.Health != "healthy" || !node.Queue.HasSpace() {
 		roundRobinIndexMu.Lock()
