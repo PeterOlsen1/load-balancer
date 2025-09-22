@@ -205,3 +205,9 @@ func (p *NodePool) Close() {
 	// this is only called when shutting down, this is okay
 	p.mu.Lock()
 }
+
+func (p *NodePool) Debug() {
+	fmt.Println("Nodes:")
+	fmt.Println(p.Active)
+	fmt.Println(p.Inactive)
+}

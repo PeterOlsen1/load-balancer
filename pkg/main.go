@@ -29,7 +29,7 @@ func main() {
 		<-c
 		logger.CleanupLogger()
 
-		fmt.Println("Cleaning up nodes...")
+		fmt.Println("\nCleaning up nodes...")
 		err := balancer.Balancer.CleanupNodes()
 		if err != nil {
 			fmt.Println("Error cleaning up nodes:", err)
