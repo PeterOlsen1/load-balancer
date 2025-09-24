@@ -5,6 +5,7 @@ import (
 	"load-balancer/pkg/balancer/node"
 	"load-balancer/pkg/config"
 	"load-balancer/pkg/logger"
+	"strings"
 )
 
 // Move all unhealthy nodes in active to inactive
@@ -208,6 +209,13 @@ func (p *NodePool) Close() {
 
 func (p *NodePool) Debug() {
 	fmt.Println("Nodes:")
-	fmt.Println(p.Active)
-	fmt.Println(p.Inactive)
+	printNodes := func(nodes []*node.Node) {
+		fmt.Printf("[ ")
+		for _, n := range nodes {
+			fmt.Printf("%s ", strings.Split(n.Address, ":")[2])
+		}
+		fmt.Printf("]\n")
+	}
+	printNodes(p.Active)
+	printNodes(p.Inactive)
 }
