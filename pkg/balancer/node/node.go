@@ -51,18 +51,20 @@ func (node *Node) processRequest(conn *types.Connection) {
 //
 // If an OK status is returned, set node to healthy. Else, unhealthy
 func (node *Node) CheckHealth() (string, error) {
-	node.Metrics.mu.Lock()
-	isPaused := node.Metrics.Health == "paused"
-	node.Metrics.mu.Unlock()
+	node.mu.Lock()
+	defer node.mu.Unlock()
 
+	return node.UnsafeCheckHealth()
+}
+
+func (node *Node) UnsafeCheckHealth() (string, error) {
+	isPaused := node.Metrics.Health == "paused"
 	if isPaused {
 		return "paused", nil
 	}
 
-	address := node.Address
-
 	start := time.Now()
-	resp, err := httpClient.Get(fmt.Sprintf("%s/health", address))
+	resp, err := httpClient.Get(fmt.Sprintf("%s/health", node.Address))
 	duration := time.Since(start)
 
 	if err != nil {
@@ -70,9 +72,6 @@ func (node *Node) CheckHealth() (string, error) {
 		ws.EventEmitter.Error("Fetching node health", err)
 		return "unhealthy", err
 	}
-
-	node.Metrics.mu.Lock()
-	defer node.Metrics.mu.Unlock()
 
 	respTime := float32(duration.Microseconds() / 1000)
 	node.Metrics.ResponseTime = respTime
@@ -89,28 +88,35 @@ func (node *Node) CheckHealth() (string, error) {
 
 	// logger.Health(health, node.Address, respTime)
 	ws.EventEmitter.Health(health, node.Address, respTime)
-
 	node.Metrics.Health = health
 
 	return health, nil
 }
 
 func (node *Node) Pause() {
-	node.Metrics.mu.Lock()
+	node.mu.Lock()
 	node.Metrics.Health = "paused"
-	node.Metrics.mu.Unlock()
+	node.mu.Unlock()
 
 	node.CloseQueue()
 }
 
 func (node *Node) Unpause() {
-	node.Metrics.mu.Lock()
+	node.mu.Lock()
 	node.Metrics.Health = "unknown"
-	node.Metrics.mu.Unlock()
+	node.UnsafeCheckHealth()
+	node.mu.Unlock()
 
-	node.CheckHealth()
 }
 
 func (n *Node) Equals(other *Node) bool {
 	return n.Address == other.Address && n.ContainerID == other.ContainerID
+}
+
+func (n *Node) Lock() {
+	n.mu.Lock()
+}
+
+func (n *Node) Unlock() {
+	n.mu.Unlock()
 }

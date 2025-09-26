@@ -22,6 +22,7 @@ type Node struct {
 	Metrics     NodeMetrics `json:"metrics"`
 	Queue       *NodeQueue  `json:"queue"`
 	Weight      uint32      `json:"weight"`
+	mu          sync.Mutex
 }
 
 // Explaining some fields
@@ -33,7 +34,6 @@ type Node struct {
 // - unknown
 // * CreatedNewNode is a flag where if we are over max connections, a node has already been created
 type NodeMetrics struct {
-	mu             sync.Mutex
 	Health         string  `json:"health"`
 	ResponseTime   float32 `json:"response_time"`
 	Connections    uint32  `json:"connections"`
