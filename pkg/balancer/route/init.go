@@ -102,7 +102,8 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 	// }()
 
 	go func() {
-		ticker := time.NewTicker(1 * time.Second)
+		time.Sleep(1500 * time.Millisecond)
+		ticker := time.NewTicker(650 * time.Millisecond)
 		defer ticker.Stop()
 		p := true
 

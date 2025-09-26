@@ -32,8 +32,10 @@ func (p *NodePool) CheckHealth(cfg config.RouteConfig) {
 
 	for _, n := range p.Inactive {
 		go func(n *node.Node) {
+			prevHealth := n.Metrics.Health
 			res, err := n.CheckHealth()
 			if res == "healthy" && err == nil {
+				fmt.Println(prevHealth)
 				logger.Info(fmt.Sprintf("Moving healthy node to active: %s", n.Address))
 				p.mu.Lock()
 				p.unsafeRemoveInactive(n)
@@ -90,16 +92,18 @@ func (p *NodePool) UnpauseOne() error {
 	defer p.mu.Unlock()
 
 	//loop through inactive nodes, health check, activate the first good one
-	for i, n := range p.Inactive {
+	for _, n := range p.Inactive {
 		if n.Metrics.Health != "unhealthy" {
+			n.Lock()
 			n.Metrics.Health = "unknown" //set to unknown so health check doesn't insta-return from pause
-			health, err := n.CheckHealth()
+			health, err := n.UnsafeCheckHealth()
+			n.Unlock()
 			if err != nil || health != "healthy" {
 				continue
 			}
 
 			//remove from inactive, add to active
-			p.Inactive = append(p.Inactive[:i], p.Inactive[i+1:]...)
+			p.unsafeRemoveActive(n)
 			p.unsafeAddActive(n)
 			if !n.Queue.IsOpen() {
 				n.OpenQueue()
@@ -111,7 +115,6 @@ func (p *NodePool) UnpauseOne() error {
 	}
 
 	logger.PoolSize(len(p.Active), len(p.Inactive))
-
 	return nil
 }
 
@@ -214,7 +217,7 @@ func (p *NodePool) Debug() {
 		for _, n := range nodes {
 			fmt.Printf("%s ", strings.Split(n.Address, ":")[2])
 		}
-		fmt.Printf("]\n")
+		fmt.Printf("]: %d\n", len(nodes))
 	}
 	printNodes(p.Active)
 	printNodes(p.Inactive)
