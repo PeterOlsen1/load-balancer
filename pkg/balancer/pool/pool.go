@@ -5,6 +5,7 @@ import (
 	"load-balancer/pkg/balancer/node"
 	"load-balancer/pkg/config"
 	"load-balancer/pkg/logger"
+	"strings"
 )
 
 // Move all unhealthy nodes in active to inactive
@@ -31,8 +32,10 @@ func (p *NodePool) CheckHealth(cfg config.RouteConfig) {
 
 	for _, n := range p.Inactive {
 		go func(n *node.Node) {
+			prevHealth := n.Metrics.Health
 			res, err := n.CheckHealth()
 			if res == "healthy" && err == nil {
+				fmt.Println(prevHealth)
 				logger.Info(fmt.Sprintf("Moving healthy node to active: %s", n.Address))
 				p.mu.Lock()
 				p.unsafeRemoveInactive(n)
@@ -89,28 +92,32 @@ func (p *NodePool) UnpauseOne() error {
 	defer p.mu.Unlock()
 
 	//loop through inactive nodes, health check, activate the first good one
-	for i, n := range p.Inactive {
-		if n.Metrics.Health != "unhealthy" {
-			n.Metrics.Health = "unknown" //set to unknown so health check doesn't insta-return from pause
-			health, err := n.CheckHealth()
-			if err != nil || health != "healthy" {
-				continue
-			}
-
-			//remove from inactive, add to active
-			p.Inactive = append(p.Inactive[:i], p.Inactive[i+1:]...)
-			p.unsafeAddActive(n)
-			if !n.Queue.IsOpen() {
-				n.OpenQueue()
-			}
-
-			logger.Info(fmt.Sprintf("Unpaused one node: %s", n.Address))
-			break
+	for _, n := range p.Inactive {
+		if n.Metrics.Health == "unhealthy" {
+			continue
 		}
+
+		n.Lock()
+		n.Metrics.Health = "unknown" //set to unknown so health check doesn't insta-return from pause
+		health, err := n.UnsafeCheckHealth()
+		n.Unlock()
+		if err != nil || health != "healthy" {
+			fmt.Println("hit unpause continue")
+			continue
+		}
+
+		//remove from inactive, add to active
+		p.unsafeRemoveInactive(n)
+		p.unsafeAddActive(n)
+		if !n.Queue.IsOpen() {
+			n.OpenQueue()
+		}
+
+		logger.Info(fmt.Sprintf("Unpaused one node: %s", n.Address))
+		break
 	}
 
 	logger.PoolSize(len(p.Active), len(p.Inactive))
-
 	return nil
 }
 
@@ -204,4 +211,17 @@ func (p *NodePool) Close() {
 
 	// this is only called when shutting down, this is okay
 	p.mu.Lock()
+}
+
+func (p *NodePool) Debug() {
+	fmt.Println("Nodes:")
+	printNodes := func(nodes []*node.Node) {
+		fmt.Printf("[ ")
+		for _, n := range nodes {
+			fmt.Printf("\033[1m%s\033[0m: %s ", strings.Split(n.Address, ":")[2], n.Metrics.Health)
+		}
+		fmt.Printf("]: %d\n", len(nodes))
+	}
+	printNodes(p.Active)
+	printNodes(p.Inactive)
 }
