@@ -103,9 +103,11 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 
 	go func() {
 		time.Sleep(1500 * time.Millisecond)
-		ticker := time.NewTicker(650 * time.Millisecond)
+		ticker := time.NewTicker(200 * time.Millisecond)
 		defer ticker.Stop()
-		p := true
+		p := false
+
+		routeStruct.NodePool.Debug()
 
 		for range ticker.C {
 			if p {

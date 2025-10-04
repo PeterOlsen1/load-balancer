@@ -93,25 +93,28 @@ func (p *NodePool) UnpauseOne() error {
 
 	//loop through inactive nodes, health check, activate the first good one
 	for _, n := range p.Inactive {
-		if n.Metrics.Health != "unhealthy" {
-			n.Lock()
-			n.Metrics.Health = "unknown" //set to unknown so health check doesn't insta-return from pause
-			health, err := n.UnsafeCheckHealth()
-			n.Unlock()
-			if err != nil || health != "healthy" {
-				continue
-			}
-
-			//remove from inactive, add to active
-			p.unsafeRemoveActive(n)
-			p.unsafeAddActive(n)
-			if !n.Queue.IsOpen() {
-				n.OpenQueue()
-			}
-
-			logger.Info(fmt.Sprintf("Unpaused one node: %s", n.Address))
-			break
+		if n.Metrics.Health == "unhealthy" {
+			continue
 		}
+
+		n.Lock()
+		n.Metrics.Health = "unknown" //set to unknown so health check doesn't insta-return from pause
+		health, err := n.UnsafeCheckHealth()
+		n.Unlock()
+		if err != nil || health != "healthy" {
+			fmt.Println("hit unpause continue")
+			continue
+		}
+
+		//remove from inactive, add to active
+		p.unsafeRemoveInactive(n)
+		p.unsafeAddActive(n)
+		if !n.Queue.IsOpen() {
+			n.OpenQueue()
+		}
+
+		logger.Info(fmt.Sprintf("Unpaused one node: %s", n.Address))
+		break
 	}
 
 	logger.PoolSize(len(p.Active), len(p.Inactive))
@@ -215,7 +218,7 @@ func (p *NodePool) Debug() {
 	printNodes := func(nodes []*node.Node) {
 		fmt.Printf("[ ")
 		for _, n := range nodes {
-			fmt.Printf("%s ", strings.Split(n.Address, ":")[2])
+			fmt.Printf("\033[1m%s\033[0m: %s ", strings.Split(n.Address, ":")[2], n.Metrics.Health)
 		}
 		fmt.Printf("]: %d\n", len(nodes))
 	}
