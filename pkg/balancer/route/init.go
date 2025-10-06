@@ -85,19 +85,40 @@ func InitRoute(cfg config.RouteConfig) (*Route, error) {
 		}
 	}()
 
-	//goroutine to periodically check if we need to stop a container
-	go func() {
-		//allow the server to start up before sending stop requests
-		time.Sleep(1500 * time.Millisecond)
+	// //goroutine to periodically check if we need to stop a container
+	// go func() {
+	// 	//allow the server to start up before sending stop requests
+	// 	time.Sleep(1500 * time.Millisecond)
 
-		ticker := time.NewTicker(time.Duration(cfg.Pool.CleanupInterval) * time.Millisecond)
+	// 	ticker := time.NewTicker(time.Duration(cfg.Pool.CleanupInterval) * time.Millisecond)
+	// 	defer ticker.Stop()
+
+	// 	for range ticker.C {
+	// 		load := routeStruct.CalculateLoad()
+	// 		if load < 10 {
+	// 			routeStruct.Descale(cfg)
+	// 		}
+	// 	}
+	// }()
+
+	go func() {
+		time.Sleep(1500 * time.Millisecond)
+		ticker := time.NewTicker(200 * time.Millisecond)
 		defer ticker.Stop()
+		p := false
+
+		routeStruct.NodePool.Debug()
 
 		for range ticker.C {
-			load := routeStruct.CalculateLoad()
-			if load < 10 {
-				routeStruct.Descale(cfg)
+			if p {
+				fmt.Println("pausing one")
+				routeStruct.NodePool.PauseOne()
+			} else {
+				fmt.Println("unpausing one")
+				routeStruct.NodePool.UnpauseOne()
 			}
+			p = !p
+			routeStruct.NodePool.Debug()
 		}
 	}()
 
