@@ -26,6 +26,8 @@ func (node *Node) processRequest(conn *types.Connection) {
 	}
 
 	maps.Copy(req.Header, conn.Request.Header)
+
+	start := time.Now()
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		logger.Err("Backend request failed", err)
@@ -33,6 +35,11 @@ func (node *Node) processRequest(conn *types.Connection) {
 		errors.Send500(conn, "Sending backend request")
 		return
 	}
+	end := time.Now()
+	duration := end.Sub(start)
+	respTime := float32(duration.Microseconds() / 1000)
+	node.Metrics.ResponseTimes = append(node.Metrics.ResponseTimes, respTime)
+
 	defer resp.Body.Close()
 
 	conn.Response.WriteHeader(resp.StatusCode)
@@ -107,6 +114,19 @@ func (node *Node) Unpause() {
 	node.UnsafeCheckHealth()
 	node.mu.Unlock()
 
+}
+
+func (node *Node) AvgRespTime() float32 {
+	total := float32(0)
+	for _, r := range node.Metrics.ResponseTimes {
+		total += r
+	}
+
+	if len(node.Metrics.ResponseTimes) > 0 {
+		return total / float32(len(node.Metrics.ResponseTimes))
+	} else {
+		return -1
+	}
 }
 
 func (n *Node) Equals(other *Node) bool {

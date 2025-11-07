@@ -30,9 +30,10 @@ func FromContainer(containerID string, address string, routeConfig config.RouteC
 		ContainerID: containerID,
 		Address:     address,
 		Metrics: NodeMetrics{
-			Health:       "unknown",
-			ResponseTime: 0,
-			Connections:  0,
+			Health:        "unknown",
+			ResponseTime:  0,
+			Connections:   0,
+			ResponseTimes: make([]float32, 100),
 		},
 	}
 	// add node queue later since we need to call the n.getWorkerPoolEventHandler method
@@ -47,9 +48,10 @@ func FromURL(url string, routeConfig *config.RouteConfig) *Node {
 		ContainerID: "",
 		Address:     url,
 		Metrics: NodeMetrics{
-			Health:       "unknown",
-			ResponseTime: 0,
-			Connections:  0,
+			Health:        "unknown",
+			ResponseTime:  0,
+			Connections:   0,
+			ResponseTimes: make([]float32, 100),
 		},
 	}
 	// add node queue later since we need to call the n.getWorkerPoolEventHandler method

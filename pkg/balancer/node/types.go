@@ -34,11 +34,11 @@ type Node struct {
 // - unknown
 // * CreatedNewNode is a flag where if we are over max connections, a node has already been created
 type NodeMetrics struct {
-	Health         string  `json:"health"`
-	ResponseTime   float32 `json:"response_time"`
-	Connections    uint32  `json:"connections"`
-	CreatedNewNode bool    `json:"-"`
-	// LastRequestTime time.Time  `json:"last_request"`
+	Health         string    `json:"health"`
+	ResponseTime   float32   `json:"response_time"`
+	Connections    uint32    `json:"connections"`
+	CreatedNewNode bool      `json:"-"`
+	ResponseTimes  []float32 `json:"response_times"`
 }
 
 // A batch-processed request queue that implements a worker pool for processing
